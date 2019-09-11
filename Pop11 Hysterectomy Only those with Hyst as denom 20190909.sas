@@ -963,21 +963,22 @@ pop_11_carexclude_2018_1 pop_11_carexclude_2018_2 pop_11_carexclude_2018_3 pop_1
 pop_11_carexclude_2018_8 pop_11_carexclude_2018_9 pop_11_carexclude_2018_10 pop_11_carexclude_2018_11 pop_11_carexclude_2018_12
 ;
 run;
-proc sort data=pop_11_exclude NODUPKEY;by bene_id pop_11_malig_dt;run;* for 2010;
+proc sort data=pop_11_exclude NODUPKEY;by bene_id pop_11_malig_dt;run;*358,411;
 
 *if in cc_cohort and in numerator and didn't have endometrial cancer or genital cancer based on icd dx codes before hysterectomy date then include;
-proc sort data=cc; by bene_id;
-proc sort data=pop_11_exclude NODUPKEY; by bene_id; *only keep first cancer dx for exclusion;
+proc sort data=cc; by bene_id;*228,233;
+proc sort data=pop_11_exclude NODUPKEY; by bene_id; *60,018 only keep first cancer dx for exclusion;
 proc sort data=pop_11_denom NODUPKEY; by bene_id;*denominator is person level not date so keep only 1 hysterectomy for the year-sorted above so we are keeping 1st hysterectomy only;
-		* when de-dupe to 1 hyst per person;
-data pop_11_cc; 
+		*229,847 when de-dupe to 1 hyst per person;
+data shu172sl.pop_11_cc; 
 merge cc(in=a) pop_11_exclude pop_11_denom;
 if a;
 by bene_id;
-if CANCER_ENDOMETRIAL in(2,3) and cancer_endometrial_ever<=(pop_11_elig_dt+30) then popped_11=0;*if endometrial cancer after hyesterectomy then keep;
+if /*CANCER_ENDOMETRIAL in(2,3) and*/ cancer_endometrial_ever ne . and cancer_endometrial_ever<=(pop_11_elig_dt+30) then popped_11=0;*if endometrial cancer after hyesterectomy then keep;
 if popped_11=. then popped_11=1;*assume all those without malignancy had benign indication;
-run;*;
-proc freq data=pop_11_cc; table pop_11_year*popped_11; run;
+run;*228,233 (some not in cc file so dropped);
+proc sort data=shu172sl.pop_11_cc; by pop_11_nch_clm_type_cd; run;
+proc freq data=shu172sl.pop_11_cc; *by pop_11_nch_clm_type_cd; table pop_11_year*popped_11 / nocol nopercent; run;
 
 
 
