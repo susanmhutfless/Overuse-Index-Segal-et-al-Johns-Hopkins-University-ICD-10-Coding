@@ -5,7 +5,7 @@
 				'58291', '58292', '59293', '59294', '58200', '58210', '58541', '58542', '58543', '58544', '58548', 
 				'58550', '58552', '58553', '58554', '58570','58571', '58572', '58573'; *Hysterectomy (radical: 58548, 58285, 58210);
 *Minor difference between thislist and ACOG and CMS measures: ACOG does not include 58200, CMS includes 58956;
-%let pop11_drg='734','735';
+%let pop11_drg='734','735','736','737','738','739','740','741';
 *did not include ICD codes for hysterectomy-they did not match the DRG list;
 *ICD9 codes from CMS https://www.google.com/url?sa=t&rct=j&q=&esrc=s&source=web&cd=2&cad=rja&uact=8&ved=2ahUKEwiSgurrmMTkAhWsneAKHVTxBT0QFjABegQIBBAC&url=https%3A%2F%2Fcmit.cms.gov%2FCMIT_public%2FReportMeasure%3FmeasureRevisionId%3D1823&usg=AOvVaw3r6nZNGU9EO8ndkjN4kxL-:
 68.6,
@@ -21,6 +21,41 @@
 %let pop11_icd_EX_dx10_4='C763','C796','Z804','Z854';*include family history: z80.4 & personal history z85.4;
 %let pop11_icd_EX_dx10='C7982';
 *did not include DRG exclusion--checked diagnosis codes included in malignancy DRG lists and incorporated those that matched original ICD list;
+
+*create formats for dgns, drg, hcpcs for easier data checks;
+proc sort data=METADX.CCW_RFRNC_dgns_CD NODUPKEY OUT=dgns; BY dgns_CD dgns_DESC; RUN; *799;
+proc sort data=dgns ; by dgns_cd descending dgns_efctv_dt; run;
+proc sort data=dgns NODUPKEY out=dgns2 dupout=dgns_dup; by dgns_cd; run;
+proc print data=dgns_dup; run;
+data fmtdgns (rename=(dgns_CD=start));
+set dgns2 (keep = dgns_cd dgns_desc);
+fmtname='$dgns';
+label = dgns_cd ||": " || dgns_desc;
+run;
+proc format cntlin=fmtdgns; run;
+
+proc sort data=METADX.CCW_RFRNC_DRG_CD NODUPKEY OUT=DRG; WHERE DRG_EFCTV_DT>='01JAN2013'D; BY DRG_CD DRG_DESC; RUN; *799;
+proc sort data=drg ; by drg_cd descending drg_efctv_dt; run;
+proc sort data=drg NODUPKEY out=drg2 dupout=drg_dup; by drg_cd; run;
+proc print data=drg_dup; run;
+data fmtDRG (rename=(DRG_CD=start));
+set DRG2 (keep = drg_cd drg_desc);
+fmtname='$DRG';
+label = drg_cd ||": " || drg_desc;
+run;
+proc format cntlin=fmtDRG; run;
+
+proc sort data=METADX.CCW_RFRNC_hcpcs_CD NODUPKEY OUT=hcpcs; BY hcpcs_CD hcpcs_shrt_desc; RUN; *799;
+proc sort data=hcpcs ; by hcpcs_cd descending hcpcs_actn_efctv_dt; run;
+proc sort data=hcpcs NODUPKEY out=hcpcs2 dupout=hcpcs_dup; by hcpcs_cd; run;
+proc print data=hcpcs_dup; run;
+data fmthcpcs (rename=(hcpcs_CD=start));
+set hcpcs2 (keep = hcpcs_cd hcpcs_shrt_desc);
+fmtname='$hcpcs';
+label = hcpcs_cd ||": " || hcpcs_shrt_desc;
+run;
+proc format cntlin=fmthcpcs; run;
+
 
 
 *First: Identify HCPCS codes for hysterectomy from inpatient, outpatient, carrier;
@@ -38,7 +73,7 @@ proc sql;
 create table include_cohort2 (compress=yes) as
 select *
 from 
-include_cohort1 a,
+include_cohort1 a, 
 &source b
 where 
 (a.bene_id=b.bene_id and a.clm_id=b.clm_id) or b.clm_drg_cd in(&pop11_drg);		*check that code still works on outpatient/carrier;
@@ -54,6 +89,10 @@ pop_11_age=round(pop_11_age);
 pop_11_year=year(clm_thru_dt);
 pop_11_nch_clm_type_cd=nch_clm_type_cd; label pop_11_nch_clm_type_cd='claim/facility type for pop 11 eligibility'; 
 pop_11_los=clm_thru_dt-clm_from_dt;	label pop_11_los='length of stay for pop 11 eligibility';
+pop_11_admtg_dgns_cd=put(admtg_dgns_cd,$dgns.);
+pop_11_icd_dgns_cd1=put(icd_dgns_cd1,$dgns.);
+pop_11_clm_drg_cd=put(clm_drg_cd,$drg.);
+pop_11_hcpcs_cd=put(hcpcs_cd,$hcpcs.);
 run; 
 %mend;
 %claims_rev(source=rif2010.inpatient_claims_01, rev_cohort=rif2010.inpatient_revenue_01, include_cohort=pop_11_indenom_2010_1);
