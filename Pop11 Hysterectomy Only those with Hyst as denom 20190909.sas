@@ -233,6 +233,9 @@ pop_11_age=round(pop_11_age);
 pop_11_year=year(clm_thru_dt);
 pop_11_nch_clm_type_cd=nch_clm_type_cd; label pop_11_nch_clm_type_cd='claim/facility type for pop 11 eligibility'; 
 pop_11_los=clm_thru_dt-clm_from_dt;	label pop_11_los='length of stay for pop 11 eligibility';
+pop_11_admtg_dgns_cd=put(admtg_dgns_cd,$dgns.);
+pop_11_icd_dgns_cd1=put(icd_dgns_cd1,$dgns.);
+pop_11_hcpcs_cd=put(hcpcs_cd,$hcpcs.);
 run; 
 %mend;
 %claims_rev(source=rif2010.outpatient_claims_01, rev_cohort=rif2010.outpatient_revenue_01, include_cohort=pop_11_outdenom_2010_1);
@@ -531,7 +534,7 @@ pop_11_cardenom_2018_1 pop_11_cardenom_2018_2 pop_11_cardenom_2018_3 pop_11_card
 pop_11_cardenom_2018_8 pop_11_cardenom_2018_9 pop_11_cardenom_2018_10 pop_11_cardenom_2018_11 pop_11_cardenom_2018_12
 ;
 *only keep inpatient and outpatient claims;
-if pop_11_nch_clm_type_cd notin(40,50,61) then delete;
+*if pop_11_nch_clm_type_cd notin(40,50,61) then delete;
 run;*232,450;
 proc sort data=pop_11_denom NODUPKEY;by bene_id pop_11_elig_dt;run;*230,116;
 proc freq data=pop_11_denom; table pop_11_nch_clm_type_cd; run;*need to use ICD procedure codes to identify inpatient, all are outpatient;
@@ -1014,10 +1017,11 @@ merge cc(in=a) pop_11_exclude pop_11_denom;
 if a;
 by bene_id;
 if /*CANCER_ENDOMETRIAL in(2,3) and*/ cancer_endometrial_ever ne . and cancer_endometrial_ever<=(pop_11_elig_dt+30) then popped_11=0;*if endometrial cancer after hyesterectomy then keep;
+if popped_11_clm_drg_cd in('736','737','738','739','740','741') then popped_11=0;*if had hysterectomy for malignancy then not pop;
 if popped_11=. then popped_11=1;*assume all those without malignancy had benign indication;
 run;*228,233 (some not in cc file so dropped);
 proc sort data=shu172sl.pop_11_cc; by pop_11_nch_clm_type_cd; run;
-proc freq data=shu172sl.pop_11_cc; *by pop_11_nch_clm_type_cd; table pop_11_year*popped_11 / nocol nopercent; run;
+proc freq data=shu172sl.pop_11_cc; *by pop_11_nch_clm_type_cd; table pop_11_year*popped_11 pop_11_nch_clm_type_cd / nocol nopercent; run;
 
 
 
