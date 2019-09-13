@@ -533,11 +533,9 @@ pop_11_outdenom_2018_8 pop_11_outdenom_2018_9 pop_11_outdenom_2018_10 pop_11_out
 pop_11_cardenom_2018_1 pop_11_cardenom_2018_2 pop_11_cardenom_2018_3 pop_11_cardenom_2018_4 pop_11_cardenom_2018_5 pop_11_cardenom_2018_6 pop_11_cardenom_2018_7
 pop_11_cardenom_2018_8 pop_11_cardenom_2018_9 pop_11_cardenom_2018_10 pop_11_cardenom_2018_11 pop_11_cardenom_2018_12
 ;
-*only keep inpatient and outpatient claims;
-*if pop_11_nch_clm_type_cd notin(40,50,61) then delete;
-run;*232,450;
-proc sort data=pop_11_denom NODUPKEY;by bene_id pop_11_elig_dt;run;*230,116;
-proc freq data=pop_11_denom; table pop_11_nch_clm_type_cd; run;*need to use ICD procedure codes to identify inpatient, all are outpatient;
+run;*1,306,711;
+proc sort data=pop_11_denom NODUPKEY;by bene_id pop_11_elig_dt;run;*671,076;
+proc freq data=pop_11_denom; table pop_11_nch_clm_type_cd; run;*most are  physician claims;
 
 *bring in chronic conditions---associated with denominator first then match to the num-denom file;
 %macro line(abcd=, include_cohort=);
@@ -569,8 +567,8 @@ hyperl_ever hyperp_ever hypert_ever hypoth_ever );
 merge 
 cc_2010 cc_2011 cc_2012 cc_2013 cc_2014 cc_2015 cc_2016 cc_2017;* cc_2018;
 by bene_id;
-run; 
-proc sort data=cc nodupkey; by bene_id; run;*228,233;
+run; *667,543;
+proc sort data=cc nodupkey; by bene_id; run;*474,892;
 proc print data=cc (obs=20); run; *this has chronic condition outcomes EVER (not tied to the proc date);
 proc freq data=cc; table CANCER_ENDOMETRIAL; run;
 
@@ -1020,9 +1018,61 @@ if /*CANCER_ENDOMETRIAL in(2,3) and*/ cancer_endometrial_ever ne . and cancer_en
 if pop_11_clm_drg_cd in('736','737','738','739','740','741') then popped_11=0;*if had hysterectomy for malignancy then not pop;
 if popped_11=. then popped_11=1;*assume all those without malignancy had benign indication;
 format pop_11_nch_clm_type_cd $clm_typ.;
-run;*474,892 (some not in cc file so dropped);
+if ami_ever ne . and ami_ever<=pop_11_elig_dt then cc_ami=1; else cc_ami=0;
+if alzh_ever ne . and alzh_ever <=pop_11_elig_dt then cc_alzh=1; else cc_alzh=0;
+if alzh_demen_ever ne . and alzh_demen_ever <=pop_11_elig_dt then cc_alzh_demen=1; else cc_alzh_demen=0;
+if atrial_fib_ever ne . and atrial_fib_ever<=pop_11_elig_dt then cc_atrial_fib=1; else cc_atrial_fib=0;
+if cataract_ever ne . and cataract_ever <=pop_11_elig_dt then cc_cataract=1; else cc_cataract=0;
+if chronickidney_ever ne . and chronickidney_ever<=pop_11_elig_dt then cc_chronickidney=1; else cc_chronickidney=0;
+if copd_ever ne . and copd_ever <=pop_11_elig_dt then cc_copd=1; else cc_copd=0;
+if chf_ever ne . and chf_ever <=pop_11_elig_dt then cc_chf=1; else cc_chf=0;
+if diabetes_ever ne . and diabetes_ever <=pop_11_elig_dt then cc_diabetes=1; else cc_diabetes=0;
+if glaucoma_ever ne . and glaucoma_ever  <=pop_11_elig_dt then cc_glaucoma=1; else cc_glaucoma=0;
+if hip_fracture_ever ne . and hip_fracture_ever <=pop_11_elig_dt then cc_hip_fracture=1; else cc_hip_fracture=0;
+if ischemicheart_ever ne . and ischemicheart_ever<=pop_11_elig_dt then cc_ischemicheart=1; else cc_ischemicheart=0;
+if depression_ever ne . and depression_ever <=pop_11_elig_dt then cc_depression=1; else cc_depression=0;
+if osteoporosis_ever ne . and osteoporosis_ever <=pop_11_elig_dt then cc_osteoporosis=1; else cc_osteoporosis=0;
+if ra_oa_ever ne . and ra_oa_ever <=pop_11_elig_dt then cc_ra_oa=1; else cc_ra_oa=0;
+if stroke_tia_ever  ne . and stroke_tia_ever <=pop_11_elig_dt then cc_stroke_tia=1; else cc_stroke_tia=0;
+if cancer_breast_ever ne . and cancer_breast_ever<=pop_11_elig_dt then cc_cancer_breast=1; else cc_cancer_breast=0;
+if cancer_colorectal_ever ne . and cancer_colorectal_ever<=pop_11_elig_dt then cc_cancer_colorectal=1; else cc_cancer_colorectal=0;
+if cancer_prostate_ever ne . and cancer_prostate_ever <=pop_11_elig_dt then cc_cancer_prostate=1; else cc_cancer_prostate=0;
+if cancer_lung_ever ne . and cancer_lung_ever <=pop_11_elig_dt then cc_cancer_lung=1; else cc_cancer_lung=0;
+if cancer_endometrial_ever ne . and cancer_endometrial_ever<=pop_11_elig_dt then cc_cancer_endometrial=1; else cc_cancer_endometrial=0;
+if anemia_ever ne . and anemia_ever <=pop_11_elig_dt then cc_anemia=1; else cc_anemia=0;
+if asthma_ever ne . and asthma_ever<=pop_11_elig_dt then cc_asthma=1; else cc_asthma=0;
+if hyperl_ever ne . and hyperl_ever <=pop_11_elig_dt then cc_hyperl=1; else cc_hyperl=0;
+if hyperp_ever ne . and hyperp_ever <=pop_11_elig_dt then cc_hyperp=1; else cc_hyperp=0;
+if hypert_ever ne . and hypert_ever <=pop_11_elig_dt then cc_hypert=1; else cc_hypert=0;
+if hypoth_ever ne . and hypoth_ever<=pop_11_elig_dt then cc_hypoth=1; else cc_hypoth=0;
+cc_sum=sum(cc_ami, cc_alzh, cc_alzh_demen, cc_atrial_fib, cc_chronickidney, cc_copd, cc_chf, cc_diabetes, cc_glaucoma, cc_hip_fracture,
+cc_ischemicheart, cc_depression, cc_osteoporosis, cc_ra_oa, cc_stroke_tia, cc_cancer_breast, cc_cancer_colorectal, cc_cancer_prostate,
+cc_cancer_lung, cc_cancer_endometrial, cc_anemia, cc_asthma, cc_hyperl, cc_hyperp, cc_hypert, cc_hypoth);
+if cc_sum=0     then cc_cat='0  ';
+if 1<=cc_sum<=5 then cc_cat='1-5';
+if 6<=cc_sum<=9 then cc_cat='6-9';
+if cc_sum>=10   then cc_cat='10+';
+if     pop_11_age<65 then age_cat='LT 65';
+if 65<=pop_11_age<70 then age_cat='65-69';
+if 70<=pop_11_age<75 then age_cat='70-74';
+if 75<=pop_11_age<79 then age_cat='75-79';
+if 79<=pop_11_age<84 then age_cat='80-84';
+if pop_11_age>=84     then age_cat='85-95';
+*delete males;
+if gndr_cd ne 2 then delete;
+run;*474,649 (some not in cc file & some were labeled male so dropped);
 proc sort data=shu172sl.pop_11_cc; by pop_11_nch_clm_type_cd; run;
-proc freq data=shu172sl.pop_11_cc; *by pop_11_nch_clm_type_cd; table pop_11_year*popped_11 pop_11_nch_clm_type_cd / nocol nopercent; run;
+proc freq data=shu172sl.pop_11_cc order=freq; *by pop_11_nch_clm_type_cd; 
+table gndr_cd pop_11_year*popped_11 pop_11_nch_clm_type_cd 
+pop_11_admtg_dgns_cd pop_11_icd_dgns_cd1 pop_11_clm_drg_cd pop_11_hcpcs_cd
+/ nocol nopercent; run;
+
+PROC logistic DATA=shu172sl.pop_11_cc; 
+class pop_11_year(ref=first) gndr_cd(ref='2')  bene_race_cd(ref=first) cc_cat(ref='6-9') age_cat(ref=first)/param=ref;
+model popped_11 (event='1')= pop_11_year gndr_cd bene_race_cd age_cat cc_cat;*pop_11_age ed_admit;
+      output out=pop_11_model p=pred_popped_11;
+	  ods output parameterestimates=parameterestimates;
+run;
 
 
 
