@@ -480,7 +480,7 @@ pop_20_outdenom_2018_8 pop_20_outdenom_2018_9 pop_20_outdenom_2018_10 pop_20_out
 pop_20_cardenom_2018_1 pop_20_cardenom_2018_2 pop_20_cardenom_2018_3 pop_20_cardenom_2018_4 pop_20_cardenom_2018_5 pop_20_cardenom_2018_6 pop_20_cardenom_2018_7
 pop_20_cardenom_2018_8 pop_20_cardenom_2018_9 pop_20_cardenom_2018_10 pop_20_cardenom_2018_11 pop_20_cardenom_2018_12
 ;
-run;*;
+run;*52,725,065;
 proc sort data=pop_20_denom NODUPKEY;by bene_id pop_20_elig_dt;run;*48,371,873;
 proc freq data=pop_20_denom; table pop_20_nch_clm_type_cd; run;*most are  physician claims;
 
@@ -507,7 +507,7 @@ a.bene_id=b.bene_id and a.clm_id=b.clm_id;
 quit;
 Data &include_cohort (keep=bene_id pop_20_elig_dt pop_20_popped_dt pop_20_hcpcs_cd_popped); 
 set include_cohort2;   
-pop_20_popped_dt=clm_thru_dt;  			label pop_20_elig_dt='date popped for pop 20';
+pop_20_popped_dt=clm_thru_dt;  			label pop_20_popped_dt='date popped for pop 20';
 pop_20_hcpcs_cd_popped=put(hcpcs_cd,$hcpcs.); label pop_20_hcpcs_cd_popped='hcpcs code associated with procedure for pop 20';
 run; 
 %mend;
@@ -916,8 +916,10 @@ pop_20_outnum_2018_8 pop_20_outnum_2018_9 pop_20_outnum_2018_10 pop_20_outnum_20
 pop_20_carnum_2018_1 pop_20_carnum_2018_2 pop_20_carnum_2018_3 pop_20_carnum_2018_4 pop_20_carnum_2018_5 pop_20_carnum_2018_6 pop_20_carnum_2018_7
 pop_20_carnum_2018_8 pop_20_carnum_2018_9 pop_20_carnum_2018_10 pop_20_carnum_2018_11 pop_20_carnum_2018_12
 ;
-run;*;
-proc sort data=pop_20_num NODUPKEY;by bene_id pop_20_elig_dt;run;*;
+*only keep procedures that occur after sinusitis diagnosis;
+if pop_20_popped_dt<pop_20_elig_dt then delete;
+run;*447,583;
+proc sort data=pop_20_num NODUPKEY;by bene_id pop_20_elig_dt;run;*411,252;
 
 *bring in chronic conditions---associated with denominator first then match to the num-denom file;
 %macro line(abcd=, include_cohort=);
@@ -949,26 +951,26 @@ hyperl_ever hyperp_ever hypert_ever hypoth_ever );
 merge 
 cc_2010 cc_2011 cc_2012 cc_2013 cc_2014 cc_2015 cc_2016 cc_2017;* cc_2018;
 by bene_id;
-run; *;
-proc sort data=cc nodupkey; by bene_id; run;*;
+run; *48,212,026;
+proc sort data=cc nodupkey; by bene_id; run;*15,511,080;
 proc print data=cc (obs=20); run; *this has chronic condition outcomes EVER (not tied to the proc date);
 proc freq data=cc; table CANCER_ENDOMETRIAL; run;
 
 
 *start here;
 
-*if in cc_cohort and in numerator and didn't have endometrial cancer or genital cancer based on icd dx codes before hysterectomy date then include;
-proc sort data=cc; by bene_id;*474,892;
-proc sort data=pop_20_exclude NODUPKEY; by bene_id; *147,546 only keep first cancer dx for exclusion;
-proc sort data=pop_20_denom NODUPKEY; by bene_id;*denominator is person level not date so keep only 1 hysterectomy for the year-sorted above so we are keeping 1st hysterectomy only;
-		*477,234 when de-dupe to 1 hyst per person;
+*if in cc_cohort and in denominator then include;
+proc sort data=cc; by bene_id;*;
+proc sort data=pop_20_num; by bene_id pop_20_popped_dt;*sort so keep first popped date--all procedures before elig date have been deleted;
+proc sort data=pop_20_num NODUPKEY; by bene_id; *;
+proc sort data=pop_20_denom; by bene_id pop_20_elig_dt; *sort so keep first eligibility date;
+proc sort data=pop_20_denom NODUPKEY; by bene_id;*denominator is person level not date so keep only 1 per person;
+		*when de-dupe to 1 sinusitis per person;
 data shu172sl.pop_20_cc; 
-merge cc(in=a) pop_20_exclude pop_20_denom;
-if a;
+merge cc(in=a) pop_20_denom (in=b) pop_20_num;
+if a and b;
 by bene_id;
-if /*CANCER_ENDOMETRIAL in(2,3) and*/ cancer_endometrial_ever ne . and cancer_endometrial_ever<=(pop_20_elig_dt+30) then popped_11=0;*if endometrial cancer after hyesterectomy then keep;
-if pop_20_clm_drg_cd in('736','737','738','739','740','741') then popped_11=0;*if had hysterectomy for malignancy then not pop;
-if popped_11=. then popped_11=1;*assume all those without malignancy had benign indication;
+if popped_20=. then popped_20=0;
 format pop_20_nch_clm_type_cd $clm_typ.;
 if ami_ever ne . and ami_ever<=pop_20_elig_dt then cc_ami=1; else cc_ami=0;
 if alzh_ever ne . and alzh_ever <=pop_20_elig_dt then cc_alzh=1; else cc_alzh=0;
@@ -1010,9 +1012,7 @@ if 70<=pop_20_age<75 then age_cat='70-74';
 if 75<=pop_20_age<79 then age_cat='75-79';
 if 79<=pop_20_age<84 then age_cat='80-84';
 if pop_20_age>=84     then age_cat='85-95';
-*delete males;
-if gndr_cd ne 2 then delete;
-run;*474,649 (some not in cc file & some were labeled male so dropped);
+run;* (some not in cc file );
 proc sort data=shu172sl.pop_20_cc; by pop_20_nch_clm_type_cd; run;
 proc freq data=shu172sl.pop_20_cc order=freq; *by pop_20_nch_clm_type_cd; 
 table gndr_cd pop_20_year*popped_11 pop_20_nch_clm_type_cd 
