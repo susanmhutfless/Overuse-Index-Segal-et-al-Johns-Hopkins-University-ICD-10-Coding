@@ -952,7 +952,7 @@ merge
 cc_2010 cc_2011 cc_2012 cc_2013 cc_2014 cc_2015 cc_2016 cc_2017;* cc_2018;
 by bene_id;
 run; *48,212,026;
-proc sort data=cc nodupkey; by bene_id; run;*15,511,080;
+proc sort data=cc nodupkey; by bene_id; run;*;
 proc print data=cc (obs=20); run; *this has chronic condition outcomes EVER (not tied to the proc date);
 proc freq data=cc; table CANCER_ENDOMETRIAL; run;
 
@@ -961,10 +961,10 @@ proc freq data=cc; table CANCER_ENDOMETRIAL; run;
 
 *if in cc_cohort and in denominator then include;
 proc sort data=cc; by bene_id;*;
-proc sort data=pop_20_num; by bene_id pop_20_popped_dt;*sort so keep first popped date--all procedures before elig date have been deleted;
-proc sort data=pop_20_num NODUPKEY; by bene_id; *;
-proc sort data=pop_20_denom; by bene_id pop_20_elig_dt; *sort so keep first eligibility date;
-proc sort data=pop_20_denom NODUPKEY; by bene_id;*denominator is person level not date so keep only 1 per person;
+proc sort data=pop_20_num; by bene_id pop_20_popped_dt;*447,583 sort so keep first popped date--all procedures before elig date have been deleted;
+proc sort data=pop_20_num NODUPKEY; by bene_id; *303,547;
+proc sort data=pop_20_denom; by bene_id pop_20_elig_dt; *48,371,873 sort so keep first eligibility date;
+proc sort data=pop_20_denom NODUPKEY; by bene_id;*15,618,210 denominator is person level not date so keep only 1 per person;
 		*when de-dupe to 1 sinusitis per person;
 data shu172sl.pop_20_cc; 
 merge cc(in=a) pop_20_denom (in=b) pop_20_num;
