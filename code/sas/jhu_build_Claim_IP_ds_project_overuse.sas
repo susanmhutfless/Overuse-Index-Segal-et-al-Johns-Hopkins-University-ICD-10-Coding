@@ -1,61 +1,125 @@
 /********************************************************************
-* Job Name: jhu_build_Claim_IP_ds_project_crohns.sas
-* Job Desc: Input for Inpat Claims for Step1 Job
-* Copyright: Johns Hopkins University - HutflessLab 2019
+* Job Name: jhu_build_Claim_IP_ds_project_overuse.sas
+* Job Desc: Input for Inpat Claims 
+* Copyright: Johns Hopkins University - SegalLab & HutflessLab 2019
 ********************************************************************/
+
+
+/*this example was created for hysterectomy**
+From sheet/manuscript, located at .....add later for final......
+Useful as build (how to concat from excel to tak exact codes): =CONCATENATE("'",D1,"'")
+
+(New) Number 		11	
+Indicator 			Hysterectomy for benign disease	
+Indicator
+			Motivator: there are too many hysterectomies performed for benign disease
+			that could be managed more conservatively
+
+			Indicator: Hysterectomy performed for an indication other than a cancer diagnosis
+			of a pelvic organ (ovary, uterus, peritoneum, cervix, bladder).
+
+			[this can be reported among all patients with hysterectomy]
+
+Timing		Inclusionary diagnosis code is associated with the procedure code (same claim)
+			or same admission (with primary diagnosis)	
+
+System		Gyne	
+
+Actor		Gynecologist, occasionally general surgeon
+*/
 
 
 /*** start of section - global vars ***/
 %global lwork ltemp shlib                    ;   /** libname prefix **/
-%global pat_idb clm_id                       ;
-%global pat_idm                              ;
+%global pat_id clm_id                       ;
 %global pat_id                               ;
-%global by_var_pat_id                        ;
 
 /*** libname prefix alias assignments ***/
 %let  lwork              = work              ;
 %let  ltemp              = temp              ;
 %let  shlib              = shu172sl          ;
 
-%let  pat_idb            = bene_id           ;
-%let  pat_idm            = msis_id           ;
-%let  pat_id             = msis_bene_id      ;
+%let  pat_id             = bene_id      ;
 %let  clm_id             = clm_id            ;
 
-%let    by_var_pat_id    = &pat_idm &pat_idb;
 
 %global diag_pfx diag_cd_min diag_cd_max ;
 %global plc_of_srvc_cd                   ;
 %global ds_all_prefix                    ;
 %let  ds_all_prefix      = ;
-%let  ds_all_ip          = /* &lwork..cd_ip_2010_14_all; **/ shu172sl.cd_ip_2010_14_all;
-%let  ds_all_op          = /* &lwork..cd_ot_2010_14_all; **/ shu172sl.cd_ot_2010_14_all;
+%let  ds_all_ip          =  &lwork..ip_2010_14_all; 
+%let  ds_all_op          =  &lwork..ot_2010_14_all; 
+%let  ds_all_car         =  &lwork..car_2010_14_all; 
 
 %let  diag_pfx           = diag_cd_          ;
 %let  diag_cd_min        = 1                 ;
-%let  diag_cd_max        = 9                 ;
+%let  diag_cd_max        = 25                 ;
 %let  plc_of_srvc_cd     = plc_of_srvc_cd    ;
 
-%global main_diag_criteria;
-%global cd_diag_criteria;
-%global uc_diag_criteria;
-%let  main_diag_criteria = '555' '556' 'K50' 'K51'    ;
-%let  cd_diag_criteria   = '555' 'K50'                ;
-%let  uc_diag_criteria   = '556' 'K51'                ;
+*start of OLD--for comparison purposes;
+*Minor difference between thislist and ACOG and CMS measures: ACOG does not include 58200, CMS includes 58956;
+%let pop11_drg='734','735','736','737','738','739','740','741';
+*did not include ICD codes for hysterectomy-they did not match the DRG list;
+*ICD9 codes from CMS https://www.google.com/url?sa=t&rct=j&q=&esrc=s&source=web&cd=2&cad=rja&uact=8&ved=2ahUKEwiSgurrmMTkAhWsneAKHVTxBT0QFjABegQIBBAC&url=https%3A%2F%2Fcmit.cms.gov%2FCMIT_public%2FReportMeasure%3FmeasureRevisionId%3D1823&usg=AOvVaw3r6nZNGU9EO8ndkjN4kxL-:
+68.6,
+68.61, 68.69, 68.7, 68.71, 68.79, 68.3, 68.31, 68.39, 68.4, 68.41, 68.49, 68.5,
+68.51, 68.59, 68.6, 68.61, 68.69, 68.9;
 
-%global flag_cd flag_uc;
-%let flag_cd             = cd ;
-%let flag_uc             = uc ;
+*Popped--malignancy without record of malignancy;
+		*DID NOT INCLUDE PLACENTA or "uncertain behavior"--note that DRG lists included placenta, in situ and uncertain behavior ICD dx codes;
+%let pop11_icd_EX_dx9_3='179', '180', '182','183', '184';*"malignancy" exlcusion icd-9;
+%let pop11_icd_EX_dx9_4='V164','V104';
+%let pop11_icd_EX_dx9='1953','1986','19882';
+%let pop11_icd_EX_dx10_3='C51','C52','C53','C54','C55','C56','C57'; *"malignancy" exclusion icd-10 based on cross-walk and check of DRG hysterectomy codes for malignancy;
+%let pop11_icd_EX_dx10_4='C763','C796','Z804','Z854';*include family history: z80.4 & personal history z85.4;
+%let pop11_icd_EX_dx10='C7982';
+*did not include DRG exclusion--checked diagnosis codes included in malignancy DRG lists and incorporated those that matched original ICD list;
+*end of OLD--for comparison purposes;
+
+/*inclusion criteria*/
+%global includ_hcpcs;
+%global includ_pr10;
+
+%let includ_hcpcs =
+					'58150'	'58152'	'58180'	'58200'
+					'58210'	'58260'	'58262'	'58263'	
+					'58267'	'58270'	'58275'	'58280'
+					'58285'	'58290'	'58291'	'58292'
+					'59293'	'59294'	'58541'	'58542'
+					'58543'	'58544'	'58548'	'58550'
+					'58552'	'58553'	'58554'	'58570'
+					'58571'	'58572'	'58573'				;
+
+%let includ_pr10 =
+					'0UT94ZL'	'0UT90ZL'	'0UT94ZZ'
+					'0UT90ZZ'	'0UT9FZL'	'0UT9FZZ'
+					'0UT97ZL'	'0UT98ZL'	'0UT97ZZ'
+					'0UT98ZZ'	'0UT44ZZ'	'0UT94ZZ'
+					'0UT40ZZ'	'0UT90ZZ'	'0UT44ZZ'
+					'0UT9FZZ'	'0UT47ZZ'	'0UT48ZZ'
+					'0UT97ZZ'	'0UT98ZZ'	'0UT90ZZ'
+					'0UT94ZZ'	'0UT90ZL'	'0UT90ZZ'
+					'0UT94ZL'	'0UT94ZZ'	'0UT97ZL'
+					'0UT97ZZ'	'0UT98ZL'	'0UT98ZZ'
+					'0UT9FZL'	'0UT9FZZ'				;
+
+
+/*Exclusion criteria**/
+%let EXCLUD_dx10_3='C53','C54','C55','C56'; 
+
+/**flag for overuse (=popped)*/
+%global flag_popped;
+%let flag_popped             = popped11 ;
 
 %global age;
 %global clm_beg_dt clm_end_dt clm_dob clm_pymt_dt;
 %global clm_drg ;
 %let  age                = age           ;
-%let  clm_beg_dt         = srvc_bgn_dt   ;
-%let  clm_end_dt         = srvc_end_dt   ;
-%let  clm_pymt_dt        = pymt_dt       ;
+%let  clm_beg_dt         = clm_beg_dt   ;
+%let  clm_end_dt         = clm_end_dt   ;
+%let  clm_pymt_dt        = clm_pymt_dt     ;
 %let  clm_drg            = clm_drg_cd    ;
-%let  clm_dob            = el_dob        ;
+%let  clm_dob            = clm_dob        ;
 
 /*** end of section   - global vars ***/
 
@@ -64,7 +128,7 @@
 /*** end of section   - OUTPUT DS NAMES ***/
 
 %let vpath     = /sas/vrdc/users/shu172/files     ;
-%let proj_path = /jhu_projects/cd_cohort          ;
+%let proj_path = /jhu_projects/overuse          ;
 %let code_path = /code/                           ;
 %let vrdc_code = &vpath./jhu_vrdc_code            ;
 
