@@ -1,10 +1,10 @@
 /********************************************************************
 * Job Name: jhu_build_Claim_IP_ds_project_overuse.sas
-* Job Desc: Input for Inpat Claims 
+* Job Desc: Input for Inpatient Claims 
 * Copyright: Johns Hopkins University - SegalLab & HutflessLab 2019
 ********************************************************************/
 
-
+/*** Indicator description ***/
 /*this example was created for hysterectomy**
 From sheet/manuscript, located at .....add later for final......
 Useful as build (how to concat from excel to tak exact codes): =CONCATENATE("'",D1,"'")
@@ -28,53 +28,7 @@ System		Gyne
 Actor		Gynecologist, occasionally general surgeon
 */
 
-
-/*** start of section - global vars ***/
-%global lwork ltemp shlib                    ;   /** libname prefix **/
-%global pat_id clm_id                       ;
-%global pat_id                               ;
-
-/*** libname prefix alias assignments ***/
-%let  lwork              = work              ;
-%let  ltemp              = temp              ;
-%let  shlib              = shu172sl          ;
-
-%let  pat_id             = bene_id      ;
-%let  clm_id             = clm_id            ;
-
-
-%global diag_pfx diag_cd_min diag_cd_max ;
-%global plc_of_srvc_cd                   ;
-%global ds_all_prefix                    ;
-%let  ds_all_prefix      = ;
-%let  ds_all_ip          =  &lwork..ip_2010_14_all; 
-%let  ds_all_op          =  &lwork..ot_2010_14_all; 
-%let  ds_all_car         =  &lwork..car_2010_14_all; 
-
-%let  diag_pfx           = diag_cd_          ;
-%let  diag_cd_min        = 1                 ;
-%let  diag_cd_max        = 25                 ;
-%let  plc_of_srvc_cd     = plc_of_srvc_cd    ;
-
-*start of OLD--for comparison purposes;
-*Minor difference between thislist and ACOG and CMS measures: ACOG does not include 58200, CMS includes 58956;
-%let pop11_drg='734','735','736','737','738','739','740','741';
-*did not include ICD codes for hysterectomy-they did not match the DRG list;
-*ICD9 codes from CMS https://www.google.com/url?sa=t&rct=j&q=&esrc=s&source=web&cd=2&cad=rja&uact=8&ved=2ahUKEwiSgurrmMTkAhWsneAKHVTxBT0QFjABegQIBBAC&url=https%3A%2F%2Fcmit.cms.gov%2FCMIT_public%2FReportMeasure%3FmeasureRevisionId%3D1823&usg=AOvVaw3r6nZNGU9EO8ndkjN4kxL-:
-68.6,
-68.61, 68.69, 68.7, 68.71, 68.79, 68.3, 68.31, 68.39, 68.4, 68.41, 68.49, 68.5,
-68.51, 68.59, 68.6, 68.61, 68.69, 68.9;
-
-*Popped--malignancy without record of malignancy;
-		*DID NOT INCLUDE PLACENTA or "uncertain behavior"--note that DRG lists included placenta, in situ and uncertain behavior ICD dx codes;
-%let pop11_icd_EX_dx9_3='179', '180', '182','183', '184';*"malignancy" exlcusion icd-9;
-%let pop11_icd_EX_dx9_4='V164','V104';
-%let pop11_icd_EX_dx9='1953','1986','19882';
-%let pop11_icd_EX_dx10_3='C51','C52','C53','C54','C55','C56','C57'; *"malignancy" exclusion icd-10 based on cross-walk and check of DRG hysterectomy codes for malignancy;
-%let pop11_icd_EX_dx10_4='C763','C796','Z804','Z854';*include family history: z80.4 & personal history z85.4;
-%let pop11_icd_EX_dx10='C7982';
-*did not include DRG exclusion--checked diagnosis codes included in malignancy DRG lists and incorporated those that matched original ICD list;
-*end of OLD--for comparison purposes;
+/*** start of indicator specific variables ***/
 
 /*inclusion criteria*/
 %global includ_hcpcs;
@@ -111,12 +65,46 @@ Actor		Gynecologist, occasionally general surgeon
 %global flag_popped;
 %let flag_popped             = popped11 ;
 
+/*** end of indicator specific variables ***/
+
+/*** start of section - global vars ***/
+%global lwork ltemp shlib                    ;   /** libname prefix **/
+%global pat_id clm_id                       ;
+%global pat_id                               ;
+
+/*** libname prefix alias assignments ***/
+%let  lwork              = work              ;
+%let  ltemp              = temp              ;
+%let  shlib              = shu172sl          ;
+
+%let  pat_id             = bene_id      ;
+%let  clm_id             = clm_id            ;
+
+
+%global diag_pfx diag_cd_min diag_cd_max ;
+%global plc_of_srvc_cd                   ;
+%global ds_all_prefix                    ;
+%let  ds_all_prefix      = ;
+%let  ds_all_ip          =  &lwork..num11_ip_2010_14_all; 
+%let  ds_all_op          =  &lwork..num11_ot_2010_14_all; 
+%let  ds_all_car         =  &lwork..num11_car_2010_14_all; 
+
+%let  diag_pfx           = icd_dgns_cd_          ;
+%let  diag_cd_min        = 1                 ;
+%let  diag_cd_max        = 25                 ;
+
+%let  proc_pfx           = icd_prcdr_          ;
+%let  proc_cd_min        = 1                 ;
+%let  proc_cd_max        = 25                 ;
+
+%let  plc_of_srvc_cd     = clm_fac_type_cd    ;
+
 %global age;
 %global clm_beg_dt clm_end_dt clm_dob clm_pymt_dt;
 %global clm_drg ;
-%let  age                = age           ;
-%let  clm_beg_dt         = clm_beg_dt   ;
-%let  clm_end_dt         = clm_end_dt   ;
+%let  age                = age_at_proc           ;
+%let  clm_beg_dt         = clm_from_dt   ;
+%let  clm_end_dt         = clm_thru_dt   ;
 %let  clm_pymt_dt        = clm_pymt_dt     ;
 %let  clm_drg            = clm_drg_cd    ;
 %let  clm_dob            = clm_dob        ;
@@ -173,22 +161,97 @@ Actor		Gynecologist, occasionally general surgeon
 %let vars_to_drop_op    = el_mdcr_ann: el_mdcr_xov:               ;
 
 %global view_lib;
-libname sviews "/sas/vrdc/users/shu172/sviews1";
+libname sviews "/sas/vrdc/users/SHU172SL/sviews1";
 %let    view_lib = sviews;
 
-libname view_out "/sas/vrdc/users/shu172/sviews1/view_out";
+libname view_out "/sas/vrdc/users/SHU172SL/sviews1/view_out";
 %global def_proj_src_ds_prefix;
 %let    def_proj_src_ds_prefix = max;
 
 
 /*** this section is related to IP - inpatient claims ***/
-/*   get inpatient cd diagnoses                         */
+/*   get inpatient procedure codes                         */
 
 %macro create_dsk(view_lib       = ,
                   src_lib_prefix = ,
                   year           = ,
                   prefix         = ,
                   ctype          = );
+*start;
+*First: Identify HCPCS codes for hysterectomy from inpatient, outpatient, carrier;
+*denominator for inpatient, outpatient, carrier;
+%macro claims_rev(source=, rev_cohort=, include_cohort=);
+proc sql;
+create table include_cohort1 (compress=yes) as
+select *
+from 
+&rev_cohort
+where 
+hcpcs_cd in (&includ_hcpcs);
+quit;
+proc sql;
+create table include_cohort2 (compress=yes) as
+select *
+from 
+include_cohort1 a, 
+&source b
+where 
+b.CLM_IP_ADMSN_TYPE_CD = '3'
+AND
+b.OP_PHYSN_SPCLTY_CD in('02', '16')
+AND
+(
+	(a.bene_id=b.bene_id and a.clm_id=b.clm_id) 
+	or (
+		b.icd_prcdr_1 in(&includ_pr10) or
+		b.icd_prcdr_2 in(&includ_pr10) or
+		b.icd_prcdr_3 in(&includ_pr10) or
+		b.icd_prcdr_4 in(&includ_pr10) or
+		b.icd_prcdr_5 in(&includ_pr10) or
+		b.icd_prcdr_6 in(&includ_pr10) or
+		b.icd_prcdr_7 in(&includ_pr10) or
+		b.icd_prcdr_8 in(&includ_pr10) or
+		b.icd_prcdr_9 in(&includ_pr10) or
+		b.icd_prcdr_10 in(&includ_pr10) or
+		b.icd_prcdr_11 in(&includ_pr10) or
+		b.icd_prcdr_12 in(&includ_pr10) or
+		b.icd_prcdr_13 in(&includ_pr10) or
+		b.icd_prcdr_14 in(&includ_pr10) or
+		b.icd_prcdr_15 in(&includ_pr10) or
+		b.icd_prcdr_16 in(&includ_pr10) or
+		b.icd_prcdr_17 in(&includ_pr10) or
+		b.icd_prcdr_18 in(&includ_pr10) or
+		b.icd_prcdr_19 in(&includ_pr10) or
+		b.icd_prcdr_20 in(&includ_pr10) or
+		b.icd_prcdr_21 in(&includ_pr10) or
+		b.icd_prcdr_22 in(&includ_pr10) or
+		b.icd_prcdr_23 in(&includ_pr10) or
+		b.icd_prcdr_24 in(&includ_pr10) or
+		b.icd_prcdr_25 in(&includ_pr10) or
+)
+;		*check that code still works on outpatient/carrier;
+quit;
+Data &include_cohort (keep=pop:
+		bene_id gndr_cd bene_race_cd bene_cnty_cd bene_state_cd bene_mlg_cntct_zip_cd  
+		prvdr_num prvdr_state_cd 
+		at_physn_npi op_physn_npi org_npi_num ot_physn_npi rndrng_physn_npi rfr_physn_npi prf_physn_npi); 
+set include_cohort2;   
+pop_11_elig_dt=clm_thru_dt;  			label pop_11_elig_dt='date eligible for pop 11';
+pop_11_elig=1; 							label pop_11_elig='eligible for pop 11';
+pop_11_age=(clm_thru_dt-dob_dt)/365.25; label pop_11_age='age eligible for pop 11';
+pop_11_age=round(pop_11_age);
+pop_11_year=year(clm_thru_dt);
+pop_11_nch_clm_type_cd=nch_clm_type_cd; label pop_11_nch_clm_type_cd='claim/facility type for pop 11 eligibility';
+pop_11_los=clm_thru_dt-clm_from_dt;	label pop_11_los='length of stay for pop 11 eligibility';
+pop_11_admtg_dgns_cd=put(admtg_dgns_cd,$dgns.);
+pop_11_icd_dgns_cd1=put(icd_dgns_cd1,$dgns.);
+pop_11_clm_drg_cd=put(clm_drg_cd,$drg.);
+pop_11_hcpcs_cd=put(hcpcs_cd,$hcpcs.);
+run; 
+%mend;
+%claims_rev(source=rif2016.inpatient_claims_01, rev_cohort=rif2016.inpatient_revenue_01, include_cohort=pop_11_indenom_2016_1);
+*stop;
+
 
      data        &view_lib..&prefix.data_&ctype._&year.    /
           view = &view_lib..&prefix.data_&ctype._&year.    ;
