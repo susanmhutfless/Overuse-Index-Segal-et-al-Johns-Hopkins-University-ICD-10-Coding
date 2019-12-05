@@ -57,13 +57,32 @@ Actor		Gynecologist, occasionally general surgeon
 					'0UT97ZZ'	'0UT98ZL'	'0UT98ZZ'
 					'0UT9FZL'	'0UT9FZZ'				;
 
+%let includ_drg = ;
 
-/*Exclusion criteria**/
-%let EXCLUD_dx10_3='C53','C54','C55','C56'; 
+/** Exclusion criteria **/
+%let EXCLUD_dx10_1='C'; 
 
-/**flag for overuse (=popped)*/
-%global flag_popped;
-%let flag_popped             = popped11 ;
+/** label pop specific variables **/
+%global flag_popped																;
+%let 	flag_popped             		= popped11 								;
+%let 	flag_popped_label				= 'indicator 11 popped'					;	
+%let	flag_popped_dt					= popped11_dt							;
+%let 	flag_popped_dt_label			= 'indicator 11 date patient popped'	;
+%let 	pop_age							= pop_11_age							;				
+%let	pop_age_label					= 'age eligible for pop 11'				;
+%let	pop_los							= pop_11_los							;
+%let	pop_los_label					= 'length of stay when patient popped'	;
+%let	pop_year						= pop_11_year							;
+%let	pop_nch_clm_type_cd				= pop_11_nch_clm_type_cd				;
+%let	pop_nch_clm_type_cd_label		= 'claim/facility type for pop 11 eligibility' 	;
+%let  	pop_CLM_IP_ADMSN_TYPE_CD		= pop_11_CLM_IP_ADMSN_TYPE_CD			;
+%let	pop_CLM_IP_ADMSN_TYPE_CD_label	= 'inpatient admission type code for pop 11'	;
+%let	pop_admtg_dgns_cd				= pop_11_admtg_dgns_cd					;
+%let	pop_icd_dgns_cd1				= pop_11_icd_dgns_cd1					;
+%let	pop_clm_drg_cd					= pop_11_clm_drg_cd						;
+%let	pop_hcpcs_cd					= pop_11_hcpcs_cd						;
+%let	pop_OP_PHYSN_SPCLTY_CD			= pop_11_OP_PHYSN_SPCLTY_CD				;
+
 
 /*** end of indicator specific variables ***/
 
@@ -230,8 +249,8 @@ Data &include_cohort (keep=pop:
 		prvdr_num prvdr_state_cd 
 		at_physn_npi op_physn_npi org_npi_num ot_physn_npi rndrng_physn_npi rfr_physn_npi); 
 set include_cohort2;   
-pop_11_elig_dt=clm_from_dt; format pop_11_elig_dt date9.; 			label pop_11_elig_dt='date eligible for pop 11 (IP=clm_admsn_dt OP=clm_from_dt)';
-pop_11_elig=1; 							label pop_11_elig='eligible for pop 11';
+&flag_popped_dt=clm_from_dt; format &flag_popped_dt date9.; 			label &flag_popped_dt='date eligible for pop 11 (IP=clm_admsn_dt OP=clm_from_dt)';
+&flag_popped=1; 							label &flag_popped=&flag_popped_label;
 pop_11_age=(clm_from_dt-dob_dt)/365.25; label pop_11_age='age eligible for pop 11';
 pop_11_age=round(pop_11_age);
 pop_11_los=clm_thru_dt-clm_from_dt;	label pop_11_los='length of stay for pop 11 eligibility';
@@ -242,7 +261,7 @@ pop_11_hcpcs_cd=put(hcpcs_cd,$hcpcs.);
 pop_11_OP_PHYSN_SPCLTY_CD=OP_PHYSN_SPCLTY_CD;
 array dx(25) icd_dgns_cd1 - icd_dgns_cd25;
 do j=1 to 25;
-	if substr(dx(j),1,3) in(&EXCLUD_dx10_3) then delete;
+	if substr(dx(j),1,3) in(&EXCLUD_dx10_1) then delete;
 end;
 run; 
 %mend;
@@ -294,16 +313,15 @@ set pop_11_OUT_2016_1 pop_11_OUT_2016_2 pop_11_OUT_2016_3 pop_11_OUT_2016_4 pop_
 ;
 if pop_11_year<2016 then delete;
 if pop_11_year>2018 then delete;
-if pop_11_age<65 	then delete;
 run;
 *get rid of duplicate rows;
-proc sort data=pop_11_OUT nodupkey; by bene_id pop_11_elig_dt; run;
+proc sort data=pop_11_OUT nodupkey; by bene_id &flag_popped_dt; run;
 
 *look at OUTpatient OUTfo;
 proc freq data=pop_11_OUT order=freq; 
-table  pop_11_elig pop_11_year pop_11_OP_PHYSN_SPCLTY_CD pop_11_nch_clm_type_cd 
+table  &flag_popped pop_11_year pop_11_OP_PHYSN_SPCLTY_CD pop_11_nch_clm_type_cd 
 		 pop_11_icd_dgns_cd1 pop_11_hcpcs_cd; run;
 
-proc means data=pop_11_OUT n mean median min max; var pop_11_elig_dt pop_11_age pop_11_los; run;
+proc means data=pop_11_OUT n mean median min max; var &flag_popped_dt pop_11_age pop_11_los; run;
 
 *stop;

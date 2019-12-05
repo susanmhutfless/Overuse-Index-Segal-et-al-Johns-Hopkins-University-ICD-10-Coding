@@ -57,13 +57,39 @@ Actor		Gynecologist, occasionally general surgeon
 					'0UT97ZZ'	'0UT98ZL'	'0UT98ZZ'
 					'0UT9FZL'	'0UT9FZZ'				;
 
+%let includ_drg = ;
 
-/*Exclusion criteria**/
-%let EXCLUD_dx10_3='C53','C54','C55','C56'; 
+/** Exclusion criteria **/
+%let EXCLUD_dx10_1='C'; 
 
-/**flag for overuse (=popped)*/
-%global flag_popped;
-%let flag_popped             = popped11 ;
+/** label pop specific variables **/
+%global flag_popped																;
+%let 	flag_popped             		= popped11 								;
+%let 	flag_popped_label				= 'indicator 11 popped'					;	
+%let	flag_popped_dt					= popped11_dt							;
+%let 	flag_popped_dt_label			= 'indicator 11 date patient popped'	;
+%let 	pop_age							= pop_11_age							;				
+%let	pop_age_label					= 'age at pop 11'						;
+%let	pop_los							= pop_11_los							;
+%let	pop_los_label					= 'length of stay when patient popped'	;
+%let	pop_year						= pop_11_year							;
+%let	pop_nch_clm_type_cd				= pop_11_nch_clm_type_cd				;
+%let  	pop_CLM_IP_ADMSN_TYPE_CD		= pop_11_CLM_IP_ADMSN_TYPE_CD			;
+%let	pop_clm_fac_type_cd				= pop_11_clm_fac_type_cd				;
+%let	pop_clm_src_ip_admsn_cd			= pop_11_clm_src_ip_admsn_cd					;
+%let	pop_ptnt_dschrg_stus_cd  		= pop_11_ptnt_dschrg_stus_cd			;
+%let	pop_admtg_dgns_cd				= pop_11_admtg_dgns_cd					;
+%let	pop_icd_dgns_cd1				= pop_11_icd_dgns_cd1					;
+%let	pop_clm_drg_cd					= pop_11_clm_drg_cd						;
+%let	pop_hcpcs_cd					= pop_11_hcpcs_cd						;
+%let	pop_OP_PHYSN_SPCLTY_CD			= pop_11_OP_PHYSN_SPCLTY_CD				;
+
+%let	pop_nch_clm_type_cd_label		= 'claim/facility type for pop 11' 		;
+%let	pop_CLM_IP_ADMSN_TYPE_CD_label	= 'inpatient admission type code for pop 11'	;
+%let  	pop_clm_fac_type_cd_label		= 'inpatient clm_fac_type_cd for pop 11';
+%let	pop_clm_src_ip_admsn_cd_label	= 'clm_src_ip_admsn_cd for pop 11'		;
+%let	pop_ptnt_dschrg_stus_cd_label	= 'discharge status code for pop 11'	;	
+
 
 /*** end of indicator specific variables ***/
 
@@ -180,78 +206,104 @@ libname view_out "/sas/vrdc/users/shu172/sviewsl/view_out";
 *start of code;
 
 %macro claims_rev(source=, rev_cohort=, include_cohort=);
+/* identify hcpcs  */
 proc sql;
-create table include_cohort1 (compress=yes) as
+create table include_cohort1a (compress=yes) as
 select bene_id, clm_id, hcpcs_cd
 from 
-&rev_cohort
+	&rev_cohort
 where 
-hcpcs_cd in (&includ_hcpcs);
+	hcpcs_cd in (&includ_hcpcs);
 quit;
 proc sql;
-create table include_cohort2 (compress=yes) as
+	create table include_cohort1b (compress=yes) as
+select a.hcpcs_cd, b.*
+from 
+	include_cohort1a a, 
+	&source b
+where 
+	a.bene_id=b.bene_id and a.clm_id=b.clm_id;
+quit;
+/* identify icd  */
+proc sql;
+	create table include_cohort2 (compress=yes) as
 select *
 from 
-include_cohort1 a, 
-&source b
+	&source 
 where 
-	(a.bene_id=b.bene_id and a.clm_id=b.clm_id) 
-	or (
-		b.icd_prcdr_cd1 in(&includ_pr10) or
-		b.icd_prcdr_cd2 in(&includ_pr10) or
-		b.icd_prcdr_cd3 in(&includ_pr10) or
-		b.icd_prcdr_cd4 in(&includ_pr10) or
-		b.icd_prcdr_cd5 in(&includ_pr10) or
-		b.icd_prcdr_cd6 in(&includ_pr10) or
-		b.icd_prcdr_cd7 in(&includ_pr10) or
-		b.icd_prcdr_cd8 in(&includ_pr10) or
-		b.icd_prcdr_cd9 in(&includ_pr10) or
-		b.icd_prcdr_cd10 in(&includ_pr10) or
-		b.icd_prcdr_cd11 in(&includ_pr10) or
-		b.icd_prcdr_cd12 in(&includ_pr10) or
-		b.icd_prcdr_cd13 in(&includ_pr10) or
-		b.icd_prcdr_cd14 in(&includ_pr10) or
-		b.icd_prcdr_cd15 in(&includ_pr10) or
-		b.icd_prcdr_cd16 in(&includ_pr10) or
-		b.icd_prcdr_cd17 in(&includ_pr10) or
-		b.icd_prcdr_cd18 in(&includ_pr10) or
-		b.icd_prcdr_cd19 in(&includ_pr10) or
-		b.icd_prcdr_cd20 in(&includ_pr10) or
-		b.icd_prcdr_cd21 in(&includ_pr10) or
-		b.icd_prcdr_cd22 in(&includ_pr10) or
-		b.icd_prcdr_cd23 in(&includ_pr10) or
-		b.icd_prcdr_cd24 in(&includ_pr10) or
-		b.icd_prcdr_cd25 in(&includ_pr10) 
-		)
-;		*check that code still works on outpatient/carrier;
+		icd_prcdr_cd1 in(&includ_pr10) or
+		icd_prcdr_cd2 in(&includ_pr10) or
+		icd_prcdr_cd3 in(&includ_pr10) or
+		icd_prcdr_cd4 in(&includ_pr10) or
+		icd_prcdr_cd5 in(&includ_pr10) or
+		icd_prcdr_cd6 in(&includ_pr10) or
+		icd_prcdr_cd7 in(&includ_pr10) or
+		icd_prcdr_cd8 in(&includ_pr10) or
+		icd_prcdr_cd9 in(&includ_pr10) or
+		icd_prcdr_cd10 in(&includ_pr10) or
+		icd_prcdr_cd11 in(&includ_pr10) or
+		icd_prcdr_cd12 in(&includ_pr10) or
+		icd_prcdr_cd13 in(&includ_pr10) or
+		icd_prcdr_cd14 in(&includ_pr10) or
+		icd_prcdr_cd15 in(&includ_pr10) or
+		icd_prcdr_cd16 in(&includ_pr10) or
+		icd_prcdr_cd17 in(&includ_pr10) or
+		icd_prcdr_cd18 in(&includ_pr10) or
+		icd_prcdr_cd19 in(&includ_pr10) or
+		icd_prcdr_cd20 in(&includ_pr10) or
+		icd_prcdr_cd21 in(&includ_pr10) or
+		icd_prcdr_cd22 in(&includ_pr10) or
+		icd_prcdr_cd23 in(&includ_pr10) or
+		icd_prcdr_cd24 in(&includ_pr10) or
+		icd_prcdr_cd25 in(&includ_pr10) 
+;		
 quit;
-Data &include_cohort (keep=pop:
+proc sql;
+	create table include_cohort3 (compress=yes) as
+select include_cohort1b.hcpcs_cd, include_cohort2.*
+from 
+	include_cohort1b 
+right outer join 
+	include_cohort2 
+					(keep = bene_id clm_id clm_admsn_dt dob_dt NCH_BENE_DSCHRG_DT ptnt_dschrg_stus_cd
+							nch_clm_type_cd CLM_IP_ADMSN_TYPE_CD clm_fac_type_cd clm_src_ip_admsn_cd 
+							admtg_dgns_cd clm_drg_cd icd_dgns_cd1-icd_dgns_cd25  
+							gndr_cd bene_race_cd bene_cnty_cd bene_state_cd bene_mlg_cntct_zip_cd  
+							prvdr_num prvdr_state_cd OP_PHYSN_SPCLTY_CD
+							at_physn_npi op_physn_npi org_npi_num ot_physn_npi rndrng_physn_npi )
+on (
+	include_cohort1b.bene_id = include_cohort2.bene_id and include_cohort1b.clm_id = include_cohort2.clm_id
+	)
+;
+quit;
+Data &include_cohort (keep= pop:
 		bene_id gndr_cd bene_race_cd bene_cnty_cd bene_state_cd bene_mlg_cntct_zip_cd  
 		prvdr_num prvdr_state_cd 
-		at_physn_npi op_physn_npi org_npi_num ot_physn_npi rndrng_physn_npi /*rfr_physn_npi prf_physn_npi*/); 
-set include_cohort2;   
-*where 	CLM_IP_ADMSN_TYPE_CD = '3' /* keep elective only */
-	AND OP_PHYSN_SPCLTY_CD in('02', '16');	/*keep general surgeon or gyn/onc only*/
-pop_11_elig_dt=clm_admsn_dt; format pop_11_elig_dt date9.; 			label pop_11_elig_dt='date eligible for pop 11 (clm_admsn_dt)';
-pop_11_elig=1; 							label pop_11_elig='eligible for pop 11';
-pop_11_age=(clm_admsn_dt-dob_dt)/365.25; label pop_11_age='age eligible for pop 11';
-pop_11_age=round(pop_11_age);
-pop_11_los=NCH_BENE_DSCHRG_DT-clm_admsn_dt;	label pop_11_los='length of stay for pop 11 eligibility';
-pop_11_year=year(clm_admsn_dt);
-pop_11_nch_clm_type_cd=put(nch_clm_type_cd, clm_type_cd.); label pop_11_nch_clm_type_cd='claim/facility type for pop 11 eligibility';
-pop_11_CLM_IP_ADMSN_TYPE_CD = put(CLM_IP_ADMSN_TYPE_CD,$IP_ADMSN_TYPE_CD.);
-pop_11_admtg_dgns_cd=put(admtg_dgns_cd,$dgns.);
-pop_11_icd_dgns_cd1=put(icd_dgns_cd1,$dgns.);
-pop_11_clm_drg_cd=put(clm_drg_cd,$drg.);
-pop_11_hcpcs_cd=put(hcpcs_cd,$hcpcs.);
-pop_11_OP_PHYSN_SPCLTY_CD=OP_PHYSN_SPCLTY_CD;
+		at_physn_npi op_physn_npi org_npi_num ot_physn_npi rndrng_physn_npi); 
+set include_cohort3;   
+&flag_popped_dt=clm_admsn_dt; format &flag_popped_dt date9.; 			label &flag_popped_dt=&flag_popped_dt_label;
+&flag_popped=1; 							label &flag_popped=&flag_popped_label;
+&pop_age=(clm_admsn_dt-dob_dt)/365.25; label &pop_age=&pop_age_label;
+&pop_age=round(&pop_age);
+&pop_los=NCH_BENE_DSCHRG_DT-clm_admsn_dt;	label &pop_los=&pop_los_label;
+&pop_year=year(clm_admsn_dt);
+&pop_nch_clm_type_cd=put(nch_clm_type_cd, clm_type_cd.); label &pop_nch_clm_type_cd=&pop_nch_clm_type_cd_label;
+&pop_CLM_IP_ADMSN_TYPE_CD = put(CLM_IP_ADMSN_TYPE_CD,$IP_ADMSN_TYPE_CD.);
+&pop_clm_fac_type_cd = clm_fac_type_cd; 		label &pop_clm_fac_type_cd = &pop_clm_fac_type_cd_label;
+&pop_clm_src_ip_admsn_cd = clm_src_ip_admsn_cd; label &pop_clm_src_ip_admsn_cd = &pop_clm_src_ip_admsn_cd_label;
+&pop_ptnt_dschrg_stus_cd = ptnt_dschrg_stus_cd; label &pop_ptnt_dschrg_stus_cd = &pop_ptnt_dschrg_stus_cd;
+&pop_admtg_dgns_cd=put(admtg_dgns_cd,$dgns.);
+&pop_icd_dgns_cd1=put(icd_dgns_cd1,$dgns.);
+&pop_clm_drg_cd=put(clm_drg_cd,$drg.);
+&pop_hcpcs_cd=put(hcpcs_cd,$hcpcs.);
+&pop_OP_PHYSN_SPCLTY_CD=OP_PHYSN_SPCLTY_CD;
 array dx(25) icd_dgns_cd1 - icd_dgns_cd25;
 do j=1 to 25;
 	if substr(dx(j),1,3) in(&EXCLUD_dx10_3) then delete;
 end;
+*if clm_drg_cd notin(&includ_drg) then delete;
 run; 
 %mend;
-%claims_rev(source=rif2016.inpatient_claims_01, rev_cohort=rif2016.inpatient_revenue_01, include_cohort=pop_11_IN_2016_1);
 %claims_rev(source=rif2016.inpatient_claims_01, rev_cohort=rif2016.inpatient_revenue_01, include_cohort=pop_11_IN_2016_1);
 %claims_rev(source=rif2016.inpatient_claims_02, rev_cohort=rif2016.inpatient_revenue_02, include_cohort=pop_11_IN_2016_2);
 %claims_rev(source=rif2016.inpatient_claims_03, rev_cohort=rif2016.inpatient_revenue_03, include_cohort=pop_11_IN_2016_3);
@@ -297,18 +349,21 @@ set pop_11_IN_2016_1 pop_11_IN_2016_2 pop_11_IN_2016_3 pop_11_IN_2016_4 pop_11_I
 	pop_11_IN_2018_1 pop_11_IN_2018_2 pop_11_IN_2018_3 pop_11_IN_2018_4 pop_11_IN_2018_5 pop_11_IN_2018_6
 	pop_11_IN_2018_7 pop_11_IN_2018_8 pop_11_IN_2018_9 pop_11_IN_2018_10 pop_11_IN_2018_11 pop_11_IN_2018_12
 ;
-if pop_11_year<2016 then delete;
-if pop_11_year>2018 then delete;
-if pop_11_age<65 	then delete;
+if &pop_year<2016 then delete;
+if &pop_year>2018 then delete;
 run;
-*get rid of duplicate rows;
-proc sort data=pop_11_IN nodupkey; by bene_id pop_11_elig_dt; run;
+/* get rid of duplicate rows--keep first occurence so sort by date first */
+proc sort data=pop_11_IN; by bene_id &flag_popped_dt; run;
+proc sort data=pop_11_IN nodupkey; by bene_id; run;
 
 *look at inpatient info;
 proc freq data=pop_11_IN order=freq; 
-table  pop_11_elig pop_11_year pop_11_OP_PHYSN_SPCLTY_CD pop_11_nch_clm_type_cd pop_11_CLM_IP_ADMSN_TYPE_CD
-		pop_11_admtg_dgns_cd pop_11_icd_dgns_cd1 pop_11_clm_drg_cd pop_11_hcpcs_cd; run;
+table  	&flag_popped &pop_year gndr_cd bene_state_cd prvdr_state_cd 
+		&pop_OP_PHYSN_SPCLTY_CD &pop_ptnt_dschrg_stus_cd
+		&pop_nch_clm_type_cd &pop_CLM_IP_ADMSN_TYPE_CD &pop_clm_fac_type_cd &pop_clm_src_ip_admsn_cd
+		&pop_admtg_dgns_cd &pop_icd_dgns_cd1 &pop_clm_drg_cd &pop_hcpcs_cd; 
+format bene_state_cd prvdr_state_cd $state. &pop_OP_PHYSN_SPCLTY_CD $speccd. &pop_clm_src_ip_admsn_cd $src1adm.
+		&pop_ptnt_dschrg_stus_cd $stuscd.;
+run;
 
-proc means data=pop_11_IN n mean median min max; var pop_11_elig_dt pop_11_age pop_11_los; run;
-
-*stop;
+proc means data=pop_11_IN n mean median min max; var &flag_popped_dt &pop_age &pop_los; run;
