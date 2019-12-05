@@ -3,8 +3,9 @@
 * Job Desc: describe the jobs and sequence required to run jobs
 * Copyright: Johns Hopkins University - SegalLab & HutflessLab 2019
 ********************************************************************
-Order which jobs should be run.  If same number is listed twice that
+Order of which jobs should be run.  If same number is listed twice that
 means that order does not matter for those 2+ jobs
+
 Seq   Job Name
   0   read_me_overuse_job_sequence.txt
   1   jhu_build_Claim_IP_ds_project_overuse.sas
@@ -36,7 +37,7 @@ Seq   Job Name (followed by description)
           diligent administration of folders, naming, intent
   
   1   jhu_build_Claim_OP_ds_project_overuse.sas
-      - Takes Outpatient (OP) claims for STATE / YYYY and preps them
+      - Takes Outpatient (OP) claims for YYYY and preps them
         with overuse logic and intention for use in downstream jobs
         - this job should typically RUN before 
           overuse_cohort_prep_logic_for_output.sas
@@ -46,7 +47,7 @@ Seq   Job Name (followed by description)
           diligent administration of folders, naming, intent  
 
   1   jhu_build_Claim_CAR_ds_project_overuse.sas
-      - Takes Carrier (CAR) claims for STATE / YYYY and preps them
+      - Takes Carrier (CAR) claims for YYYY and preps them
         with overuse logic and intention for use in downstream jobs
         - this job should typically RUN before 
           overuse_cohort_prep_logic_for_output.sas
@@ -69,7 +70,7 @@ Seq   Job Name (followed by description)
   
   
       source_code_for_output_prep_using_table1_logic.sas
-      - This code is meant to hold logic and code which
+      - This code is meant to hold logic and code 
         for overuse maybe used in parts, sections to refine
         output.  The parts copied from here will go into
         overuse_cohort_prep_logic_for_output.sas
