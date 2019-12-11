@@ -89,7 +89,9 @@ Actor		Gynecologist, occasionally general surgeon
 %let  	pop_clm_fac_type_cd_label		= 'inpatient clm_fac_type_cd for pop 11';
 %let	pop_clm_src_ip_admsn_cd_label	= 'clm_src_ip_admsn_cd for pop 11'		;
 %let	pop_ptnt_dschrg_stus_cd_label	= 'discharge status code for pop 11'	;	
-
+%let  ds_all_ip          =  &lwork..num11_ip_2010_14_all; 
+%let  ds_all_op          =  &lwork..num11_ot_2010_14_all; 
+%let  ds_all_car         =  &lwork..num11_car_2010_14_all;
 
 /*** end of indicator specific variables ***/
 
@@ -110,10 +112,7 @@ Actor		Gynecologist, occasionally general surgeon
 %global diag_pfx diag_cd_min diag_cd_max ;
 %global plc_of_srvc_cd                   ;
 %global ds_all_prefix                    ;
-%let  ds_all_prefix      = ;
-%let  ds_all_ip          =  &lwork..num11_ip_2010_14_all; 
-%let  ds_all_op          =  &lwork..num11_ot_2010_14_all; 
-%let  ds_all_car         =  &lwork..num11_car_2010_14_all; 
+%let  ds_all_prefix      = ; 
 
 %let  diag_pfx           = icd_dgns_cd_          ;
 %let  diag_cd_min        = 1                 ;

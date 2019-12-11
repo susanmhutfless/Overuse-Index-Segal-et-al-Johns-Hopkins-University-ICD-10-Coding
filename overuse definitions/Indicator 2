@@ -1,6 +1,6 @@
 /* Indicator 02 */
 
-/*Description from Excel file*/
+/*Description from Excel file
 (New) Number 		2	
 Indicator 		Don’t perform unproven diagnostic tests, such as immunoglobulin G (IgG) testing or an indiscriminate battery of immunoglobulin E (IgE) tests, in the evaluation of allergy.
 Indicator
@@ -17,7 +17,7 @@ System		Allergy
 
 Actor		Allergists, primary care
 
-/*Updated with information from ICD-10 conversions_12_06-19*/
+Updated with information from ICD-10 conversions_12_06-19*/
 
 
 /*** start of indicator specific variables ***/
@@ -29,7 +29,7 @@ Actor		Allergists, primary care
 %let includ_hcpcs =
 					'82784'	'82785'	'82787'	'86005'			;
 
-%let includ_dx10_3 ='Z91 ;
+%let includ_dx10_3 ='Z91' ;
 
 %let includ_drg = ;
 
@@ -62,6 +62,9 @@ Actor		Allergists, primary care
 %let  	pop_clm_fac_type_cd_label		= 'inpatient clm_fac_type_cd for pop 2';
 %let	pop_clm_src_ip_admsn_cd_label	= 'clm_src_ip_admsn_cd for pop 2'		;
 %let	pop_ptnt_dschrg_stus_cd_label	= 'discharge status code for pop 2'	;	
+%let  ds_all_ip          =  &lwork..num02_ip_2010_14_all; 
+%let  ds_all_op          =  &lwork..num02_ot_2010_14_all; 
+%let  ds_all_car         =  &lwork..num02_car_2010_14_all;
 
 
 /*** end of indicator specific variables ***/
