@@ -1,24 +1,8 @@
 /* Indicator 02 */
 
-/*Description from Excel file
-(New) Number 		11	
-Indicator 			Hysterectomy for benign disease	
-Indicator
-			Motivator: there are too many hysterectomies performed for benign disease
-			that could be managed more conservatively
+/*Description from Excel file*/
 
-			Indicator: Hysterectomy performed for an indication other than a cancer diagnosis
-			of a pelvic organ (ovary, uterus, peritoneum, cervix, bladder).
-
-			[this can be reported among all patients with hysterectomy]
-
-Timing		Inclusionary diagnosis code is associated with the procedure code (same claim)
-			or same admission (with primary diagnosis)	
-
-System		Gyne	
-
-Actor		Gynecologist, occasionally general surgeon
-*/
+/*will add in info for number 2. Also add in file name and data for tracking*/
 
 /* Eliana this might be Useful: how to concat from excel to tak exact codes: =CONCATENATE("'",D1,"'")
 
