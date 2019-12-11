@@ -249,7 +249,7 @@ proc sql;
 select include_cohort1b.hcpcs_cd, include_cohort2.*
 from 
 	include_cohort1b 
-right outer join 
+left join 
 	include_cohort2 
 					(keep = bene_id clm_id clm_admsn_dt dob_dt NCH_BENE_DSCHRG_DT ptnt_dschrg_stus_cd
 							nch_clm_type_cd CLM_IP_ADMSN_TYPE_CD clm_fac_type_cd clm_src_ip_admsn_cd 
