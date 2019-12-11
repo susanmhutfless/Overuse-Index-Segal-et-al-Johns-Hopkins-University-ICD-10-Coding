@@ -38,9 +38,11 @@ Actor		Allergists, primary care
 %let includ_hcpcs =
 					'82784'	'82785'	'82787'	'86005'			;
 
+*%let includ_pr10 =	;
+
 %let includ_dx10_3 ='Z91' ;
 
-%let includ_drg = ;
+*%let includ_drg = ;
 
 /** Exclusion criteria **/
 /* no exclusions for pop 02*/
@@ -214,7 +216,7 @@ proc sql;
 select *
 from 
 	&source 
-where 
+/*where 
 		icd_prcdr_cd1 in(&includ_pr10) or
 		icd_prcdr_cd2 in(&includ_pr10) or
 		icd_prcdr_cd3 in(&includ_pr10) or
@@ -240,7 +242,7 @@ where
 		icd_prcdr_cd23 in(&includ_pr10) or
 		icd_prcdr_cd24 in(&includ_pr10) or
 		icd_prcdr_cd25 in(&includ_pr10) 
-;		
+;	*/	
 quit;
 proc sql;
 	create table include_cohort3 (compress=yes) as
@@ -283,7 +285,7 @@ set include_cohort3;
 &pop_OP_PHYSN_SPCLTY_CD=OP_PHYSN_SPCLTY_CD;
 array dx(25) icd_dgns_cd1 - icd_dgns_cd25;
 do j=1 to 25;
-	if substr(dx(j),1,3) in(&EXCLUD_dx10_3) then delete;
+	if substr(dx(j),1,3) notin(&includ_dx10_3) then delete;
 end;
 *if clm_drg_cd notin(&includ_drg) then delete;
 run; 
