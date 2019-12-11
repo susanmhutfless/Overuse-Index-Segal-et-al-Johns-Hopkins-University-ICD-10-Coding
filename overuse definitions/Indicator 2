@@ -1,10 +1,23 @@
 /* Indicator 02 */
 
 /*Description from Excel file*/
+(New) Number 		2	
+Indicator 		Don’t perform unproven diagnostic tests, such as immunoglobulin G (IgG) testing or an indiscriminate battery of immunoglobulin E (IgE) tests, in the evaluation of allergy.
+Indicator
+			Motivator: IgG testing has no relevance to allergy; IgE testing should be very selective
 
-/*will add in info for number 2. Also add in file name and data for tracking*/
+			Indictor: IgG testing where the primary diagnosis is allergy or broad IgE testing where the primary diagnosis is allergy
 
-/* Eliana this might be Useful: how to concat from excel to tak exact codes: =CONCATENATE("'",D1,"'")
+			[this can be reported among all patients with IgG and IgE testing]
+
+Timing		Inclusionary diagnosis code is associated with the procedure code (same claim)
+			or same admission (with primary diagnosis)	
+
+System		Allergy	
+
+Actor		Allergists, primary care
+
+/*Updated with information from ICD-10 conversions_12_06-19*/
 
 
 /*** start of indicator specific variables ***/
