@@ -1,4 +1,4 @@
-/* Template for Eliana to enter in inclusion exclusion per pop */
+/* Indicator 02 */
 
 /*Description from Excel file
 (New) Number 		11	
