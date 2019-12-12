@@ -67,60 +67,58 @@ Actor		Allergists, primary care
 %let	pop_clm_drg_cd					= pop_02_clm_drg_cd						;
 %let	pop_hcpcs_cd					= pop_02_hcpcs_cd						;
 %let	pop_OP_PHYSN_SPCLTY_CD			= pop_02_OP_PHYSN_SPCLTY_CD				;
-
 %let	pop_nch_clm_type_cd				= pop_02_nch_clm_type_cd				;
 %let	pop_nch_clm_type_cd_label		= 'claim/facility type for pop 02' 		;
-
 %let	pop_CLM_IP_ADMSN_TYPE_CD_label	= 'inpatient admission type code for pop 02'	;
 %let  	pop_clm_fac_type_cd_label		= 'inpatient clm_fac_type_cd for pop 02';
 %let	pop_clm_src_ip_admsn_cd_label	= 'clm_src_ip_admsn_cd for pop 02'		;
 %let	pop_ptnt_dschrg_stus_cd_label	= 'discharge status code for pop 02'	;	
-%let  ds_all_ip          =  &lwork..num02_ip_2010_14_all; 
-%let  ds_all_op          =  &lwork..num02_ot_2010_14_all; 
-%let  ds_all_car         =  &lwork..num02_car_2010_14_all;
+%let  ds_all_ip          =  &lwork..num02_ip_2010_14_all						; 
+%let  ds_all_op          =  &lwork..num02_ot_2010_14_all						; 
+%let  ds_all_car         =  &lwork..num02_car_2010_14_all						;
 
 
 /*** end of indicator specific variables ***/
 
 
 /*** start of section - global vars ***/
-%global lwork ltemp shlib                    ;   /** libname prefix **/
-%global pat_id clm_id                       ;
-%global pat_id                               ;
+%global lwork ltemp shlib                    	;   /** libname prefix **/
+%global pat_id clm_id                       	;
+%global pat_id                               	;
 
 /*** libname prefix alias assignments ***/
-%let  lwork              = work              ;
-%let  ltemp              = temp              ;
-%let  shlib              = shu172sl          ;
+%let  lwork              = work              	;
+%let  ltemp              = temp              	;
+%let  shlib              = shu172sl          	;
 
-%let  pat_id             = bene_id      ;
-%let  clm_id             = clm_id            ;
+%let  pat_id             = bene_id      		;
+%let  clm_id             = clm_id            	;
 
 
-%global diag_pfx diag_cd_min diag_cd_max ;
-%global plc_of_srvc_cd                   ;
-%global ds_all_prefix                    ;
-%let  ds_all_prefix      = ; 
+%global diag_pfx diag_cd_min diag_cd_max 		;
+%global plc_of_srvc_cd                   		;
+%global ds_all_prefix                    		;
+%let  ds_all_prefix      = 						; 
 
-%let  diag_pfx           = icd_dgns_cd_          ;
-%let  diag_cd_min        = 1                 ;
-%let  diag_cd_max        = 25                 ;
+%let  diag_pfx           = icd_dgns_cd_         ;
+%let  diag_cd_min        = 1                 	;
+%let  diag_cd_max        = 25                 	;
 
-%let  proc_pfx           = icd_prcdr_          ;
-%let  proc_cd_min        = 1                 ;
-%let  proc_cd_max        = 25                 ;
+%let  proc_pfx           = icd_prcdr_          	;
+%let  proc_cd_min        = 1                 	;
+%let  proc_cd_max        = 25                 	;
 
-%let  plc_of_srvc_cd     = clm_fac_type_cd    ;
+%let  plc_of_srvc_cd     = clm_fac_type_cd    	;
 
-%global age;
-%global clm_beg_dt clm_end_dt clm_dob clm_pymt_dt;
-%global clm_drg ;
-%let  age                = age_at_proc           ;
-%let  clm_beg_dt         = clm_from_dt   ;
-%let  clm_end_dt         = clm_thru_dt   ;
-%let  clm_pymt_dt        = clm_pymt_dt     ;
-%let  clm_drg            = clm_drg_cd    ;
-%let  clm_dob            = dob_dt       ;
+%global age										;
+%global clm_beg_dt clm_end_dt clm_dob clm_pymt_dt	;
+%global clm_drg 								;
+%let  age                = age_at_proc          ;
+%let  clm_beg_dt         = clm_from_dt   		;
+%let  clm_end_dt         = clm_thru_dt   		;
+%let  clm_pymt_dt        = clm_pymt_dt     		;
+%let  clm_drg            = clm_drg_cd    		;
+%let  clm_dob            = dob_dt       		;
 
 /*** end of section   - global vars ***/
 
@@ -128,10 +126,10 @@ Actor		Allergists, primary care
 
 /*** end of section   - OUTPUT DS NAMES ***/
 
-%let vpath     = /sas/vrdc/users/shu172/files     ;
+%let vpath     = /sas/vrdc/users/shu172/files   ;
 %let proj_path = /jhu_projects/overuse          ;
-%let code_path = /code/                           ;
-%let vrdc_code = &vpath./jhu_vrdc_code            ;
+%let code_path = /code/                         ;
+%let vrdc_code = &vpath./jhu_vrdc_code          ;
 
 
 /*** start of section - local vars remote work ***/
@@ -139,14 +137,14 @@ Actor		Allergists, primary care
 /*** end of section   - local vars remote work ***/
 
 /*** make sure to run macros in ***/
-%include "&vrdc_code./macro_tool_box.sas";
+%include "&vrdc_code./macro_tool_box.sas"		;
 
 
-%global vars_to_keep_ip_op;
-%global vars_to_keep_ip   ;
+%global vars_to_keep_ip_op						;
+%global vars_to_keep_ip   						;
 
-%global vars_to_drop_op   ;
-%global vars_to_drop_op   ;
+%global vars_to_drop_op   						;
+%global vars_to_drop_op   						;
 
 %let vars_to_keep_ip_op = 	pop:
 							bene_id 
@@ -164,13 +162,14 @@ Actor		Allergists, primary care
 							rndrng_physn_npi
                           ;
 
-%let vars_to_keep_ip    = 	;
-                          
-
+%let vars_to_keep_ip    = 	bene_id clm_id clm_admsn_dt dob_dt NCH_BENE_DSCHRG_DT ptnt_dschrg_stus_cd
+							nch_clm_type_cd CLM_IP_ADMSN_TYPE_CD clm_fac_type_cd clm_src_ip_admsn_cd 
+							admtg_dgns_cd clm_drg_cd icd_dgns_cd1-icd_dgns_cd25  
+							gndr_cd bene_race_cd bene_cnty_cd bene_state_cd bene_mlg_cntct_zip_cd  
+							prvdr_num prvdr_state_cd OP_PHYSN_SPCLTY_CD
+							at_physn_npi op_physn_npi org_npi_num ot_physn_npi rndrng_physn_npi;                         
 %let vars_to_keep_op	=	;
-
 %let vars_to_drop_ip    = 	;
-
 %let vars_to_drop_op    =  	;
 
 %global view_lib;
@@ -225,13 +224,7 @@ select include_cohort1b.hcpcs_cd, include_cohort2.*
 from 
 	include_cohort1b 
 left join 
-	include_cohort2 
-					(keep = bene_id clm_id clm_admsn_dt dob_dt NCH_BENE_DSCHRG_DT ptnt_dschrg_stus_cd
-							nch_clm_type_cd CLM_IP_ADMSN_TYPE_CD clm_fac_type_cd clm_src_ip_admsn_cd 
-							admtg_dgns_cd clm_drg_cd icd_dgns_cd1-icd_dgns_cd25  
-							gndr_cd bene_race_cd bene_cnty_cd bene_state_cd bene_mlg_cntct_zip_cd  
-							prvdr_num prvdr_state_cd OP_PHYSN_SPCLTY_CD
-							at_physn_npi op_physn_npi org_npi_num ot_physn_npi rndrng_physn_npi )
+	include_cohort2 	(keep = &vars_to_keep_ip )
 on (
 	include_cohort1b.bene_id = include_cohort2.bene_id and include_cohort1b.clm_id = include_cohort2.clm_id
 	)
@@ -434,8 +427,8 @@ proc sort data=pop_02_OUT nodupkey; by bene_id &flag_popped_dt; run;
 *look at OUTpatient info;
 proc freq data=pop_02_OUT order=freq; 
 table  &flag_popped &pop_year &pop_OP_PHYSN_SPCLTY_CD &pop_nch_clm_type_cd 
-		 &pop_icd_dgns_cd1 &pop_hcpcs_cd; 
-format &pop_OP_PHYSN_SPCLTY_CD speccd. &pop_icd_dgns_cd1 $dgns. &pop_hcpcs_cd $hcpcs.;
+		 &pop_hcpcs_cd &pop_icd_dgns_cd1 ; 
+format &pop_OP_PHYSN_SPCLTY_CD $speccd. &pop_icd_dgns_cd1 $dgns. &pop_hcpcs_cd $hcpcs.;
 run;
 
 proc means data=pop_02_OUT n mean median min max; var &flag_popped_dt pop_02_age pop_02_los; run;
