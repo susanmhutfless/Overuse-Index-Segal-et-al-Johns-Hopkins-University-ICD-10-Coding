@@ -1,5 +1,5 @@
 /********************************************************************
-* Job Name: jhu_build_Claim_IP_ds_project_overuse.sas
+* Job Name: jhu_build_Claim_IPOP_ds_project_overuse_num02.sas
 * Job Desc: Input for Inpatient Claims 
 * Copyright: Johns Hopkins University - SegalLab & HutflessLab 2019
 ********************************************************************/
@@ -44,7 +44,9 @@ Actor		Allergists, primary care
 *%let includ_drg = ;
 
 /** Exclusion criteria **/
-/* no exclusions for pop 02*/
+%let exclud_dx10_1 =	'C'														;
+%let exclud_dx10_3 =	'D80'	'D81'	'D82'	'D83'	'D84'	'D85'
+						'D86'	'D87'	'D88'	'D89'							;
 
 /** Label pop specific variables  instructions **/
 %global flag_popped																;
@@ -253,8 +255,10 @@ set include_cohort3;
 array dx(25) icd_dgns_cd1 - icd_dgns_cd25;
 do j=1 to 25;
 	if substr(dx(j),1,3) in(&includ_dx10_3) or substr(dx(j),1,4) in(&includ_dx10_4) then ALLERGY=1;
+	if substr(dx(j),1,3) in(&exclud_dx10_3) or substr(dx(j),1,1) in(&exclud_dx10_1) then DELETE=1;
 end;
 IF ALLERGY ne 1 then delete;
+IF DELETE  =  1 then delete;
 *if clm_drg_cd notin(&includ_drg) then delete;
 run; 
 %mend;
@@ -368,8 +372,10 @@ set include_cohort2;
 array dx(25) icd_dgns_cd1 - icd_dgns_cd25;
 do j=1 to 25;
 	if substr(dx(j),1,3) in(&includ_dx10_3) or substr(dx(j),1,4) in(&includ_dx10_4) then ALLERGY=1;
+	if substr(dx(j),1,3) in(&exclud_dx10_3) or substr(dx(j),1,1) in(&exclud_dx10_1) then DELETE=1;
 end;
 IF ALLERGY ne 1 then delete;
+IF DELETE  =  1 then delete;
 run; 
 %mend;
 %claims_rev(source=rif2016.OUTpatient_claims_01, rev_cohort=rif2016.OUTpatient_revenue_01, include_cohort=pop_02_OUT_2016_1);
