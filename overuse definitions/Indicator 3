@@ -2,25 +2,21 @@
 
 /*Description from Excel file
 (New) Number 		3	
-Indicator 			Hysterectomy for benign disease	
+Indicator 			Preoperative chest radiography in the absence of a clinical suspicion for intrathoracic pathology
 Indicator
-			Motivator: there are too many hysterectomies performed for benign disease
-			that could be managed more conservatively
+			Motivator: this is of little clinical value and leads to cascades of harm
 
-			Indicator: Hysterectomy performed for an indication other than a cancer diagnosis
-			of a pelvic organ (ovary, uterus, peritoneum, cervix, bladder).
+			Indicator: use of preoperative chest xray in people without symptoms or history of lung disease
 
-			[this can be reported among all patients with hysterectomy]
+			[this can be reported among all patients with preoperative chest X-ray]
 
-Timing		Inclusionary diagnosis code is associated with the procedure code (same claim)
-			or same admission (with primary diagnosis)	
+Timing		Procedure code is associated with the Inclusionary diagnsosis code(same claim) with NO exclusionary diagnosis codes within 180 days preceding procedure code	
 
-System		Gyne	
+System		Anesthesia	
 
-Actor		Gynecologist, occasionally general surgeon
-*/
+Actor		Anesthesiologists, primary care
 
-/* Eliana this might be Useful: how to concat from excel to tak exact codes: =CONCATENATE("'",D1,"'")
+/*Updated with information from ICD-10 conversions_12_06-19*/
 
 
 /*** start of indicator specific variables ***/
