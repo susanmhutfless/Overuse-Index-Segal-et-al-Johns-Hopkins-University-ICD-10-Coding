@@ -26,32 +26,18 @@ Actor		Anesthesiologists, primary care
 %global includ_pr10;
 
 %let includ_hcpcs =
-					'58150'	'58152'	'58180'	'58200'
-					'58210'	'58260'	'58262'	'58263'	
-					'58267'	'58270'	'58275'	'58280'
-					'58285'	'58290'	'58291'	'58292'
-					'59293'	'59294'	'58541'	'58542'
-					'58543'	'58544'	'58548'	'58550'
-					'58552'	'58553'	'58554'	'58570'
-					'58571'	'58572'	'58573'				;
+					'71045'	'71046'					;
 
 %let includ_pr10 =
-					'0UT94ZL'	'0UT90ZL'	'0UT94ZZ'
-					'0UT90ZZ'	'0UT9FZL'	'0UT9FZZ'
-					'0UT97ZL'	'0UT98ZL'	'0UT97ZZ'
-					'0UT98ZZ'	'0UT44ZZ'	'0UT94ZZ'
-					'0UT40ZZ'	'0UT90ZZ'	'0UT44ZZ'
-					'0UT9FZZ'	'0UT47ZZ'	'0UT48ZZ'
-					'0UT97ZZ'	'0UT98ZZ'	'0UT90ZZ'
-					'0UT94ZZ'	'0UT90ZL'	'0UT90ZZ'
-					'0UT94ZL'	'0UT94ZZ'	'0UT97ZL'
-					'0UT97ZZ'	'0UT98ZL'	'0UT98ZZ'
-					'0UT9FZL'	'0UT9FZZ'				;
-
+					'BW03ZZZ'					;
+%let includ_dx10 =
+					'Z01.81'					;
 %let includ_drg = ;
 
 /** Exclusion criteria **/
-%let EXCLUD_dx10_1='C'; 
+%let EXCLUD_dx10_3= 			'J00-J06' 'J09-J18' 'J20-J22' 'J30-J39'
+					'J40-J47' 'J60-J70' 'J80-J84' 'J85-J86'
+					'J90-J94 				; 
 
 /** label pop specific variables  instructions: ctrl-H 11 for this pop # **/
 %global flag_popped																;
