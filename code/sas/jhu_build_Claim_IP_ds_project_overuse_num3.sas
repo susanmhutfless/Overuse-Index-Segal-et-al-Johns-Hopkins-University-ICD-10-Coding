@@ -4,29 +4,26 @@
 * Copyright: Johns Hopkins University - SegalLab & HutflessLab 2019
 ********************************************************************/
 
-/*** Indicator description ***/
-/*this example was created for hysterectomy**
-From sheet/manuscript, located at .....add later for final......
-Useful as build (how to concat from excel to tak exact codes): =CONCATENATE("'",D1,"'")
+/* Indicator 3 */
 
-(New) Number 		11	
-Indicator 			Hysterectomy for benign disease	
+/*Description from Excel file
+(New) Number 		3	
+Indicator 			Preoperative chest radiography in the absence of a clinical suspicion for intrathoracic pathology
 Indicator
-			Motivator: there are too many hysterectomies performed for benign disease
-			that could be managed more conservatively
+			Motivator: this is of little clinical value and leads to cascades of harm
 
-			Indicator: Hysterectomy performed for an indication other than a cancer diagnosis
-			of a pelvic organ (ovary, uterus, peritoneum, cervix, bladder).
+			Indicator: use of preoperative chest xray in people without symptoms or history of lung disease
 
-			[this can be reported among all patients with hysterectomy]
+			[this can be reported among all patients with preoperative chest X-ray]
 
-Timing		Inclusionary diagnosis code is associated with the procedure code (same claim)
-			or same admission (with primary diagnosis)	
+Timing		Procedure code is associated with the Inclusionary diagnsosis code(same claim) with NO exclusionary diagnosis codes within 180 days preceding procedure code	
 
-System		Gyne	
+System		Anesthesia	
 
-Actor		Gynecologist, occasionally general surgeon
-*/
+Actor		Anesthesiologists, primary care
+
+/*Updated with information from ICD-10 conversions_12_06-19*/
+
 
 /*** start of indicator specific variables ***/
 
@@ -35,63 +32,47 @@ Actor		Gynecologist, occasionally general surgeon
 %global includ_pr10;
 
 %let includ_hcpcs =
-					'58150'	'58152'	'58180'	'58200'
-					'58210'	'58260'	'58262'	'58263'	
-					'58267'	'58270'	'58275'	'58280'
-					'58285'	'58290'	'58291'	'58292'
-					'59293'	'59294'	'58541'	'58542'
-					'58543'	'58544'	'58548'	'58550'
-					'58552'	'58553'	'58554'	'58570'
-					'58571'	'58572'	'58573'				;
+					'71045'	'71046'					;
 
 %let includ_pr10 =
-					'0UT94ZL'	'0UT90ZL'	'0UT94ZZ'
-					'0UT90ZZ'	'0UT9FZL'	'0UT9FZZ'
-					'0UT97ZL'	'0UT98ZL'	'0UT97ZZ'
-					'0UT98ZZ'	'0UT44ZZ'	'0UT94ZZ'
-					'0UT40ZZ'	'0UT90ZZ'	'0UT44ZZ'
-					'0UT9FZZ'	'0UT47ZZ'	'0UT48ZZ'
-					'0UT97ZZ'	'0UT98ZZ'	'0UT90ZZ'
-					'0UT94ZZ'	'0UT90ZL'	'0UT90ZZ'
-					'0UT94ZL'	'0UT94ZZ'	'0UT97ZL'
-					'0UT97ZZ'	'0UT98ZL'	'0UT98ZZ'
-					'0UT9FZL'	'0UT9FZZ'				;
-
+					'BW03ZZZ'					;
+%let includ_dx10 =
+					'Z01.81'					;
 %let includ_drg = ;
 
 /** Exclusion criteria **/
-%let EXCLUD_dx10_1='C'; 
+%let EXCLUD_dx10_3= 			'J00-J06' 'J09-J18' 'J20-J22' 'J30-J39'
+					'J40-J47' 'J60-J70' 'J80-J84' 'J85-J86'
+					'J90-J94 				; 
 
-/** label pop specific variables **/
+/** label pop specific variables  instructions: ctrl-H 3 for this pop # **/
 %global flag_popped																;
-%let 	flag_popped             		= popped11 								;
-%let 	flag_popped_label				= 'indicator 11 popped'					;	
-%let	flag_popped_dt					= popped11_dt							;
-%let 	flag_popped_dt_label			= 'indicator 11 date patient popped'	;
-%let 	pop_age							= pop_11_age							;				
-%let	pop_age_label					= 'age at pop 11'						;
-%let	pop_los							= pop_11_los							;
+%let 	flag_popped             		= popped3 								;
+%let 	flag_popped_label				= 'indicator 3 popped'					;	
+%let	flag_popped_dt					= popped3_dt							;
+%let 	flag_popped_dt_label			= 'indicator 3 date patient popped'	;
+%let 	pop_age							= pop_3_age							;				
+%let	pop_age_label					= 'age eligible for pop 3'				;
+%let	pop_los							= pop_3_los							;
 %let	pop_los_label					= 'length of stay when patient popped'	;
-%let	pop_year						= pop_11_year							;
-%let	pop_nch_clm_type_cd				= pop_11_nch_clm_type_cd				;
-%let  	pop_CLM_IP_ADMSN_TYPE_CD		= pop_11_CLM_IP_ADMSN_TYPE_CD			;
-%let	pop_clm_fac_type_cd				= pop_11_clm_fac_type_cd				;
-%let	pop_clm_src_ip_admsn_cd			= pop_11_clm_src_ip_admsn_cd					;
-%let	pop_ptnt_dschrg_stus_cd  		= pop_11_ptnt_dschrg_stus_cd			;
-%let	pop_admtg_dgns_cd				= pop_11_admtg_dgns_cd					;
-%let	pop_icd_dgns_cd1				= pop_11_icd_dgns_cd1					;
-%let	pop_clm_drg_cd					= pop_11_clm_drg_cd						;
-%let	pop_hcpcs_cd					= pop_11_hcpcs_cd						;
-%let	pop_OP_PHYSN_SPCLTY_CD			= pop_11_OP_PHYSN_SPCLTY_CD				;
+%let	pop_year						= pop_3_year							;
+%let	pop_nch_clm_type_cd				= pop_3_nch_clm_type_cd				;
+%let  	pop_CLM_IP_ADMSN_TYPE_CD		= pop_3_CLM_IP_ADMSN_TYPE_CD			;
+%let	pop_clm_fac_type_cd				= pop_3_clm_fac_type_cd				;
+%let	pop_clm_src_ip_admsn_cd			= pop_3_clm_src_ip_admsn_cd					;
+%let	pop_ptnt_dschrg_stus_cd  		= pop_3_ptnt_dschrg_stus_cd			;
+%let	pop_admtg_dgns_cd				= pop_3_admtg_dgns_cd					;
+%let	pop_icd_dgns_cd1				= pop_3_icd_dgns_cd1					;
+%let	pop_clm_drg_cd					= pop_3_clm_drg_cd						;
+%let	pop_hcpcs_cd					= pop_3_hcpcs_cd						;
+%let	pop_OP_PHYSN_SPCLTY_CD			= pop_3_OP_PHYSN_SPCLTY_CD				;
 
-%let	pop_nch_clm_type_cd_label		= 'claim/facility type for pop 11' 		;
-%let	pop_CLM_IP_ADMSN_TYPE_CD_label	= 'inpatient admission type code for pop 11'	;
-%let  	pop_clm_fac_type_cd_label		= 'inpatient clm_fac_type_cd for pop 11';
-%let	pop_clm_src_ip_admsn_cd_label	= 'clm_src_ip_admsn_cd for pop 11'		;
-%let	pop_ptnt_dschrg_stus_cd_label	= 'discharge status code for pop 11'	;	
-%let  ds_all_ip          =  &lwork..num11_ip_2010_14_all; 
-%let  ds_all_op          =  &lwork..num11_ot_2010_14_all; 
-%let  ds_all_car         =  &lwork..num11_car_2010_14_all;
+%let	pop_nch_clm_type_cd_label		= 'claim/facility type for pop 3' 		;
+%let	pop_CLM_IP_ADMSN_TYPE_CD_label	= 'inpatient admission type code for pop 3'	;
+%let  	pop_clm_fac_type_cd_label		= 'inpatient clm_fac_type_cd for pop 3';
+%let	pop_clm_src_ip_admsn_cd_label	= 'clm_src_ip_admsn_cd for pop 3'		;
+%let	pop_ptnt_dschrg_stus_cd_label	= 'discharge status code for pop 3'	;	
+
 
 /*** end of indicator specific variables ***/
 
