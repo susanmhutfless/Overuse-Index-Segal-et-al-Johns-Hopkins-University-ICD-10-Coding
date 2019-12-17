@@ -41,6 +41,7 @@ Actor		Anesthesiologists, primary care
 %let includ_drg = ;
 
 /** Exclusion criteria **/
+*NO!.  Need to write out all variables in list;
 %let EXCLUD_dx10_3= 			'J00-J06' 'J09-J18' 'J20-J22' 'J30-J39'
 					'J40-J47' 'J60-J70' 'J80-J84' 'J85-J86'
 					'J90-J94 				; 
