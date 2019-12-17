@@ -1,4 +1,4 @@
 *.csv
 *.dat
 *.xlsx
-*.DS_Store
+.DS_Store
