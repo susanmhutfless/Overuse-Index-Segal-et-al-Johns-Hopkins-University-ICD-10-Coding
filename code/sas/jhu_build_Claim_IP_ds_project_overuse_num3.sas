@@ -37,7 +37,7 @@ Actor		Anesthesiologists, primary care
 %let includ_pr10 =
 					'BW03ZZZ'					;
 %let includ_dx10 =
-					'Z01.81'					;
+					'Z0181'					;
 %let includ_drg = ;
 
 /** Exclusion criteria **/
