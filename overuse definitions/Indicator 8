@@ -1,24 +1,23 @@
-/* Template for Eliana to enter in inclusion exclusion per pop */
-
 /*Description from Excel file
-(New) Number 		11	
-Indicator 			Hysterectomy for benign disease	
+(New) Number 		8	
+Indicator 		Don’t order sinus computed tomography (CT) for uncomplicated acute rhinosinusitis.
 Indicator
-			Motivator: there are too many hysterectomies performed for benign disease
+			Motivator: sinus CT adds little information that will change management of acute sinusitis (we will not do the antibiotics part of this)
+
+			Indicator: Sinus CT in patients with acute sinusitis without a history of chronic sinusitis
 			that could be managed more conservatively
 
-			Indicator: Hysterectomy performed for an indication other than a cancer diagnosis
-			of a pelvic organ (ovary, uterus, peritoneum, cervix, bladder).
+			[this can be reported among all patients with sinus CT]
 
-			[this can be reported among all patients with hysterectomy]
+Timing		Procedure code is associated with an inclusionary diagnosis code (same claim)  AND  no exclusionary diagnosis code in preceding 180 days
 
-Timing		Inclusionary diagnosis code is associated with the procedure code (same claim)
-			or same admission (with primary diagnosis)	
+Setting		Inpatient or outpatient (including ED)	
 
-System		Gyne	
+System		ENT	
 
-Actor		Gynecologist, occasionally general surgeon
-*/
+Actor		primary care, ENT, allergists
+
+*/Updated with information from 12.17.19 Excel Sheet/*
 
 /* Eliana this might be Useful: how to concat from excel to tak exact codes: =CONCATENATE("'",D1,"'")
 
