@@ -10,7 +10,9 @@ Indicator
 
 			[this can be reported among all patients who had ED visits]
 
-Timing		Two or more revenue codes for an ED encounter in last 30 days of life 	
+Timing		Two or more revenue codes for an ED encounter in last 30 days of life
+
+Setting		ED 	
 
 System		All 	
 
