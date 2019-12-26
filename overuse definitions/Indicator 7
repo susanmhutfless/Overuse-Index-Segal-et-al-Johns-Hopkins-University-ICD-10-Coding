@@ -9,7 +9,9 @@ Indicator 		Nasal endoscopy for sinusitis diagnosis
 
 			[this can be reported among all patients with nasal endoscopy]
 
-Timing		Inclusionary diagnosis code is associated with the procedure code (same claim)  AND  no exclusionary diagnosis code in preceding 180 days	
+Timing		Inclusionary diagnosis code is associated with the procedure code (same claim)  AND  no exclusionary diagnosis code in preceding 180 days
+
+Setting		Inpatient or outpatient (including ED)	
 
 System		ENT	
 
