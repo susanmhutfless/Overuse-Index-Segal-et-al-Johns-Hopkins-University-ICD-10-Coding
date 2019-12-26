@@ -9,7 +9,9 @@ Indicator 		MRI in individuals with mild traumatic brain injury
 
 			[this can be reported among all patients with brain MRI]
 
-Timing		Procedure code is associated with the inclusionary diagnosis code (same claim) seen in an ED or outpatient setting; NOT APPLICABLE TO INPATIENTS	
+Timing		Procedure code is associated with the inclusionary diagnosis code (same claim) seen in an ED or outpatient setting; NOT APPLICABLE TO INPATIENTS
+
+Setting		Outpatient (including ED); not inpatient	
 
 System		ED	
 
