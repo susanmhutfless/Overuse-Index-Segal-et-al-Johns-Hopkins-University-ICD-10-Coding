@@ -35,14 +35,14 @@ Actor		ENTs, allergists
 					'09JKXZZ' '09JY0ZZ' '09JY3ZZ' '09JY4ZZ'
 					'09JY8ZZ' '09JYXZZ'				;
 
-%let includ_dx10 =			'J01.00' 'J01.10' 'J01.20' 
-					'J01.30' 'J01.40' 'J01.90'		;
+%let includ_dx10 =			'J0100' 'J0110' 'J0120' 
+					'J0130' 'J0140' 'J0190'		;
 
 %let includ_drg = N/A
 
 /** Exclusion criteria **/
-%let EXCLUD_dx10=			'J32.0' 'J32.1' 'J32.2' 'J32.3'
-					'J32.4' 'J32.8' 'J32.9'		; 
+%let EXCLUD_dx10=			'J320' 'J321' 'J322' 'J323'
+					'J324' 'J328' 'J329'		; 
 
 /** label pop specific variables  instructions: ctrl-H 7 for this pop # **/
 %global flag_popped																;
