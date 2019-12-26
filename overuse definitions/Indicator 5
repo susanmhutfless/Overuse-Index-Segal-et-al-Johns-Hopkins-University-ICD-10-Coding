@@ -10,7 +10,9 @@ Indicator
 
 			[this can be reported among all patients with foot imaging]
 
-Timing		Inclusionary diagnosis on the same claim as the CPT code and no exclusionary code (same code) in the preceding 30 days, restrict to age over 5 years	
+Timing		Inclusionary diagnosis on the same claim as the CPT code and no exclusionary code (same code) in the preceding 30 days, restrict to age over 5 years
+
+Setting		Inpatient or outpatient (including ED)	
 
 System		ED, primary care
 
