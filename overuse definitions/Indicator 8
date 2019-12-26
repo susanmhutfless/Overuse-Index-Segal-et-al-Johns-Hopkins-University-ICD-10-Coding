@@ -19,8 +19,6 @@ Actor		primary care, ENT, allergists
 
 */Updated with information from 12.17.19 Excel Sheet/*
 
-/* Eliana this might be Useful: how to concat from excel to tak exact codes: =CONCATENATE("'",D1,"'")
-
 
 /*** start of indicator specific variables ***/
 
@@ -29,32 +27,20 @@ Actor		primary care, ENT, allergists
 %global includ_pr10;
 
 %let includ_hcpcs =
-					'58150'	'58152'	'58180'	'58200'
-					'58210'	'58260'	'58262'	'58263'	
-					'58267'	'58270'	'58275'	'58280'
-					'58285'	'58290'	'58291'	'58292'
-					'59293'	'59294'	'58541'	'58542'
-					'58543'	'58544'	'58548'	'58550'
-					'58552'	'58553'	'58554'	'58570'
-					'58571'	'58572'	'58573'				;
+					'70486'	'70487'	'70488'	;
 
 %let includ_pr10 =
-					'0UT94ZL'	'0UT90ZL'	'0UT94ZZ'
-					'0UT90ZZ'	'0UT9FZL'	'0UT9FZZ'
-					'0UT97ZL'	'0UT98ZL'	'0UT97ZZ'
-					'0UT98ZZ'	'0UT44ZZ'	'0UT94ZZ'
-					'0UT40ZZ'	'0UT90ZZ'	'0UT44ZZ'
-					'0UT9FZZ'	'0UT47ZZ'	'0UT48ZZ'
-					'0UT97ZZ'	'0UT98ZZ'	'0UT90ZZ'
-					'0UT94ZZ'	'0UT90ZL'	'0UT90ZZ'
-					'0UT94ZL'	'0UT94ZZ'	'0UT97ZL'
-					'0UT97ZZ'	'0UT98ZL'	'0UT98ZZ'
-					'0UT9FZL'	'0UT9FZZ'				;
+					'BN250ZZ'	'BN251ZZ'	'BN25YZZ'
+					'BN25ZZZ'			;
+
+%let includ_dx10 =			'J0100' 'J0110' 'J0120' 
+					'J0130' 'J0140' 'J0190' 	;
 
 %let includ_drg = ;
 
 /** Exclusion criteria **/
-%let EXCLUD_dx10_1='C'; 
+%let EXCLUD_dx10=			'J320' 'J321' 'J322' 'J323'
+					'J324' 'J328' 'J329'		;  
 
 /** label pop specific variables  instructions: ctrl-H 11 for this pop # **/
 %global flag_popped																;
