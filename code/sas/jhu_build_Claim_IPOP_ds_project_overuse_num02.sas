@@ -1,6 +1,6 @@
 /********************************************************************
 * Job Name: jhu_build_Claim_IPOP_ds_project_overuse_num02.sas
-* Job Desc: Input for Inpatient Claims 
+* Job Desc: Input for Inpatient & Outpatient Claims 
 * Copyright: Johns Hopkins University - SegalLab & HutflessLab 2019
 ********************************************************************/
 
@@ -438,3 +438,65 @@ format &pop_OP_PHYSN_SPCLTY_CD $speccd. &pop_icd_dgns_cd1 $dgns. &pop_hcpcs_cd $
 run;
 
 proc means data=pop_02_OUT n mean median min max; var &flag_popped_dt pop_02_age pop_02_los; run;
+
+/**Do same for Carrier file that we did for Outpatient**/
+%claims_rev(source=rif2016.bcarrier_claims_01, rev_cohort=rif2016.bcarrier_line_01, include_cohort=pop_02_CAR_2016_1);
+%claims_rev(source=rif2016.bcarrier_claims_01, rev_cohort=rif2016.bcarrier_line_01, include_cohort=pop_02_CAR_2016_1);
+%claims_rev(source=rif2016.bcarrier_claims_02, rev_cohort=rif2016.bcarrier_line_02, include_cohort=pop_02_CAR_2016_2);
+%claims_rev(source=rif2016.bcarrier_claims_03, rev_cohort=rif2016.bcarrier_line_03, include_cohort=pop_02_CAR_2016_3);
+%claims_rev(source=rif2016.bcarrier_claims_04, rev_cohort=rif2016.bcarrier_line_04, include_cohort=pop_02_CAR_2016_4);
+%claims_rev(source=rif2016.bcarrier_claims_05, rev_cohort=rif2016.bcarrier_line_05, include_cohort=pop_02_CAR_2016_5);
+%claims_rev(source=rif2016.bcarrier_claims_06, rev_cohort=rif2016.bcarrier_line_06, include_cohort=pop_02_CAR_2016_6);
+%claims_rev(source=rif2016.bcarrier_claims_07, rev_cohort=rif2016.bcarrier_line_07, include_cohort=pop_02_CAR_2016_7);
+%claims_rev(source=rif2016.bcarrier_claims_08, rev_cohort=rif2016.bcarrier_line_08, include_cohort=pop_02_CAR_2016_8);
+%claims_rev(source=rif2016.bcarrier_claims_09, rev_cohort=rif2016.bcarrier_line_09, include_cohort=pop_02_CAR_2016_9);
+%claims_rev(source=rif2016.bcarrier_claims_10, rev_cohort=rif2016.bcarrier_line_10, include_cohort=pop_02_CAR_2016_10);
+%claims_rev(source=rif2016.bcarrier_claims_11, rev_cohort=rif2016.bcarrier_line_11, include_cohort=pop_02_CAR_2016_11);
+%claims_rev(source=rif2016.bcarrier_claims_12, rev_cohort=rif2016.bcarrier_line_12, include_cohort=pop_02_CAR_2016_12);
+%claims_rev(source=rif2017.bcarrier_claims_01, rev_cohort=rif2017.bcarrier_line_01, include_cohort=pop_02_CAR_2017_1);
+%claims_rev(source=rif2017.bcarrier_claims_02, rev_cohort=rif2017.bcarrier_line_02, include_cohort=pop_02_CAR_2017_2);
+%claims_rev(source=rif2017.bcarrier_claims_03, rev_cohort=rif2017.bcarrier_line_03, include_cohort=pop_02_CAR_2017_3);
+%claims_rev(source=rif2017.bcarrier_claims_04, rev_cohort=rif2017.bcarrier_line_04, include_cohort=pop_02_CAR_2017_4);
+%claims_rev(source=rif2017.bcarrier_claims_05, rev_cohort=rif2017.bcarrier_line_05, include_cohort=pop_02_CAR_2017_5);
+%claims_rev(source=rif2017.bcarrier_claims_06, rev_cohort=rif2017.bcarrier_line_06, include_cohort=pop_02_CAR_2017_6);
+%claims_rev(source=rif2017.bcarrier_claims_07, rev_cohort=rif2017.bcarrier_line_07, include_cohort=pop_02_CAR_2017_7);
+%claims_rev(source=rif2017.bcarrier_claims_08, rev_cohort=rif2017.bcarrier_line_08, include_cohort=pop_02_CAR_2017_8);
+%claims_rev(source=rif2017.bcarrier_claims_09, rev_cohort=rif2017.bcarrier_line_09, include_cohort=pop_02_CAR_2017_9);
+%claims_rev(source=rif2017.bcarrier_claims_10, rev_cohort=rif2017.bcarrier_line_10, include_cohort=pop_02_CAR_2017_10);
+%claims_rev(source=rif2017.bcarrier_claims_11, rev_cohort=rif2017.bcarrier_line_11, include_cohort=pop_02_CAR_2017_11);
+%claims_rev(source=rif2017.bcarrier_claims_12, rev_cohort=rif2017.bcarrier_line_12, include_cohort=pop_02_CAR_2017_12);
+%claims_rev(source=rifq2018.bcarrier_claims_01, rev_cohort=rifq2018.bcarrier_line_01, include_cohort=pop_02_CAR_2018_1);
+%claims_rev(source=rifq2018.bcarrier_claims_02, rev_cohort=rifq2018.bcarrier_line_02, include_cohort=pop_02_CAR_2018_2);
+%claims_rev(source=rifq2018.bcarrier_claims_03, rev_cohort=rifq2018.bcarrier_line_03, include_cohort=pop_02_CAR_2018_3);
+%claims_rev(source=rifq2018.bcarrier_claims_04, rev_cohort=rifq2018.bcarrier_line_04, include_cohort=pop_02_CAR_2018_4);
+%claims_rev(source=rifq2018.bcarrier_claims_05, rev_cohort=rifq2018.bcarrier_line_05, include_cohort=pop_02_CAR_2018_5);
+%claims_rev(source=rifq2018.bcarrier_claims_06, rev_cohort=rifq2018.bcarrier_line_06, include_cohort=pop_02_CAR_2018_6);
+%claims_rev(source=rifq2018.bcarrier_claims_07, rev_cohort=rifq2018.bcarrier_line_07, include_cohort=pop_02_CAR_2018_7);
+%claims_rev(source=rifq2018.bcarrier_claims_08, rev_cohort=rifq2018.bcarrier_line_08, include_cohort=pop_02_CAR_2018_8);
+%claims_rev(source=rifq2018.bcarrier_claims_09, rev_cohort=rifq2018.bcarrier_line_09, include_cohort=pop_02_CAR_2018_9);
+%claims_rev(source=rifq2018.bcarrier_claims_10, rev_cohort=rifq2018.bcarrier_line_10, include_cohort=pop_02_CAR_2018_10);
+%claims_rev(source=rifq2018.bcarrier_claims_11, rev_cohort=rifq2018.bcarrier_line_11, include_cohort=pop_02_CAR_2018_11);
+%claims_rev(source=rifq2018.bcarrier_claims_12, rev_cohort=rifq2018.bcarrier_line_12, include_cohort=pop_02_CAR_2018_12);
+
+data pop_02_car;
+set pop_02_car_2016_1 pop_02_car_2016_2 pop_02_car_2016_3 pop_02_car_2016_4 pop_02_car_2016_5 pop_02_car_2016_6
+	pop_02_car_2016_7 pop_02_car_2016_8 pop_02_car_2016_9 pop_02_car_2016_10 pop_02_car_2016_11 pop_02_car_2016_12
+	pop_02_car_2017_1 pop_02_car_2017_2 pop_02_car_2017_3 pop_02_car_2017_4 pop_02_car_2017_5 pop_02_car_2017_6
+	pop_02_car_2017_7 pop_02_car_2017_8 pop_02_car_2017_9 pop_02_car_2017_10 pop_02_car_2017_11 pop_02_car_2017_12
+	pop_02_car_2018_1 pop_02_car_2018_2 pop_02_car_2018_3 pop_02_car_2018_4 pop_02_car_2018_5 pop_02_car_2018_6
+	pop_02_car_2018_7 pop_02_car_2018_8 pop_02_car_2018_9 pop_02_car_2018_10 pop_02_car_2018_11 pop_02_car_2018_12
+;
+if pop_02_year<2016 then delete;
+if pop_02_year>2018 then delete;
+run;
+*get rid of duplicate rows;
+proc sort data=pop_02_car nodupkey; by bene_id &flag_popped_dt; run;
+
+*look at carpatient info;
+proc freq data=pop_02_car order=freq; 
+table  &flag_popped &pop_year &pop_OP_PHYSN_SPCLTY_CD &pop_nch_clm_type_cd 
+		 &pop_hcpcs_cd &pop_icd_dgns_cd1 ; 
+format &pop_OP_PHYSN_SPCLTY_CD $speccd. &pop_icd_dgns_cd1 $dgns. &pop_hcpcs_cd $hcpcs.;
+run;
+
+proc means data=pop_02_car n mean median min max; var &flag_popped_dt pop_02_age pop_02_los; run;
