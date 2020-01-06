@@ -494,8 +494,8 @@ proc sort data=pop_02_car nodupkey; by bene_id &flag_popped_dt; run;
 *look at inpatient info;
 %macro poppedlook(in=);
 proc freq data=&in order=freq noprint; 
-table  	&flag_popped /nocum out=&flag_popped (drop = count); run;
-proc print data=&flag_popped noobs; run;
+table  	&flag_popped /nocum out=&flag_popped; run;
+proc print data=&flag_popped noobs; where count>=11; run;
 
 proc freq data=&in order=freq noprint; 
 table  	&pop_year /nocum out=&pop_year (drop = count); run;
