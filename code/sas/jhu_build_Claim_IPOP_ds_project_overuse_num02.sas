@@ -558,6 +558,38 @@ table  	&pop_OP_PHYSN_SPCLTY_CD /nocum out=&pop_OP_PHYSN_SPCLTY_CD (drop = count
 proc print data=&pop_OP_PHYSN_SPCLTY_CD noobs; run;
 
 proc freq data=&in order=freq noprint; 
+table  	&pop_nch_clm_type_cd /nocum out=&pop_nch_clm_type_cd (drop = count); run;
+proc print data=&pop_nch_clm_type_cd noobs; run;
+
+proc freq data=&in order=freq noprint; 
+table  	&gndr_cd /nocum out=&gndr_cd (drop = count); run;
+proc print data=&gndr_cd noobs; run;
+proc means data=&in mean median min max; var  &pop_age &pop_los; run;
+%mend;
+%poppedlook(in=pop_02_OUT);
+title 'Carrier Popped';
+%macro poppedlook(in=);
+proc freq data=&in order=freq noprint; 
+table  	&flag_popped /nocum out=&flag_popped; run;
+proc print data=&flag_popped noobs; where count>=11; run;
+
+proc freq data=&in order=freq noprint; 
+table  	&pop_year /nocum out=&pop_year (drop = count); run;
+proc print data=&pop_year noobs; run;
+
+proc freq data=&in order=freq noprint; 
+table  	&pop_hcpcs_cd /nocum out=&pop_hcpcs_cd (drop = count); run;
+proc print data=&pop_hcpcs_cd noobs; where percent>1; run;
+
+proc freq data=&in order=freq noprint; 
+table  	&pop_icd_dgns_cd1 /nocum out=&pop_icd_dgns_cd1 (drop = count); run;
+proc print data=&pop_icd_dgns_cd1 noobs; where percent>1; run;
+
+proc freq data=&in order=freq noprint; 
+table  	&pop_OP_PHYSN_SPCLTY_CD /nocum out=&pop_OP_PHYSN_SPCLTY_CD (drop = count); run;
+proc print data=&pop_OP_PHYSN_SPCLTY_CD noobs; run;
+
+proc freq data=&in order=freq noprint; 
 table  	prvdr_spclty /nocum out=prvdr_spclty (drop = count); format prvdr_spclty $speccd.; run;
 proc print data=prvdr_spclty noobs; run;
 
@@ -570,8 +602,6 @@ table  	&gndr_cd /nocum out=&gndr_cd (drop = count); run;
 proc print data=&gndr_cd noobs; run;
 proc means data=&in mean median min max; var  &pop_age &pop_los; run;
 %mend;
-%poppedlook(in=pop_02_OUT);
-title 'Carrier Popped';
 %poppedlook(in=pop_02_car);
 
 *compile all Inpatient and Outpatient Popped into 1 dataset
