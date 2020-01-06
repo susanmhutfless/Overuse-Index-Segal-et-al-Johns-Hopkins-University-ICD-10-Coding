@@ -485,7 +485,7 @@ set pop_02_car_2016_1 pop_02_car_2016_2 pop_02_car_2016_3 pop_02_car_2016_4 pop_
 ;
 if pop_02_year<2016 then delete;
 if pop_02_year>2018 then delete;
-format &pop_OP_PHYSN_SPCLTY_CD $speccd. &pop_icd_dgns_cd1 $dgns. &pop_hcpcs_cd $hcpcs.;
+format &pop_OP_PHYSN_SPCLTY_CD prvdr_spclty $speccd. &pop_icd_dgns_cd1 $dgns. &pop_hcpcs_cd $hcpcs.;
 run;
 *get rid of duplicate rows--keep duplicate bene_ids for same reason as OP;
 proc sort data=pop_02_car nodupkey; by bene_id &flag_popped_dt; run;
@@ -536,6 +536,40 @@ title 'Inpatient Popped';
 		&pop_OP_PHYSN_SPCLTY_CD &pop_clm_fac_type_cd &pop_ptnt_dschrg_stus_cd
 		&pop_nch_clm_type_cd &pop_CLM_IP_ADMSN_TYPE_CD &pop_clm_src_ip_admsn_cd*/  
 title 'Outpatient Popped';
+%macro poppedlook(in=);
+proc freq data=&in order=freq noprint; 
+table  	&flag_popped /nocum out=&flag_popped; run;
+proc print data=&flag_popped noobs; where count>=11; run;
+
+proc freq data=&in order=freq noprint; 
+table  	&pop_year /nocum out=&pop_year (drop = count); run;
+proc print data=&pop_year noobs; run;
+
+proc freq data=&in order=freq noprint; 
+table  	&pop_hcpcs_cd /nocum out=&pop_hcpcs_cd (drop = count); run;
+proc print data=&pop_hcpcs_cd noobs; where percent>1; run;
+
+proc freq data=&in order=freq noprint; 
+table  	&pop_icd_dgns_cd1 /nocum out=&pop_icd_dgns_cd1 (drop = count); run;
+proc print data=&pop_icd_dgns_cd1 noobs; where percent>1; run;
+
+proc freq data=&in order=freq noprint; 
+table  	&pop_OP_PHYSN_SPCLTY_CD /nocum out=&pop_OP_PHYSN_SPCLTY_CD (drop = count); run;
+proc print data=&pop_OP_PHYSN_SPCLTY_CD noobs; run;
+
+proc freq data=&in order=freq noprint; 
+table  	prvdr_spclty /nocum out=prvdr_spclty (drop = count); format prvdr_spclty $speccd.; run;
+proc print data=prvdr_spclty noobs; run;
+
+proc freq data=&in order=freq noprint; 
+table  	&pop_nch_clm_type_cd /nocum out=&pop_nch_clm_type_cd (drop = count); run;
+proc print data=&pop_nch_clm_type_cd noobs; run;
+
+proc freq data=&in order=freq noprint; 
+table  	&gndr_cd /nocum out=&gndr_cd (drop = count); run;
+proc print data=&gndr_cd noobs; run;
+proc means data=&in mean median min max; var  &pop_age &pop_los; run;
+%mend;
 %poppedlook(in=pop_02_OUT);
 title 'Carrier Popped';
 %poppedlook(in=pop_02_car);
@@ -543,9 +577,20 @@ title 'Carrier Popped';
 *compile all Inpatient and Outpatient Popped into 1 dataset
 		DO NOT INCLUDE CARRIER
 		Keep ONLY the first observation per person;
-data pop_02_in_out;
+data pop_02_in_out 
+	(keep = bene_id &flag_popped &pop_age &flag_popped_dt &pop_year &gndr_cd
+			prvdr_num prvdr_state_cd OP_PHYSN_SPCLTY_CD /*RFR_PHYSN_NPI*/
+			at_physn_npi op_physn_npi org_npi_num ot_physn_npi rndrng_physn_npi
+			bene_race_cd	bene_cnty_cd bene_state_cd 	bene_mlg_cntct_zip_cd);
 set pop_02_IN pop_02_OUT;
 run;
 proc sort data=pop_02_in_out nodupkey; by bene_id &flag_popped_dt; run;
 proc sort data=pop_02_in_out nodupkey; by bene_id; run;
+title 'Popped (Inpatient and Outpatient (No Carrier) For Analysis';
+proc freq data=pop_02_in_out; 
+table  	&pop_year; run;
+proc contents data=pop_02_in_out; run;
+
+*save permanent dataset;
+data &permlib..pop_02_in_out; set pop_02_in_out; run;
 
