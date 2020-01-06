@@ -128,6 +128,8 @@ Actor		Allergists, primary care
 %let proj_path = /jhu_projects/overuse          ;
 %let code_path = /code/                         ;
 %let vrdc_code = &vpath./jhu_vrdc_code          ;
+%include "&vrdc_code./macro_tool_box.sas";
+%include "&vrdc_code./medicare_formats.sas";
 
 /** vars to keep or delete from the different data sources **/
 
@@ -490,25 +492,60 @@ proc sort data=pop_02_car nodupkey; by bene_id &flag_popped_dt; run;
 
 /**This section makes summaries for inpatient, outpatient carrier POPPED **/
 *look at inpatient info;
-%macro poppedlook(in=, varlist=);
-proc freq data=&in order=freq; 
-table  	&varlist; 
-run;
-proc means data=&in n mean median min max; var  &pop_age &pop_los; run;
+%macro poppedlook(in=);
+proc freq data=&in order=freq noprint; 
+table  	&flag_popped /nocum out=&flag_popped (drop = count); run;
+proc print data=&flag_popped noobs; run;
+
+proc freq data=&in order=freq noprint; 
+table  	&pop_year /nocum out=&pop_year (drop = count); run;
+proc print data=&pop_year noobs; run;
+
+proc freq data=&in order=freq noprint; 
+table  	&pop_hcpcs_cd /nocum out=&pop_hcpcs_cd (drop = count); run;
+proc print data=&pop_hcpcs_cd noobs; where percent>1; run;
+
+proc freq data=&in order=freq noprint; 
+table  	&pop_clm_drg_cd /nocum out=&pop_clm_drg_cd (drop = count); run;
+proc print data=&pop_clm_drg_cd noobs; run;
+
+proc freq data=&in order=freq noprint; 
+table  	&pop_admtg_dgns_cd /nocum out=&pop_admtg_dgns_cd (drop = count); run;
+proc print data=&pop_admtg_dgns_cd noobs; where percent>1; run;
+
+proc freq data=&in order=freq noprint; 
+table  	&pop_icd_dgns_cd1 /nocum out=&pop_icd_dgns_cd1 (drop = count); run;
+proc print data=&pop_icd_dgns_cd1 noobs; where percent>1; run;
+
+proc freq data=&in order=freq noprint; 
+table  	&pop_OP_PHYSN_SPCLTY_CD /nocum out=&pop_OP_PHYSN_SPCLTY_CD (drop = count); run;
+proc print data=&pop_OP_PHYSN_SPCLTY_CD noobs; run;
+
+proc freq data=&in order=freq noprint; 
+table  	&pop_nch_clm_type_cd /nocum out=&pop_nch_clm_type_cd (drop = count); run;
+proc print data=&pop_nch_clm_type_cd noobs; run;
+
+proc freq data=&in order=freq noprint; 
+table  	&gndr_cd /nocum out=&gndr_cd (drop = count); run;
+proc print data=&gndr_cd noobs; run;
+proc means data=&in mean median min max; var  &pop_age &pop_los; run;
 %mend;
 title 'Inpatient Popped';
-%poppedlook(in=pop_02_IN, 
-		varlist=&flag_popped &pop_year gndr_cd /*bene_state_cd prvdr_state_cd 
+%poppedlook(in=pop_02_IN);
+		/*bene_state_cd prvdr_state_cd 
 		&pop_OP_PHYSN_SPCLTY_CD &pop_clm_fac_type_cd &pop_ptnt_dschrg_stus_cd
 		&pop_nch_clm_type_cd &pop_CLM_IP_ADMSN_TYPE_CD &pop_clm_src_ip_admsn_cd*/  
-		&pop_hcpcs_cd &pop_admtg_dgns_cd &pop_icd_dgns_cd1 &pop_clm_drg_cd );
 title 'Outpatient Popped';
-%poppedlook(in=pop_02_OUT,
-		varlist=&flag_popped &pop_year gndr_cd &pop_OP_PHYSN_SPCLTY_CD &pop_nch_clm_type_cd 
-		 &pop_hcpcs_cd &pop_icd_dgns_cd1 );
+%poppedlook(in=pop_02_OUT);
 title 'Carrier Popped';
-%poppedlook(in=pop_02_car,
-		varlist=&flag_popped &pop_year gndr_cd &pop_OP_PHYSN_SPCLTY_CD &pop_nch_clm_type_cd 
-		 &pop_hcpcs_cd &pop_icd_dgns_cd1 );
+%poppedlook(in=pop_02_car);
 
+*compile all Inpatient and Outpatient Popped into 1 dataset
+		DO NOT INCLUDE CARRIER
+		Keep ONLY the first observation per person;
+data pop_02_in_out;
+set pop_02_IN pop_02_OUT;
+run;
+proc sort data=pop_02_in_out nodupkey; by bene_id &flag_popped_dt; run;
+proc sort data=pop_02_in_out nodupkey; by bene_id; run;
 
