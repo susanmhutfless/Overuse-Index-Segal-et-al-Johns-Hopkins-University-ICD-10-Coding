@@ -35,3 +35,23 @@ merge ahrq_ccn2016 ahrq_ccn2018;
 by compendium_hospital_id year;
 run;
 
+
+*create dataset of all individuals seen in a health system;
+%macro count_people(source=, rev_cohort=, include_cohort=, ccn=);
+/* identify hcpcs  */
+proc sql;
+	create table count_people (compress=yes) as
+select *
+from 
+	&source a,
+	ahrq_ccn b
+where 
+	a.prvdr_num = b.&ccn
+;
+quit;
+proc sort data=count_people nodupey; by bene_id; run;
+proc summary data count_people;
+by compendium_hospital_id;
+run;
+%mend;
+%count_people(source=rif2016.inpatient_claims_01, include_cohort=overuse_IN_2016_1, ccn=ccn2016);
