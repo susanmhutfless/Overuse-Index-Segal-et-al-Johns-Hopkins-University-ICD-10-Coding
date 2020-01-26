@@ -25,33 +25,23 @@ Actor		Oncologists, primary care, surgeons maybe
 %global includ_hcpcs;
 %global includ_pr10;
 
-%let includ_hcpcs =
-					'58150'	'58152'	'58180'	'58200'
-					'58210'	'58260'	'58262'	'58263'	
-					'58267'	'58270'	'58275'	'58280'
-					'58285'	'58290'	'58291'	'58292'
-					'59293'	'59294'	'58541'	'58542'
-					'58543'	'58544'	'58548'	'58550'
-					'58552'	'58553'	'58554'	'58570'
-					'58571'	'58572'	'58573'				;
+%let includ_hcpcs_procedures=		'82378'	'86300'			;
+
+%let includ_hcpcs_populations=		'19160'	'19161'	'19162' '19180'	
+					'19181'	'19182'	'19200' '19220'
+					'19240'	'19301'	'19302' '19303'
+					'19304'	'19305'	'19306' '19307'
+					'19340'	'19341'	'19342' '19357'	
+					'19361'	'19364'	'19365' '19366'
+					'19367'	'19368'	'19369' 	;
 
 %let includ_pr10 =
-					'0UT94ZL'	'0UT90ZL'	'0UT94ZZ'
-					'0UT90ZZ'	'0UT9FZL'	'0UT9FZZ'
-					'0UT97ZL'	'0UT98ZL'	'0UT97ZZ'
-					'0UT98ZZ'	'0UT44ZZ'	'0UT94ZZ'
-					'0UT40ZZ'	'0UT90ZZ'	'0UT44ZZ'
-					'0UT9FZZ'	'0UT47ZZ'	'0UT48ZZ'
-					'0UT97ZZ'	'0UT98ZZ'	'0UT90ZZ'
-					'0UT94ZZ'	'0UT90ZL'	'0UT90ZZ'
-					'0UT94ZL'	'0UT94ZZ'	'0UT97ZL'
-					'0UT97ZZ'	'0UT98ZL'	'0UT98ZZ'
-					'0UT9FZL'	'0UT9FZZ'				;
+					'0HPT' '0HPU'			;
 
 %let includ_drg = ;
 
 /** Exclusion criteria **/
-%let EXCLUD_dx10_1='C'; 
+NONE
 
 /** label pop specific variables  instructions: ctrl-H 11 for this pop # **/
 %global flag_popped																;
