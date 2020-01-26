@@ -30,7 +30,7 @@ Actor		Physical therapists?
 					'97012' '97140' 'E0830'			;
 
 %let includ_pr10 =
-					''2W65X0Z' '2W65XZZ'			;
+					'2W65X0Z' '2W65XZZ'			;
 
 %let includ_drg = ;
 
