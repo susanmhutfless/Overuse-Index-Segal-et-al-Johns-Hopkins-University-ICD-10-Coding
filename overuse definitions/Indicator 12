@@ -25,32 +25,23 @@ Actor		Neurologists, hospitalists
 %global includ_pr10;
 
 %let includ_hcpcs =
-					'58150'	'58152'	'58180'	'58200'
-					'58210'	'58260'	'58262'	'58263'	
-					'58267'	'58270'	'58275'	'58280'
-					'58285'	'58290'	'58291'	'58292'
-					'59293'	'59294'	'58541'	'58542'
-					'58543'	'58544'	'58548'	'58550'
-					'58552'	'58553'	'58554'	'58570'
-					'58571'	'58572'	'58573'				;
+					'3650F'	'95812'	'95813'	'95816'
+					'95819'	'95822'	'95827'				;
 
 %let includ_pr10 =
-					'0UT94ZL'	'0UT90ZL'	'0UT94ZZ'
-					'0UT90ZZ'	'0UT9FZL'	'0UT9FZZ'
-					'0UT97ZL'	'0UT98ZL'	'0UT97ZZ'
-					'0UT98ZZ'	'0UT44ZZ'	'0UT94ZZ'
-					'0UT40ZZ'	'0UT90ZZ'	'0UT44ZZ'
-					'0UT9FZZ'	'0UT47ZZ'	'0UT48ZZ'
-					'0UT97ZZ'	'0UT98ZZ'	'0UT90ZZ'
-					'0UT94ZZ'	'0UT90ZL'	'0UT90ZZ'
-					'0UT94ZL'	'0UT94ZZ'	'0UT97ZL'
-					'0UT97ZZ'	'0UT98ZL'	'0UT98ZZ'
-					'0UT9FZL'	'0UT9FZZ'				;
+					'4A0034Z'	'4A0074Z'	'4A0084Z'
+					'4A00X4Z'	'4A1034Z'	'4A1074Z'
+					'4A1084Z'	'4A10X4Z'	'4A0034Z'
+					'4A0074Z'	'4A0084Z'	'4A00X4Z'
+					'4A1034Z'	'4A1074Z'	'4A1084Z'
+					'4A10X4Z'				;
+
+%let includ_dx10_4=			'R559'; 
 
 %let includ_drg = ;
 
 /** Exclusion criteria **/
-%let EXCLUD_dx10_1='C'; 
+NONE
 
 /** label pop specific variables  instructions: ctrl-H 11 for this pop # **/
 %global flag_popped																;
