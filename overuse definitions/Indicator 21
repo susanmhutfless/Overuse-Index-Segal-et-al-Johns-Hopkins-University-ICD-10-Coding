@@ -39,40 +39,40 @@ Actor		IM/FP/GI
 					'88305'	'G0104'			;
 
 %let includ_prdx =
-					'Z1211'			;
+					'Z1221'			;
 
 %let includ_drg = ;
 
 /** Exclusion criteria **/
 NONE
 
-/** label pop specific variables  instructions: ctrl-H 11 for this pop # **/
+/** label pop specific variables  instructions: ctrl-H 21 for this pop # **/
 %global flag_popped																;
-%let 	flag_popped             		= popped11 								;
-%let 	flag_popped_label				= 'indicator 11 popped'					;	
-%let	flag_popped_dt					= popped11_dt							;
-%let 	flag_popped_dt_label			= 'indicator 11 date patient popped'	;
-%let 	pop_age							= pop_11_age							;				
-%let	pop_age_label					= 'age eligible for pop 11'				;
-%let	pop_los							= pop_11_los							;
+%let 	flag_popped             		= popped21 								;
+%let 	flag_popped_label				= 'indicator 21 popped'					;	
+%let	flag_popped_dt					= popped21_dt							;
+%let 	flag_popped_dt_label			= 'indicator 21 date patient popped'	;
+%let 	pop_age							= pop_21_age							;				
+%let	pop_age_label					= 'age eligible for pop 21'				;
+%let	pop_los							= pop_21_los							;
 %let	pop_los_label					= 'length of stay when patient popped'	;
-%let	pop_year						= pop_11_year							;
-%let	pop_nch_clm_type_cd				= pop_11_nch_clm_type_cd				;
-%let  	pop_CLM_IP_ADMSN_TYPE_CD		= pop_11_CLM_IP_ADMSN_TYPE_CD			;
-%let	pop_clm_fac_type_cd				= pop_11_clm_fac_type_cd				;
-%let	pop_clm_src_ip_admsn_cd			= pop_11_clm_src_ip_admsn_cd					;
-%let	pop_ptnt_dschrg_stus_cd  		= pop_11_ptnt_dschrg_stus_cd			;
-%let	pop_admtg_dgns_cd				= pop_11_admtg_dgns_cd					;
-%let	pop_icd_dgns_cd1				= pop_11_icd_dgns_cd1					;
-%let	pop_clm_drg_cd					= pop_11_clm_drg_cd						;
-%let	pop_hcpcs_cd					= pop_11_hcpcs_cd						;
-%let	pop_OP_PHYSN_SPCLTY_CD			= pop_11_OP_PHYSN_SPCLTY_CD				;
+%let	pop_year						= pop_21_year							;
+%let	pop_nch_clm_type_cd				= pop_21_nch_clm_type_cd				;
+%let  	pop_CLM_IP_ADMSN_TYPE_CD		= pop_21_CLM_IP_ADMSN_TYPE_CD			;
+%let	pop_clm_fac_type_cd				= pop_21_clm_fac_type_cd				;
+%let	pop_clm_src_ip_admsn_cd			= pop_21_clm_src_ip_admsn_cd					;
+%let	pop_ptnt_dschrg_stus_cd  		= pop_21_ptnt_dschrg_stus_cd			;
+%let	pop_admtg_dgns_cd				= pop_21_admtg_dgns_cd					;
+%let	pop_icd_dgns_cd1				= pop_21_icd_dgns_cd1					;
+%let	pop_clm_drg_cd					= pop_21_clm_drg_cd						;
+%let	pop_hcpcs_cd					= pop_21_hcpcs_cd						;
+%let	pop_OP_PHYSN_SPCLTY_CD			= pop_21_OP_PHYSN_SPCLTY_CD				;
 
-%let	pop_nch_clm_type_cd_label		= 'claim/facility type for pop 11' 		;
-%let	pop_CLM_IP_ADMSN_TYPE_CD_label	= 'inpatient admission type code for pop 11'	;
-%let  	pop_clm_fac_type_cd_label		= 'inpatient clm_fac_type_cd for pop 11';
-%let	pop_clm_src_ip_admsn_cd_label	= 'clm_src_ip_admsn_cd for pop 11'		;
-%let	pop_ptnt_dschrg_stus_cd_label	= 'discharge status code for pop 11'	;	
+%let	pop_nch_clm_type_cd_label		= 'claim/facility type for pop 21' 		;
+%let	pop_CLM_IP_ADMSN_TYPE_CD_label	= 'inpatient admission type code for pop 21'	;
+%let  	pop_clm_fac_type_cd_label		= 'inpatient clm_fac_type_cd for pop 21';
+%let	pop_clm_src_ip_admsn_cd_label	= 'clm_src_ip_admsn_cd for pop 21'		;
+%let	pop_ptnt_dschrg_stus_cd_label	= 'discharge status code for pop 21'	;	
 
 
 /*** end of indicator specific variables ***/
