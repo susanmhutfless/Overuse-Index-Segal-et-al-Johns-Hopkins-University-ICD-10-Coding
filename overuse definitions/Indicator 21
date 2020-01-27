@@ -39,7 +39,7 @@ Actor		IM/FP/GI
 					'88305'	'G0104'			;
 
 %let includ_prdx =
-					'Z1221'			;
+					'Z1211'			;
 
 %let includ_drg = ;
 
