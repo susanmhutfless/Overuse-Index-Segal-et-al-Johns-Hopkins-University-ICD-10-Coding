@@ -22,35 +22,29 @@ Actor		IM/FP/GI
 
 /*inclusion criteria*/
 %global includ_hcpcs;
-%global includ_pr10;
+%global includ_dx10;
 
 %let includ_hcpcs =
-					'58150'	'58152'	'58180'	'58200'
-					'58210'	'58260'	'58262'	'58263'	
-					'58267'	'58270'	'58275'	'58280'
-					'58285'	'58290'	'58291'	'58292'
-					'59293'	'59294'	'58541'	'58542'
-					'58543'	'58544'	'58548'	'58550'
-					'58552'	'58553'	'58554'	'58570'
-					'58571'	'58572'	'58573'				;
+					'45378'	'45379'	'45380'	'45381'
+					'45382'	'45383'	'45384'	'45385'	
+					'45386'	'45387'	'45388'	'45389'
+					'45390'	'45391'	'45392'	'45393'
+					'45394'	'45395'	'45396'	'45397'
+					'45398'	'G0105'	'G0121'	'45330'
+					'45331'	'45332'	'45333'	'45334'
+					'45335'	'45336'	'45337'	'45338'	
+					'45339'	'45340'	'45341'	'45342'
+					'45343'	'45344'	'45345'	'45346'	
+					'45347'	'45348'	'45349'	'45350'
+					'88305'	'G0104'			;
 
-%let includ_pr10 =
-					'0UT94ZL'	'0UT90ZL'	'0UT94ZZ'
-					'0UT90ZZ'	'0UT9FZL'	'0UT9FZZ'
-					'0UT97ZL'	'0UT98ZL'	'0UT97ZZ'
-					'0UT98ZZ'	'0UT44ZZ'	'0UT94ZZ'
-					'0UT40ZZ'	'0UT90ZZ'	'0UT44ZZ'
-					'0UT9FZZ'	'0UT47ZZ'	'0UT48ZZ'
-					'0UT97ZZ'	'0UT98ZZ'	'0UT90ZZ'
-					'0UT94ZZ'	'0UT90ZL'	'0UT90ZZ'
-					'0UT94ZL'	'0UT94ZZ'	'0UT97ZL'
-					'0UT97ZZ'	'0UT98ZL'	'0UT98ZZ'
-					'0UT9FZL'	'0UT9FZZ'				;
+%let includ_prdx =
+					'Z1211'			;
 
 %let includ_drg = ;
 
 /** Exclusion criteria **/
-%let EXCLUD_dx10_1='C'; 
+NONE
 
 /** label pop specific variables  instructions: ctrl-H 11 for this pop # **/
 %global flag_popped																;
