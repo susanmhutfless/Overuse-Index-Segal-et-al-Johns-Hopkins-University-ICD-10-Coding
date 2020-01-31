@@ -4,6 +4,12 @@
 * Copyright: Johns Hopkins University - SegalLab & HutflessLab 2019
 ********************************************************************/
 
+/**Sources for compendium files:
+https://www.ahrq.gov/chsp/data-resources/compendium.html
+https://www.ahrq.gov/chsp/data-resources/compendium-2016.html includes hospital & group practice
+https://www.ahrq.gov/chsp/data-resources/compendium-2018.html includes hospitals only
+**/
+
 data ahrq_ccn2016 (KEEP = compendium_hospital_id year ccn2016 hospital_name2016 health_sys_name2016); 
 set shu172sl.ahrqcomp2016;
 ccn2016=put(ccn, $6.);
@@ -49,8 +55,9 @@ where
 	a.prvdr_num = b.&ccn
 ;
 quit;
-proc sort data=count_people nodupey; by bene_id; run;
-proc summary data count_people;
+proc sort data=count_people nodupkey; by bene_id; run;
+proc sort data=count_people; by compendium_hospital_id; 
+proc freq data = count_people;
 by compendium_hospital_id;
 run;
 %mend;
