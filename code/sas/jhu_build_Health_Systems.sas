@@ -263,6 +263,23 @@ if year>2019 then delete;
 run;
 
 *add in descriptors;
-ahrq_ccn;
-merge ahrq_ccn2016 ahrq_ccn2018; 
+*--this is set up to use the compendium hospital id for 2016 only;
+proc sort data=&permlib..ccn_inp_outp_count_2013_19; by compendium_hospital_id;
+proc sort data=ahrq_ccn2016; by compendium_hospital_id;
+
+data &permlib..ccn_inp_outp_count_2013_19;
+merge &permlib..ccn_inp_outp_count_2013_19 ahrq_ccn2016; 
+by compendium_hospital_id;
+run;
+
+
+/*--this is set up to use the compendium hospital id for 2016 and 2018--NOT 2016 only;
+proc sort data=&permlib..ccn_inp_outp_count_2013_19; by compendium_hospital_id year;
+proc sort data=ahrq_ccn; by compendium_hospital_id year;
+
+data &permlib..ccn_inp_outp_count_2013_19;
+merge &permlib..ccn_inp_outp_count_2013_19 ahrq_ccn; 
 by compendium_hospital_id year;
+run;*/
+
+proc datasets lib=work nolist kill; quit; run;
