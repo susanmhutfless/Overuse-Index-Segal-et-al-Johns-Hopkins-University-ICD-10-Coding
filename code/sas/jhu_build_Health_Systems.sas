@@ -54,7 +54,7 @@ run;
 *identify AHRQ group practices (2016 only) for linkage to carrier by TIN/tax_num;
 *health system id is the identifier that links group practices and hospitals;
 data ahrq_group2016 
-(KEEP = compendium_group_id year health_sys_id2016 health_sys_name2016 group_practice_name2016 pecos_pac_ids); 
+(KEEP = year health_sys_id2016 health_sys_name2016 group_practice_name2016 pecos_pac_ids); 
 set &permlib..ahrqgroup2016;
 health_sys_id2016=put(health_sys_id, $6.);
 health_sys_name2016=health_sys_name;
@@ -254,7 +254,7 @@ class compendium_hospital_id year qtr;
 var patient;
 output out=inp_outp_count_2013_19 (drop = _type_ _freq_) sum=/autoname; run;
 
-data &permlib.ccn_inp_outp_count_2013_19; set inp_outp_count_2013_19;
+data &permlib..ccn_inp_outp_count_2013_19; set inp_outp_count_2013_19;
 if compendium_hospital_id = ' ' then delete;
 if qtr=. then delete;
 if year=. then delete;
