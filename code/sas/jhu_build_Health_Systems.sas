@@ -20,21 +20,23 @@ https://www.ahrq.gov/chsp/data-resources/compendium-2018.html includes hospitals
 %let clm_from_dt 	= clm_from_dt;
 %let ccn_hosp		= prvdr_num;
 
-data ahrq_ccn2016 (KEEP = compendium_hospital_id year ccn2016 hospital_name2016 health_sys_name2016); 
+data ahrq_ccn2016 (KEEP = compendium_hospital_id year ccn2016 hospital_name2016 health_sys_name2016 health_sys_id2016); 
 set &permlib..ahrqcomp2016;
 ccn2016=put(ccn, $6.);
 hospital_name2016=hospital_name;
 health_sys_name2016=health_sys_name;
+health_sys_id2016=health_sys_id;
 if ccn2016=' ' then delete;
 year=2016;
 run;
 proc contents data=ahrq_CCN2016; RUN;
 
-data ahrq_ccn2018 (KEEP = compendium_hospital_id year ccn2018 hospital_name2018 health_sys_name2018); 
+data ahrq_ccn2018 (KEEP = compendium_hospital_id year ccn2018 hospital_name2018 health_sys_name2018 health_sys_id2018); 
 set &permlib..ahrqcomp2018;
 ccn2018=put(ccn, $6.);
 hospital_name2018=hospital_name;
 health_sys_name2018=health_sys_name;
+health_sys_id2018=health_sys_id;
 if ccn2018=' ' then delete;
 year=2018;
 run;
@@ -56,9 +58,9 @@ run;
 data ahrq_group2016 
 (KEEP = year health_sys_id2016 health_sys_name2016 group_practice_name2016 pecos_pac_ids); 
 set &permlib..ahrqgroup2016;
-health_sys_id2016=put(health_sys_id, $6.);
 health_sys_name2016=health_sys_name;
 group_practice_name2016=tin_name;
+health_sys_id2016=health_sys_id;
 if health_sys_id=' ' then delete;
 year=2016;
 run;
@@ -162,7 +164,7 @@ class compendium_hospital_id year qtr;
 var patient;
 output out=inpatient_count_2013_19 (drop = _type_ _freq_) sum=/autoname; run;
 
-data &permlib.ccn_inp_count_2013_19; set inpatient_count_2013_19;
+data &permlib..ccn_inp_count_2013_19; set inpatient_count_2013_19;
 if compendium_hospital_id = ' ' then delete;
 if qtr=. then delete;
 if year=. then delete;
@@ -231,7 +233,7 @@ class compendium_hospital_id year qtr;
 var patient;
 output out=outpatient_count_2013_19 (drop = _type_ _freq_) sum=/autoname; run;
 
-data &permlib.ccn_outp_count_2013_19; set outpatient_count_2013_19;
+data &permlib..ccn_outp_count_2013_19; set outpatient_count_2013_19;
 if compendium_hospital_id = ' ' then delete;
 if qtr=. then delete;
 if year=. then delete;
