@@ -42,7 +42,7 @@ year=2018;
 run;
 proc contents data=ahrq_CCN2018; RUN;
 
-*merge all AHRQ compendium hospital years that are linked by ccn together;
+*merge all AHRQ compendium hospital years that are linked by compendium hospital id together;
 
 proc sort data=ahrq_ccn2016; by compendium_hospital_id year;
 proc sort data=ahrq_ccn2018; by compendium_hospital_id year;
@@ -50,7 +50,9 @@ run;
 
 data ahrq_ccn;
 merge ahrq_ccn2016 ahrq_ccn2018; 
-by compendium_hospital_id year;
+by compendium_hospital_id;
+*only keep those with non-missing health system id;
+if health_sys_id2016 =' ' and health_sys_id2018 = ' ' then delete;
 run;
 
 *identify AHRQ group practices (2016 only) for linkage to carrier by TIN/tax_num;
@@ -61,7 +63,7 @@ set &permlib..ahrqgroup2016;
 health_sys_name2016=health_sys_name;
 group_practice_name2016=tin_name;
 health_sys_id2016=health_sys_id;
-if health_sys_id=' ' then delete;
+if health_sys_id2016=' ' then delete;
 year=2016;
 run;
 proc contents data=ahrq_group2016; RUN;
@@ -99,9 +101,11 @@ month=month(&clm_from_dt);
 year=year(&clm_from_dt);
 qtr=qtr(&clm_from_dt);
 patient=1;
-if compendium_hospital_id=' ' then delete;
+if compendium_hospital_id =' ' then delete;
+if health_sys_id2016 	  =' ' then delete;
 run;
 /*each person (bene_id) can contribute only once per period per hospital*/
+/*another option is to only allow them to contribute once per health system: health_sys_id2016*/
 proc sort data=&source._bene_&year._&month nodupkey; by compendium_hospital_id year qtr &bene_id ; run;
 %mend;
 		/*** macro that loops through years and months of interest  ***/
@@ -157,6 +161,7 @@ proc sort data=&source._bene_&year._&month nodupkey; by compendium_hospital_id y
 %scan_year_month(y_list= 2019 , m_list=  01 02 03 04 05 06 07 08 09 			);
 
 data inpatient_claims_temp; set inpatient_claims_bene: ;run;
+data &permlib..ccn_inpatient_claims_DELETE; set inpatient_claims_temp; run;
 
 *do summary after group all months together in 1 file;
 proc summary data=inpatient_claims_temp;
@@ -272,6 +277,8 @@ proc sort data=ahrq_ccn2016; by compendium_hospital_id;
 data &permlib..ccn_inp_outp_count_2013_19;
 merge &permlib..ccn_inp_outp_count_2013_19 ahrq_ccn2016; 
 by compendium_hospital_id;
+if health_sys_id2016 = ' ' then delete;
+if ccn2016=. then delete;
 run;
 
 
