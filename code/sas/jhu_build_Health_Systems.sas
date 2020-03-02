@@ -164,7 +164,7 @@ data inpatient_claims_temp; set inpatient_claims_bene: ;run;
 data &permlib..ccn_inpatient_claims_DELETE; set inpatient_claims_temp; run;
 
 *do summary after group all months together in 1 file;
-proc summary data=inpatient_claims_temp;
+proc summary data=&permlib..ccn_inpatient_claims_DELETE;
 class compendium_hospital_id year qtr;
 var patient;
 output out=inpatient_count_2013_19 (drop = _type_ _freq_) sum=/autoname; run;
@@ -176,6 +176,9 @@ if year=. then delete;
 if year<2013 then delete;
 if year>2019 then delete;
 run;
+
+*delete working files so space to run outpatient;
+proc datasets lib=work nolist kill; quit; run;
 
 /*now do for outpatient, hospital-based claims*/
 *2013-2018;
@@ -231,9 +234,13 @@ run;
 %scan_year_month(y_list= 2019 , m_list=  01 02 03 04 05 06 07 08 09 			);
 
 data outpatient_claims_temp; set outpatient_claims_bene: ;run;
+data &permlib..ccn_outpatient_claims_DELETE; set outpatient_claims_temp; run;
+
+*make room in working memory;
+proc datasets lib=work nolist kill; quit; run;
 
 *do summary after group all months together in 1 file;
-proc summary data=outpatient_claims_temp;
+proc summary data=&permlib..ccn_outpatient_claims_DELETE;
 class compendium_hospital_id year qtr;
 var patient;
 output out=outpatient_count_2013_19 (drop = _type_ _freq_) sum=/autoname; run;
@@ -247,12 +254,12 @@ if year>2019 then delete;
 run;
 
 *make a count file for unique inpatient or outpatient visits;
-Proc sort data=outpatient_claims_temp; by compendium_hospital_id year qtr &bene_id;
-Proc sort data=inpatient_claims_temp; by compendium_hospital_id year qtr &bene_id;
+Proc sort data=&permlib..ccn_outpatient_claims_DELETE; by compendium_hospital_id year qtr &bene_id;
+Proc sort data=&permlib..ccn_inpatient_claims_DELETE; by compendium_hospital_id year qtr &bene_id;
 run;
 
 data inp_outp_temp;
-merge outpatient_claims_temp inpatient_claims_temp;
+merge &permlib..ccn_outpatient_claims_DELETE &permlib..ccn_inpatient_claims_DELETE;
 by compendium_hospital_id year qtr &bene_id;
 run;
 
