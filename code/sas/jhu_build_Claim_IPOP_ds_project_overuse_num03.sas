@@ -117,7 +117,7 @@ Actor		Anesthesiologists, primary care
 %let  diag_cd_min        = 1                 	;
 %let  diag_cd_max        = 25                 	;
 
-%let  proc_pfx           = icd_prcdr          	;
+%let  proc_pfx           = icd_prcdr_cd         ;
 %let  proc_cd_min        = 1                 	;
 %let  proc_cd_max        = 25                 	;
 
@@ -251,7 +251,7 @@ quit;
 /*set info about pop, brining in any DX code inclusions & exclusions on same day as qualifying procedure*/
 Data &include_cohort (keep=  &vars_to_keep_ip); 
 set include_cohort2;  
-array pr(25) &proc_pfx.&diag_cd_min - &proc_pfx.&diag_cd_max;
+array pr(25) &proc_pfx.&proc_cd_min - &proc_pfx.&proc_cd_min;
 do i=1 to &diag_cd_max;
 	if pr(i) in(&includ_pr10) then &flag_popped=1;
 end; 
