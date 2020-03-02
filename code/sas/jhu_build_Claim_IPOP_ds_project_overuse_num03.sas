@@ -280,7 +280,7 @@ do j=1 to &diag_cd_max;
 end;
 if &flag_popped ne 1 then delete;
 IF preop_visit ne 1 then delete;
-IF DELETE  =  1 then delete;
+*IF DELETE  =  1 then delete;
 *if clm_drg_cd notin(&includ_drg) then delete;
 run; 
 %mend;
@@ -737,6 +737,16 @@ title 'Popped (Inpatient and Outpatient (No Carrier) For Analysis';
 proc freq data=pop_03_in_out; 
 table  	&pop_year; run;
 proc contents data=pop_03_in_out; run;
+
+
+/*****requires look-back---make deletions here****/
+
+*merge inpatient/outpatient and lookback 180 days in inpatient/outpatient carrier 
+	for the exclusionary diagnosis;
+	if substr(dx(j),1,3) in(&EXCLUD_dx10_3) then DELETE=1;			/*need to add 180 day exclusion--do after merge qualifying!*/
+
+
+
 
 *save permanent dataset;
 data &permlib..pop_03_in_out; set pop_03_in_out; run;
