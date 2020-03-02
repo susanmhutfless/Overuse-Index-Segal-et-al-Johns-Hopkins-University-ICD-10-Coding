@@ -251,7 +251,7 @@ quit;
 /*set info about pop, brining in any DX code inclusions & exclusions on same day as qualifying procedure*/
 Data &include_cohort (keep=  &vars_to_keep_ip); 
 set include_cohort2;  
-array pr(25) &proc_pfx.&proc_cd_min - &proc_pfx.&proc_cd_min;
+array pr(25) &proc_pfx.&proc_cd_min - &proc_pfx.&proc_cd_max;
 do i=1 to &diag_cd_max;
 	if pr(i) in(&includ_pr10) then &flag_popped=1;
 end; 
