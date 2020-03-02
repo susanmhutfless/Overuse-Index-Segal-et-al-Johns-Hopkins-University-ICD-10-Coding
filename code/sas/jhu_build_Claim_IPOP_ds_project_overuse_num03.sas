@@ -201,10 +201,10 @@ from
 where 
 	&hcpcs_cd in (&includ_hcpcs);
 quit;
-/*identify ICD procedure requirement & pull claim info for those with HCPCS*/
+/*identify ICD procedure requirement & (AT THE SAME TIME using "or") pull claim info for those with HCPCS*/
 proc sql;
 	create table include_cohort1b (compress=yes) as
-select a.&flag_popped, b.*
+select a.&hcpcs_cd, a.&flag_popped, b.*
 from 
 	include_cohort1a a, 
 	&source b
@@ -276,11 +276,11 @@ end;
 array dx(25) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
 do j=1 to &diag_cd_max;
 	if dx(j) in(&includ_dx10) then preop_visit=1;
-	if substr(dx(j),1,3) in(&EXCLUD_dx10_3) then DELETE=1;			/*need to add 180 day exclusion--do after merge qualifying!*/
+	if substr(dx(j),1,3) in(&EXCLUD_dx10_3) then DELETE=1;	*will make the 180 day exclusion after merge inp, out, car;		
 end;
 if &flag_popped ne 1 then delete;
 IF preop_visit ne 1 then delete;
-*IF DELETE  =  1 then delete;
+IF DELETE  =  1 then delete; *this is for same day lung dx only;
 *if clm_drg_cd notin(&includ_drg) then delete;
 run; 
 %mend;
@@ -336,62 +336,73 @@ format bene_state_cd prvdr_state_cd $state. &pop_OP_PHYSN_SPCLTY_CD $speccd. &po
 run;
 /* get rid of duplicate rows--keep first occurence so sort by date first */
 proc sort data=pop_03_IN; by &bene_id &flag_popped_dt; run;
-proc sort data=pop_03_IN nodupkey; by &bene_id; run;
+/*proc sort data=pop_03_IN nodupkey; by &bene_id; run;*/
 
 /*** this section is related to OP - OUTpatient claims ***/
 %macro claims_rev(source=, rev_cohort=, include_cohort=, ccn=);
 /* identify hcpcs  */
 proc sql;
-create table include_cohort1 (compress=yes) as
-select &bene_id, &clm_id, &hcpcs_cd
+create table include_cohort1a (compress=yes) as
+select &bene_id, &clm_id, &hcpcs_cd, case when &hcpcs_cd in (&includ_hcpcs) then 1 else 0 end as &flag_popped
 from 
 	&rev_cohort
 where 
 	&hcpcs_cd in (&includ_hcpcs);
 quit;
-/* identify icd & link to CCN */
+/*identify ICD procedure requirement & (AT THE SAME TIME using "or") pull claim info for those with HCPCS*/
 proc sql;
-create table include_cohort2 (compress=yes) as
-select *
+create table include_cohort1b (compress=yes) as
+select a.&hcpcs_cd, a.&flag_popped, b.*
 from 
-include_cohort1 a, 
-&source b,
-ahrq_ccn c
+include_cohort1a a, 
+&source b
 where 
-	a.&bene_id=b.&bene_id 
-and a.&clm_id=b.&clm_id 
-and b.prvdr_num = c.&ccn
-AND
-(		a.icd_prcdr_cd1 in(&includ_pr10) or
-		a.icd_prcdr_cd2 in(&includ_pr10) or
-		a.icd_prcdr_cd3 in(&includ_pr10) or
-		a.icd_prcdr_cd4 in(&includ_pr10) or
-		a.icd_prcdr_cd5 in(&includ_pr10) or
-		a.icd_prcdr_cd6 in(&includ_pr10) or
-		a.icd_prcdr_cd7 in(&includ_pr10) or
-		a.icd_prcdr_cd8 in(&includ_pr10) or
-		a.icd_prcdr_cd9 in(&includ_pr10) or
-		a.icd_prcdr_cd10 in(&includ_pr10) or
-		a.icd_prcdr_cd11 in(&includ_pr10) or
-		a.icd_prcdr_cd12 in(&includ_pr10) or
-		a.icd_prcdr_cd13 in(&includ_pr10) or
-		a.icd_prcdr_cd14 in(&includ_pr10) or
-		a.icd_prcdr_cd15 in(&includ_pr10) or
-		a.icd_prcdr_cd16 in(&includ_pr10) or
-		a.icd_prcdr_cd17 in(&includ_pr10) or
-		a.icd_prcdr_cd18 in(&includ_pr10) or
-		a.icd_prcdr_cd19 in(&includ_pr10) or
-		a.icd_prcdr_cd20 in(&includ_pr10) or
-		a.icd_prcdr_cd21 in(&includ_pr10) or
-		a.icd_prcdr_cd22 in(&includ_pr10) or
-		a.icd_prcdr_cd23 in(&includ_pr10) or
-		a.icd_prcdr_cd24 in(&includ_pr10) or
-		a.icd_prcdr_cd25 in(&includ_pr10)		) 
+	(a.&bene_id=b.&bene_id and a.&clm_id=b.&clm_id)
+OR
+(		b.icd_prcdr_cd1 in(&includ_pr10) or
+		b.icd_prcdr_cd2 in(&includ_pr10) or
+		b.icd_prcdr_cd3 in(&includ_pr10) or
+		b.icd_prcdr_cd4 in(&includ_pr10) or
+		b.icd_prcdr_cd5 in(&includ_pr10) or
+		b.icd_prcdr_cd6 in(&includ_pr10) or
+		b.icd_prcdr_cd7 in(&includ_pr10) or
+		b.icd_prcdr_cd8 in(&includ_pr10) or
+		b.icd_prcdr_cd9 in(&includ_pr10) or
+		b.icd_prcdr_cd10 in(&includ_pr10) or
+		b.icd_prcdr_cd11 in(&includ_pr10) or
+		b.icd_prcdr_cd12 in(&includ_pr10) or
+		b.icd_prcdr_cd13 in(&includ_pr10) or
+		b.icd_prcdr_cd14 in(&includ_pr10) or
+		b.icd_prcdr_cd15 in(&includ_pr10) or
+		b.icd_prcdr_cd16 in(&includ_pr10) or
+		b.icd_prcdr_cd17 in(&includ_pr10) or
+		b.icd_prcdr_cd18 in(&includ_pr10) or
+		b.icd_prcdr_cd19 in(&includ_pr10) or
+		b.icd_prcdr_cd20 in(&includ_pr10) or
+		b.icd_prcdr_cd21 in(&includ_pr10) or
+		b.icd_prcdr_cd22 in(&includ_pr10) or
+		b.icd_prcdr_cd23 in(&includ_pr10) or
+		b.icd_prcdr_cd24 in(&includ_pr10) or
+		b.icd_prcdr_cd25 in(&includ_pr10)		) 
 ;
 quit;
-
+/* link to CCN */
+proc sql;
+	create table include_cohort2 (compress=yes) as
+select *
+from 
+	include_cohort1b a,
+	ahrq_ccn b
+where 
+	a.prvdr_num = b.&ccn
+;
+quit;
 Data &include_cohort (keep = &vars_to_keep_op); 
-set include_cohort2;   
+set include_cohort2;  
+array pr(25) &proc_pfx.&diag_cd_min - &proc_pfx.&diag_cd_max;
+do i=1 to &diag_cd_max;
+	if pr(i) in(&includ_pr10) then &flag_popped=1;
+end; 
 &flag_popped_dt=&clm_from_dt; 
 	format &flag_popped_dt date9.; 			label &flag_popped_dt	=	&flag_popped_dt_label;
 &flag_popped=1; 							label &flag_popped		=	&flag_popped_label;
@@ -408,6 +419,7 @@ do j=1 to &diag_cd_max;
 	if dx(j) in(&includ_dx10) then preop_visit=1;
 	if substr(dx(j),1,3) in(&EXCLUD_dx10_3) then DELETE=1;
 end;
+if &flag_popped ne 1 then delete;
 IF preop_visit ne 1 then delete;
 IF DELETE  =  1 then delete;
 run; 
@@ -472,54 +484,67 @@ proc sort data=pop_03_OUT nodupkey; by bene_id &flag_popped_dt; run;
 %macro claims_rev(source=, rev_cohort=, include_cohort=, ccn=);
 /* identify hcpcs  */
 proc sql;
-create table include_cohort1 (compress=yes) as
-select *
+create table include_cohort1a (compress=yes) as
+select &bene_id, &clm_id, &hcpcs_cd, case when &hcpcs_cd in (&includ_hcpcs) then 1 else 0 end as &flag_popped
 from 
 	&rev_cohort
 where 
 	&hcpcs_cd in (&includ_hcpcs);
 quit;
-/* identify icd & link to CCN */
+/*identify ICD procedure requirement & (AT THE SAME TIME using "or") pull claim info for those with HCPCS*/
 proc sql;
-create table include_cohort2 (compress=yes) as
-select *
+create table include_cohort1b (compress=yes) as
+select a.&hcpcs_cd, a.&flag_popped, b.*
 from 
-include_cohort1 a, 
+include_cohort1a a, 
 &source b
 where 
-	a.&bene_id=b.&bene_id 
-and a.&clm_id=b.&clm_id 
-AND
-(		a.icd_prcdr_cd1 in(&includ_pr10) or
-		a.icd_prcdr_cd2 in(&includ_pr10) or
-		a.icd_prcdr_cd3 in(&includ_pr10) or
-		a.icd_prcdr_cd4 in(&includ_pr10) or
-		a.icd_prcdr_cd5 in(&includ_pr10) or
-		a.icd_prcdr_cd6 in(&includ_pr10) or
-		a.icd_prcdr_cd7 in(&includ_pr10) or
-		a.icd_prcdr_cd8 in(&includ_pr10) or
-		a.icd_prcdr_cd9 in(&includ_pr10) or
-		a.icd_prcdr_cd10 in(&includ_pr10) or
-		a.icd_prcdr_cd11 in(&includ_pr10) or
-		a.icd_prcdr_cd12 in(&includ_pr10) or
-		a.icd_prcdr_cd13 in(&includ_pr10) or
-		a.icd_prcdr_cd14 in(&includ_pr10) or
-		a.icd_prcdr_cd15 in(&includ_pr10) or
-		a.icd_prcdr_cd16 in(&includ_pr10) or
-		a.icd_prcdr_cd17 in(&includ_pr10) or
-		a.icd_prcdr_cd18 in(&includ_pr10) or
-		a.icd_prcdr_cd19 in(&includ_pr10) or
-		a.icd_prcdr_cd20 in(&includ_pr10) or
-		a.icd_prcdr_cd21 in(&includ_pr10) or
-		a.icd_prcdr_cd22 in(&includ_pr10) or
-		a.icd_prcdr_cd23 in(&includ_pr10) or
-		a.icd_prcdr_cd24 in(&includ_pr10) or
-		a.icd_prcdr_cd25 in(&includ_pr10)		) 
+	(a.&bene_id=b.&bene_id and a.&clm_id=b.&clm_id)
+OR
+(		b.icd_prcdr_cd1 in(&includ_pr10) or
+		b.icd_prcdr_cd2 in(&includ_pr10) or
+		b.icd_prcdr_cd3 in(&includ_pr10) or
+		b.icd_prcdr_cd4 in(&includ_pr10) or
+		b.icd_prcdr_cd5 in(&includ_pr10) or
+		b.icd_prcdr_cd6 in(&includ_pr10) or
+		b.icd_prcdr_cd7 in(&includ_pr10) or
+		b.icd_prcdr_cd8 in(&includ_pr10) or
+		b.icd_prcdr_cd9 in(&includ_pr10) or
+		b.icd_prcdr_cd10 in(&includ_pr10) or
+		b.icd_prcdr_cd11 in(&includ_pr10) or
+		b.icd_prcdr_cd12 in(&includ_pr10) or
+		b.icd_prcdr_cd13 in(&includ_pr10) or
+		b.icd_prcdr_cd14 in(&includ_pr10) or
+		b.icd_prcdr_cd15 in(&includ_pr10) or
+		b.icd_prcdr_cd16 in(&includ_pr10) or
+		b.icd_prcdr_cd17 in(&includ_pr10) or
+		b.icd_prcdr_cd18 in(&includ_pr10) or
+		b.icd_prcdr_cd19 in(&includ_pr10) or
+		b.icd_prcdr_cd20 in(&includ_pr10) or
+		b.icd_prcdr_cd21 in(&includ_pr10) or
+		b.icd_prcdr_cd22 in(&includ_pr10) or
+		b.icd_prcdr_cd23 in(&includ_pr10) or
+		b.icd_prcdr_cd24 in(&includ_pr10) or
+		b.icd_prcdr_cd25 in(&includ_pr10)		) 
 ;
 quit;
-
+/* link to CCN */
+proc sql;
+	create table include_cohort2 (compress=yes) as
+select *
+from 
+	include_cohort1b a,
+	ahrq_ccn b
+where 
+	a.prvdr_num = b.&ccn
+;
+quit;
 Data &include_cohort (keep = &vars_to_keep_car); 
-set include_cohort2;   
+set include_cohort2; 
+array pr(25) &proc_pfx.&diag_cd_min - &proc_pfx.&diag_cd_max;
+do i=1 to &diag_cd_max;
+	if pr(i) in(&includ_pr10) then &flag_popped=1;
+end;  
 &flag_popped_dt=&clm_from_dt; 
 	format &flag_popped_dt date9.; 			label &flag_popped_dt	=	&flag_popped_dt_label;
 &flag_popped=1; 							label &flag_popped		=	&flag_popped_label;
@@ -536,6 +561,7 @@ do j=1 to &diag_cd_max;
 	if dx(j) in(&includ_dx10) then preop_visit=1;
 	if substr(dx(j),1,3) in(&EXCLUD_dx10_3) then DELETE=1;
 end;
+if &flag_popped ne 1 then delete;
 IF preop_visit ne 1 then delete;
 IF DELETE  =  1 then delete;
 run; 
