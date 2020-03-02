@@ -103,7 +103,7 @@ Actor		Allergists, primary care
 %let  diag_cd_min        = 1                 	;
 %let  diag_cd_max        = 25                 	;
 
-%let  proc_pfx           = icd_prcdr          	;
+%let  proc_pfx           = icd_prcdr_cd          ;
 %let  proc_cd_min        = 1                 	;
 %let  proc_cd_max        = 25                 	;
 
