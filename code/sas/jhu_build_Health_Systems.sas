@@ -55,6 +55,10 @@ by compendium_hospital_id;
 if health_sys_id2016 =' ' and health_sys_id2018 = ' ' then delete;
 run;
 
+*save permanent file;
+data &permlib..ahrq_ccn; set ahrq_ccn;
+run;
+
 *identify AHRQ group practices (2016 only) for linkage to carrier by TIN/tax_num;
 *health system id is the identifier that links group practices and hospitals;
 data ahrq_group2016 

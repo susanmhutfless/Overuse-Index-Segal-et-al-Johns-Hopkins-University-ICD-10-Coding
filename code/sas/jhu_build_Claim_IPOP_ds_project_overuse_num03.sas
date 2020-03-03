@@ -201,7 +201,7 @@ from
 where 
 	&hcpcs_cd in (&includ_hcpcs);
 quit;
-/*identify ICD procedure requirement & (AT THE SAME TIME using "or") pull claim info for those with HCPCS*/
+/* pull claim info for those with HCPCS (need to do this to get dx codes)*/
 proc sql;
 	create table include_cohort1b (compress=yes) as
 select a.&hcpcs_cd, a.&flag_popped, b.*
@@ -209,43 +209,51 @@ from
 	include_cohort1a a, 
 	&source b
 where 
-	(a.&bene_id=b.&bene_id and a.&clm_id=b.&clm_id)
-OR
-(		b.icd_prcdr_cd1 in(&includ_pr10) or
-		b.icd_prcdr_cd2 in(&includ_pr10) or
-		b.icd_prcdr_cd3 in(&includ_pr10) or
-		b.icd_prcdr_cd4 in(&includ_pr10) or
-		b.icd_prcdr_cd5 in(&includ_pr10) or
-		b.icd_prcdr_cd6 in(&includ_pr10) or
-		b.icd_prcdr_cd7 in(&includ_pr10) or
-		b.icd_prcdr_cd8 in(&includ_pr10) or
-		b.icd_prcdr_cd9 in(&includ_pr10) or
-		b.icd_prcdr_cd10 in(&includ_pr10) or
-		b.icd_prcdr_cd11 in(&includ_pr10) or
-		b.icd_prcdr_cd12 in(&includ_pr10) or
-		b.icd_prcdr_cd13 in(&includ_pr10) or
-		b.icd_prcdr_cd14 in(&includ_pr10) or
-		b.icd_prcdr_cd15 in(&includ_pr10) or
-		b.icd_prcdr_cd16 in(&includ_pr10) or
-		b.icd_prcdr_cd17 in(&includ_pr10) or
-		b.icd_prcdr_cd18 in(&includ_pr10) or
-		b.icd_prcdr_cd19 in(&includ_pr10) or
-		b.icd_prcdr_cd20 in(&includ_pr10) or
-		b.icd_prcdr_cd21 in(&includ_pr10) or
-		b.icd_prcdr_cd22 in(&includ_pr10) or
-		b.icd_prcdr_cd23 in(&includ_pr10) or
-		b.icd_prcdr_cd24 in(&includ_pr10) or
-		b.icd_prcdr_cd25 in(&includ_pr10)		);
+	(a.&bene_id=b.&bene_id and a.&clm_id=b.&clm_id);
+quit;
+/*pull icd procedure criteria from claims*/
+proc sql;
+	create table include_cohort1c (compress=yes) as
+select *
+from  
+	&source
+where
+		icd_prcdr_cd1 in(&includ_pr10) or
+		icd_prcdr_cd2 in(&includ_pr10) or
+		icd_prcdr_cd3 in(&includ_pr10) or
+		icd_prcdr_cd4 in(&includ_pr10) or
+		icd_prcdr_cd5 in(&includ_pr10) or
+		icd_prcdr_cd6 in(&includ_pr10) or
+		icd_prcdr_cd7 in(&includ_pr10) or
+		icd_prcdr_cd8 in(&includ_pr10) or
+		icd_prcdr_cd9 in(&includ_pr10) or
+		icd_prcdr_cd10 in(&includ_pr10) or
+		icd_prcdr_cd11 in(&includ_pr10) or
+		icd_prcdr_cd12 in(&includ_pr10) or
+		icd_prcdr_cd13 in(&includ_pr10) or
+		icd_prcdr_cd14 in(&includ_pr10) or
+		icd_prcdr_cd15 in(&includ_pr10) or
+		icd_prcdr_cd16 in(&includ_pr10) or
+		icd_prcdr_cd17 in(&includ_pr10) or
+		icd_prcdr_cd18 in(&includ_pr10) or
+		icd_prcdr_cd19 in(&includ_pr10) or
+		icd_prcdr_cd20 in(&includ_pr10) or
+		icd_prcdr_cd21 in(&includ_pr10) or
+		icd_prcdr_cd22 in(&includ_pr10) or
+		icd_prcdr_cd23 in(&includ_pr10) or
+		icd_prcdr_cd24 in(&includ_pr10) or
+		icd_prcdr_cd25 in(&includ_pr10)		;
 quit;
 /* link to CCN */
 proc sql;
 	create table include_cohort2 (compress=yes) as
 select *
 from 
-	include_cohort1b a,
-	ahrq_ccn b
+	ahrq_ccn a,
+	include_cohort1b b,
+	include_cohort1c c	
 where 
-	a.prvdr_num = b.&ccn
+	b.prvdr_num = a.&ccn or c.prvdr_num = a.&ccn
 ;
 quit;
 /*set info about pop, brining in any DX code inclusions & exclusions on same day as qualifying procedure*/
@@ -285,6 +293,7 @@ IF DELETE  =  1 then delete; *this is for same day lung dx only;
 run; 
 %mend;
 %claims_rev(source=rif2016.inpatient_claims_01, rev_cohort=rif2016.inpatient_revenue_01, include_cohort=pop_03_IN_2016_1, ccn=ccn2016);
+*will see errors of duplicate variables at table 2--when included hcpcs and icd source at same time got cartesian join error;
 %claims_rev(source=rif2016.inpatient_claims_02, rev_cohort=rif2016.inpatient_revenue_02, include_cohort=pop_03_IN_2016_2, ccn=ccn2016);
 %claims_rev(source=rif2016.inpatient_claims_03, rev_cohort=rif2016.inpatient_revenue_03, include_cohort=pop_03_IN_2016_3, ccn=ccn2016);
 %claims_rev(source=rif2016.inpatient_claims_04, rev_cohort=rif2016.inpatient_revenue_04, include_cohort=pop_03_IN_2016_4, ccn=ccn2016);
@@ -349,42 +358,48 @@ from
 where 
 	&hcpcs_cd in (&includ_hcpcs);
 quit;
-/*identify ICD procedure requirement & (AT THE SAME TIME using "or") pull claim info for those with HCPCS*/
+/* pull claim info for those with HCPCS (need to do this to get dx codes)*/
 proc sql;
-create table include_cohort1b (compress=yes) as
+	create table include_cohort1b (compress=yes) as
 select a.&hcpcs_cd, a.&flag_popped, b.*
 from 
-include_cohort1a a, 
-&source b
+	include_cohort1a a, 
+	&source b
 where 
-	(a.&bene_id=b.&bene_id and a.&clm_id=b.&clm_id)
-OR
-(		b.icd_prcdr_cd1 in(&includ_pr10) or
-		b.icd_prcdr_cd2 in(&includ_pr10) or
-		b.icd_prcdr_cd3 in(&includ_pr10) or
-		b.icd_prcdr_cd4 in(&includ_pr10) or
-		b.icd_prcdr_cd5 in(&includ_pr10) or
-		b.icd_prcdr_cd6 in(&includ_pr10) or
-		b.icd_prcdr_cd7 in(&includ_pr10) or
-		b.icd_prcdr_cd8 in(&includ_pr10) or
-		b.icd_prcdr_cd9 in(&includ_pr10) or
-		b.icd_prcdr_cd10 in(&includ_pr10) or
-		b.icd_prcdr_cd11 in(&includ_pr10) or
-		b.icd_prcdr_cd12 in(&includ_pr10) or
-		b.icd_prcdr_cd13 in(&includ_pr10) or
-		b.icd_prcdr_cd14 in(&includ_pr10) or
-		b.icd_prcdr_cd15 in(&includ_pr10) or
-		b.icd_prcdr_cd16 in(&includ_pr10) or
-		b.icd_prcdr_cd17 in(&includ_pr10) or
-		b.icd_prcdr_cd18 in(&includ_pr10) or
-		b.icd_prcdr_cd19 in(&includ_pr10) or
-		b.icd_prcdr_cd20 in(&includ_pr10) or
-		b.icd_prcdr_cd21 in(&includ_pr10) or
-		b.icd_prcdr_cd22 in(&includ_pr10) or
-		b.icd_prcdr_cd23 in(&includ_pr10) or
-		b.icd_prcdr_cd24 in(&includ_pr10) or
-		b.icd_prcdr_cd25 in(&includ_pr10)		) 
-;
+	(a.&bene_id=b.&bene_id and a.&clm_id=b.&clm_id);
+quit;
+/*pull icd procedure criteria from claims*/
+proc sql;
+	create table include_cohort1c (compress=yes) as
+select *
+from  
+	&source
+where
+		icd_prcdr_cd1 in(&includ_pr10) or
+		icd_prcdr_cd2 in(&includ_pr10) or
+		icd_prcdr_cd3 in(&includ_pr10) or
+		icd_prcdr_cd4 in(&includ_pr10) or
+		icd_prcdr_cd5 in(&includ_pr10) or
+		icd_prcdr_cd6 in(&includ_pr10) or
+		icd_prcdr_cd7 in(&includ_pr10) or
+		icd_prcdr_cd8 in(&includ_pr10) or
+		icd_prcdr_cd9 in(&includ_pr10) or
+		icd_prcdr_cd10 in(&includ_pr10) or
+		icd_prcdr_cd11 in(&includ_pr10) or
+		icd_prcdr_cd12 in(&includ_pr10) or
+		icd_prcdr_cd13 in(&includ_pr10) or
+		icd_prcdr_cd14 in(&includ_pr10) or
+		icd_prcdr_cd15 in(&includ_pr10) or
+		icd_prcdr_cd16 in(&includ_pr10) or
+		icd_prcdr_cd17 in(&includ_pr10) or
+		icd_prcdr_cd18 in(&includ_pr10) or
+		icd_prcdr_cd19 in(&includ_pr10) or
+		icd_prcdr_cd20 in(&includ_pr10) or
+		icd_prcdr_cd21 in(&includ_pr10) or
+		icd_prcdr_cd22 in(&includ_pr10) or
+		icd_prcdr_cd23 in(&includ_pr10) or
+		icd_prcdr_cd24 in(&includ_pr10) or
+		icd_prcdr_cd25 in(&includ_pr10)		;
 quit;
 /* link to CCN */
 proc sql;
@@ -491,42 +506,48 @@ from
 where 
 	&hcpcs_cd in (&includ_hcpcs);
 quit;
-/*identify ICD procedure requirement & (AT THE SAME TIME using "or") pull claim info for those with HCPCS*/
+/* pull claim info for those with HCPCS (need to do this to get dx codes)*/
 proc sql;
-create table include_cohort1b (compress=yes) as
+	create table include_cohort1b (compress=yes) as
 select a.&hcpcs_cd, a.&flag_popped, b.*
 from 
-include_cohort1a a, 
-&source b
+	include_cohort1a a, 
+	&source b
 where 
-	(a.&bene_id=b.&bene_id and a.&clm_id=b.&clm_id)
-OR
-(		b.icd_prcdr_cd1 in(&includ_pr10) or
-		b.icd_prcdr_cd2 in(&includ_pr10) or
-		b.icd_prcdr_cd3 in(&includ_pr10) or
-		b.icd_prcdr_cd4 in(&includ_pr10) or
-		b.icd_prcdr_cd5 in(&includ_pr10) or
-		b.icd_prcdr_cd6 in(&includ_pr10) or
-		b.icd_prcdr_cd7 in(&includ_pr10) or
-		b.icd_prcdr_cd8 in(&includ_pr10) or
-		b.icd_prcdr_cd9 in(&includ_pr10) or
-		b.icd_prcdr_cd10 in(&includ_pr10) or
-		b.icd_prcdr_cd11 in(&includ_pr10) or
-		b.icd_prcdr_cd12 in(&includ_pr10) or
-		b.icd_prcdr_cd13 in(&includ_pr10) or
-		b.icd_prcdr_cd14 in(&includ_pr10) or
-		b.icd_prcdr_cd15 in(&includ_pr10) or
-		b.icd_prcdr_cd16 in(&includ_pr10) or
-		b.icd_prcdr_cd17 in(&includ_pr10) or
-		b.icd_prcdr_cd18 in(&includ_pr10) or
-		b.icd_prcdr_cd19 in(&includ_pr10) or
-		b.icd_prcdr_cd20 in(&includ_pr10) or
-		b.icd_prcdr_cd21 in(&includ_pr10) or
-		b.icd_prcdr_cd22 in(&includ_pr10) or
-		b.icd_prcdr_cd23 in(&includ_pr10) or
-		b.icd_prcdr_cd24 in(&includ_pr10) or
-		b.icd_prcdr_cd25 in(&includ_pr10)		) 
-;
+	(a.&bene_id=b.&bene_id and a.&clm_id=b.&clm_id);
+quit;
+/*pull icd procedure criteria from claims*/
+proc sql;
+	create table include_cohort1c (compress=yes) as
+select *
+from  
+	&source
+where
+		icd_prcdr_cd1 in(&includ_pr10) or
+		icd_prcdr_cd2 in(&includ_pr10) or
+		icd_prcdr_cd3 in(&includ_pr10) or
+		icd_prcdr_cd4 in(&includ_pr10) or
+		icd_prcdr_cd5 in(&includ_pr10) or
+		icd_prcdr_cd6 in(&includ_pr10) or
+		icd_prcdr_cd7 in(&includ_pr10) or
+		icd_prcdr_cd8 in(&includ_pr10) or
+		icd_prcdr_cd9 in(&includ_pr10) or
+		icd_prcdr_cd10 in(&includ_pr10) or
+		icd_prcdr_cd11 in(&includ_pr10) or
+		icd_prcdr_cd12 in(&includ_pr10) or
+		icd_prcdr_cd13 in(&includ_pr10) or
+		icd_prcdr_cd14 in(&includ_pr10) or
+		icd_prcdr_cd15 in(&includ_pr10) or
+		icd_prcdr_cd16 in(&includ_pr10) or
+		icd_prcdr_cd17 in(&includ_pr10) or
+		icd_prcdr_cd18 in(&includ_pr10) or
+		icd_prcdr_cd19 in(&includ_pr10) or
+		icd_prcdr_cd20 in(&includ_pr10) or
+		icd_prcdr_cd21 in(&includ_pr10) or
+		icd_prcdr_cd22 in(&includ_pr10) or
+		icd_prcdr_cd23 in(&includ_pr10) or
+		icd_prcdr_cd24 in(&includ_pr10) or
+		icd_prcdr_cd25 in(&includ_pr10)		;
 quit;
 /* link to CCN */
 proc sql;
