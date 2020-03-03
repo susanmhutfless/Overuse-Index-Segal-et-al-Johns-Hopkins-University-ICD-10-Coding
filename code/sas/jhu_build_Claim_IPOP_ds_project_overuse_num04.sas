@@ -291,7 +291,6 @@ format bene_state_cd prvdr_state_cd $state. &pop_OP_PHYSN_SPCLTY_CD $speccd. &po
 run;
 /* get rid of duplicate rows--keep first occurence so sort by date first */
 proc sort data=pop_04_IN; by &bene_id &flag_popped_dt; run;
-proc sort data=pop_04_IN nodupkey; by &bene_id; run;
 
 /*** this section is related to OP - outpatient claims ***/
 %macro claims_rev(source=, rev_cohort=, include_cohort=, ccn=);
