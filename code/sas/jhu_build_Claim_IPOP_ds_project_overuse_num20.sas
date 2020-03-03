@@ -240,10 +240,10 @@ set include_cohort3;
 &pop_OP_PHYSN_SPCLTY_CD=&OP_PHYSN_SPCLTY_CD;
 array dx(25) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
 do j=1 to &diag_cd_max;
-	if substr(dx(j),1,5) in(&includ_dx10_5) then MAMMO=1;
+	if substr(dx(j),1,5) in(&includ_dx10_5) then INCLUDE=1;
 	
 end;
-IF MAMMO ne 1 then delete;
+IF INCLUDE ne 1 then delete;
 *if clm_drg_cd notin(&includ_drg) then delete;
 run; 
 %mend;
@@ -338,10 +338,10 @@ set include_cohort2;
 &pop_OP_PHYSN_SPCLTY_CD=&OP_PHYSN_SPCLTY_CD; format &pop_OP_PHYSN_SPCLTY_CD speccd.;
 array dx(25) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
 do j=1 to &diag_cd_max;
-	if substr(dx(j),1,5) in(&includ_dx10_5) then MAMMO=1;
+	if substr(dx(j),1,5) in(&includ_dx10_5) then INCLUDE=1;
 	
 end;
-IF MAMMO ne 1 then delete;
+IF INCLUDE ne 1 then delete;
 *if clm_drg_cd notin(&includ_drg) then delete;
 run; 
 %mend;
@@ -433,10 +433,10 @@ set include_cohort2;
 &pop_hcpcs_cd=put(&hcpcs_cd,$hcpcs.);
 array dx(25) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
 do j=1 to &diag_cd_max;
-	if substr(dx(j),1,5) in(&includ_dx10_5) then MAMMO=1;
+	if substr(dx(j),1,5) in(&includ_dx10_5) then INCLUDE=1;
 	
 end;
-IF MAMMO ne 1 then delete;
+IF INCLUDE ne 1 then delete;
 *if clm_drg_cd notin(&includ_drg) then delete;
 run; 
 %mend;
