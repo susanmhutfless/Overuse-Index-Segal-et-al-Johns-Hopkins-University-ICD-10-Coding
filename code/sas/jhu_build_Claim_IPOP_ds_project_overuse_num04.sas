@@ -32,7 +32,7 @@ Actor				Hospitalists, cardiologists, internists, FPs
 *%let includ_drg = ;
 
 /** Exclusion criteria **/
-%let exclud_dx10 =	'T26.0X1' 'T26.0X2' 'T26.0X3' 'T26.0X2' 'T26.0X52'	; 														;
+%let exclud_dx10 =	'T46.0X1' 'T46.0X2' 'T46.0X3' 'T46.0X4' 'T46.0X52'	; 														;
 
 
 /** Label pop specific variables  instructions **/
