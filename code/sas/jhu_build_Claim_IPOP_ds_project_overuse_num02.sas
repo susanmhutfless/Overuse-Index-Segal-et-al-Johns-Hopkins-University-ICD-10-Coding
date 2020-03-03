@@ -130,7 +130,7 @@ Actor		Allergists, primary care
 %let vrdc_code = &vpath./jhu_vrdc_code          ;
 %include "&vrdc_code./macro_tool_box.sas";
 %include "&vrdc_code./medicare_formats.sas";
-%include "&vrdc_code./jhu_build_Health_Systems.sas";
+*%include "&vrdc_code./jhu_build_Health_Systems.sas";
 
 /** vars to keep or delete from the different data sources **/
 
@@ -202,7 +202,7 @@ proc sql;
 select *
 from 
 	&source a,
-	ahrq_ccn b
+	&permlib..ahrq_ccn b
 where 
 	a.prvdr_num = b.&ccn
 ;
@@ -303,7 +303,6 @@ format bene_state_cd prvdr_state_cd $state. &pop_OP_PHYSN_SPCLTY_CD $speccd. &po
 run;
 /* get rid of duplicate rows--keep first occurence so sort by date first */
 proc sort data=pop_02_IN; by &bene_id &flag_popped_dt; run;
-proc sort data=pop_02_IN nodupkey; by &bene_id; run;
 
 /*** this section is related to OP - outpatient claims ***/
 %macro claims_rev(source=, rev_cohort=, include_cohort=, ccn=);
@@ -321,7 +320,7 @@ select *
 from 
 include_cohort1 a, 
 &source b,
-ahrq_ccn c
+&permlib..ahrq_ccn c
 where 
 	a.&bene_id=b.&bene_id and a.&clm_id=b.&clm_id and  
 	b.prvdr_num = c.&ccn
