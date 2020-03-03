@@ -144,7 +144,7 @@ Actor		Anesthesiologists, primary care
 %let vrdc_code = &vpath./jhu_vrdc_code          ;
 %include "&vrdc_code./macro_tool_box.sas";
 %include "&vrdc_code./medicare_formats.sas";
-%include "&vrdc_code./jhu_build_Health_Systems.sas";
+*%include "&vrdc_code./jhu_build_Health_Systems.sas";
 
 /** vars to keep or delete from the different data sources **/
 
@@ -249,7 +249,7 @@ proc sql;
 	create table include_cohort2 (compress=yes) as
 select *
 from 
-	ahrq_ccn a,
+	&permlib..ahrq_ccn a,
 	include_cohort1b b,
 	include_cohort1c c	
 where 
@@ -407,7 +407,7 @@ proc sql;
 select *
 from 
 	include_cohort1b a,
-	ahrq_ccn b
+	&permlib..ahrq_ccn b
 where 
 	a.prvdr_num = b.&ccn
 ;
@@ -555,7 +555,7 @@ proc sql;
 select *
 from 
 	include_cohort1b a,
-	ahrq_ccn b
+	&permlib..ahrq_ccn b
 where 
 	a.prvdr_num = b.&ccn
 ;
@@ -785,15 +785,6 @@ proc freq data=pop_03_in_out;
 table  	&pop_year; run;
 proc contents data=pop_03_in_out; run;
 
-
-/*****requires look-back---make deletions here****/
-*merge inpatient/outpatient and lookback 180 days in inpatient/outpatient carrier 
-	for the exclusionary diagnosis;
-	if substr(dx(j),1,3) in(&EXCLUD_dx10_3) then DELETE=1;			/*need to add 180 day exclusion--do after merge qualifying!*/
-
-
-
-
 *save permanent dataset;
 data &permlib..pop_03_in_out; set pop_03_in_out; run;
 
@@ -802,45 +793,54 @@ data &permlib..pop_03_in_out; set pop_03_in_out; run;
 
 
 *start lookback;
+*merge inpatient/outpatient and lookback 180 days in inpatient/outpatient carrier 
+	for the exclusionary diagnosis;
 /*** this section is related to IP - inpatient claims--for exclusion ***/
 %macro claims_rev(source=,  exclude_cohort=);
 proc sql;
 	create table exclude_cohort1 (compress=yes) as
-select a.bene_id a.&flag_popped_dt, b.&clm_beg_dt_in, b.&diag_pfx.&diag_cd_min - b.&diag_pfx.&diag_cd_max
+select * 
 from 
-	pop_03_in_out a, 
-	&source b
+&source (keep = bene_id &clm_beg_dt_in &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max)
 where 
-	(
+	    substr(icd_dgns_cd1,1,3) in(&EXCLUD_dx10_3) or
+		substr(icd_dgns_cd2,1,3) in(&EXCLUD_dx10_3) or
+		substr(icd_dgns_cd3,1,3) in(&EXCLUD_dx10_3) or
+		substr(icd_dgns_cd4,1,3) in(&EXCLUD_dx10_3) or
+		substr(icd_dgns_cd5,1,3) in(&EXCLUD_dx10_3) or
+		substr(icd_dgns_cd6,1,3) in(&EXCLUD_dx10_3) or
+		substr(icd_dgns_cd7,1,3) in(&EXCLUD_dx10_3) or
+		substr(icd_dgns_cd8,1,3) in(&EXCLUD_dx10_3) or
+		substr(icd_dgns_cd9,1,3) in(&EXCLUD_dx10_3) or
+		substr(icd_dgns_cd10,1,3) in(&EXCLUD_dx10_3) or
+		substr(icd_dgns_cd11,1,3) in(&EXCLUD_dx10_3) or
+		substr(icd_dgns_cd12,1,3) in(&EXCLUD_dx10_3) or
+		substr(icd_dgns_cd13,1,3) in(&EXCLUD_dx10_3) or
+		substr(icd_dgns_cd14,1,3) in(&EXCLUD_dx10_3) or
+		substr(icd_dgns_cd15,1,3) in(&EXCLUD_dx10_3) or
+		substr(icd_dgns_cd16,1,3) in(&EXCLUD_dx10_3) or
+		substr(icd_dgns_cd17,1,3) in(&EXCLUD_dx10_3) or
+		substr(icd_dgns_cd18,1,3) in(&EXCLUD_dx10_3) or
+		substr(icd_dgns_cd19,1,3) in(&EXCLUD_dx10_3) or
+		substr(icd_dgns_cd20,1,3) in(&EXCLUD_dx10_3) or
+		substr(icd_dgns_cd21,1,3) in(&EXCLUD_dx10_3) or
+		substr(icd_dgns_cd22,1,3) in(&EXCLUD_dx10_3) or
+		substr(icd_dgns_cd23,1,3) in(&EXCLUD_dx10_3) or
+		substr(icd_dgns_cd24,1,3) in(&EXCLUD_dx10_3) or
+		substr(icd_dgns_cd25,1,3) in(&EXCLUD_dx10_3)		;
+quit;
+proc sql;
+	create table exclude_cohort2 (compress=yes) as
+select  a.&flag_popped_dt, b.*
+from 
+
+/*start*/
+	&permlib..pop_03_in_out	 a, 
+	exclude_cohort1			 b
+where 
 		a.&bene_id=b.&bene_id 
-		and (	(a.&flag_popped_dt-180) <=&clm_beg_dt_in <=a.&flag_popped_dt DELETE	)
-	)
-AND
-(		b.substr(icd_dgns_cd1,1,3) in(&EXCLUD_dx10_3) or
-		b.substr(icd_dgns_cd2,1,3) in(&EXCLUD_dx10_3) or
-		b.substr(icd_dgns_cd3,1,3) in(&EXCLUD_dx10_3) or
-		b.substr(icd_dgns_cd4,1,3) in(&EXCLUD_dx10_3) or
-		b.substr(icd_dgns_cd5,1,3) in(&EXCLUD_dx10_3) or
-		b.substr(icd_dgns_cd6,1,3) in(&EXCLUD_dx10_3) or
-		b.substr(icd_dgns_cd7,1,3) in(&EXCLUD_dx10_3) or
-		b.substr(icd_dgns_cd8,1,3) in(&EXCLUD_dx10_3) or
-		b.substr(icd_dgns_cd9,1,3) in(&EXCLUD_dx10_3) or
-		b.substr(icd_dgns_cd10,1,3) in(&EXCLUD_dx10_3) or
-		b.substr(icd_dgns_cd11,1,3) in(&EXCLUD_dx10_3) or
-		b.substr(icd_dgns_cd12,1,3) in(&EXCLUD_dx10_3) or
-		b.substr(icd_dgns_cd13,1,3) in(&EXCLUD_dx10_3) or
-		b.substr(icd_dgns_cd14,1,3) in(&EXCLUD_dx10_3) or
-		b.substr(icd_dgns_cd15,1,3) in(&EXCLUD_dx10_3) or
-		b.substr(icd_dgns_cd16,1,3) in(&EXCLUD_dx10_3) or
-		b.substr(icd_dgns_cd17,1,3) in(&EXCLUD_dx10_3) or
-		b.substr(icd_dgns_cd18,1,3) in(&EXCLUD_dx10_3) or
-		b.substr(icd_dgns_cd19,1,3) in(&EXCLUD_dx10_3) or
-		b.substr(icd_dgns_cd20,1,3) in(&EXCLUD_dx10_3) or
-		b.substr(icd_dgns_cd21,1,3) in(&EXCLUD_dx10_3) or
-		b.substr(icd_dgns_cd22,1,3) in(&EXCLUD_dx10_3) or
-		b.substr(icd_dgns_cd23,1,3) in(&EXCLUD_dx10_3) or
-		b.substr(icd_dgns_cd24,1,3) in(&EXCLUD_dx10_3) or
-		b.substr(icd_dgns_cd25,1,3) in(&EXCLUD_dx10_3)		);
+		and (	(a.&flag_popped_dt-180) <=&clm_beg_dt_in <=a.&flag_popped_dt	)
+	;
 quit;
 Data exclude_cohort2 (keep=  bene_id &flag_popped_dt DELETE); 
 set exclude_cohort1;  
@@ -898,6 +898,6 @@ set pop_03_INexclude_2016_1 pop_03_INexclude_2016_2 pop_03_INexclude_2016_3 pop_
 ;
 
 run;
-/* get rid of duplicate rows--keep first occurence so sort by date first */
+/* get rid of duplicate rows by bene & pop date */
 proc sort data=pop_03_INexclude; by &bene_id &flag_popped_dt; run;
 
