@@ -25,7 +25,6 @@ System		Prevention
 
 Actor		FP/IM/GYN
 
-/*
 
 
 /*** start of indicator specific variables ***/
