@@ -32,7 +32,7 @@ Actor				Hospitalists, cardiologists, internists, FPs
 *%let includ_drg = ;
 
 /** Exclusion criteria **/
-%let exclud_dx10 =	'T46.0X1' 'T46.0X2' 'T46.0X3' 'T46.0X4' 'T46.0X52'	; 														;
+%let exclud_dx10_6 =	'T460X1' 'T460X2' 'T460X3' 'T460X4' 'T460X52'	; 														;
 
 
 /** Label pop specific variables  instructions **/
@@ -233,10 +233,10 @@ set include_cohort3;
 &pop_OP_PHYSN_SPCLTY_CD=&OP_PHYSN_SPCLTY_CD;
 array dx(25) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
 do j=1 to &diag_cd_max;
-	if substr(dx(j),1,3) in(&includ_dx10_3) or substr(dx(j),1,2) in(&includ_dx10_2) then ALLERGY=1;
-	if substr(dx(j),1,3) in(&exclud_dx10_3) or substr(dx(j),1,1) in(&exclud_dx10_1) then DELETE=1;
+	if substr(dx(j),1,3) in(&includ_dx10_3) or substr(dx(j),1,2) in(&includ_dx10_2) then INCLUDE=1;
+	if substr(dx(j),1,6) in(&exclud_dx10_6) or substr(dx(j),1,1) in(&exclud_dx10_1) then DELETE=1;
 end;
-IF ALLERGY ne 1 then delete;
+IF INCLUDE ne 1 then delete;
 IF DELETE  =  1 then delete;
 *if clm_drg_cd notin(&includ_drg) then delete;
 run; 
@@ -332,11 +332,12 @@ set include_cohort2;
 &pop_OP_PHYSN_SPCLTY_CD=&OP_PHYSN_SPCLTY_CD; format &pop_OP_PHYSN_SPCLTY_CD speccd.;
 array dx(25) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
 do j=1 to &diag_cd_max;
-	if substr(dx(j),1,3) in(&includ_dx10_3) or substr(dx(j),1,2) in(&includ_dx10_2) then ALLERGY=1;
-	if substr(dx(j),1,3) in(&exclud_dx10_3) or substr(dx(j),1,1) in(&exclud_dx10_1) then DELETE=1;
+	if substr(dx(j),1,3) in(&includ_dx10_3) or substr(dx(j),1,2) in(&includ_dx10_2) then INCLUDE=1;
+	if substr(dx(j),1,6) in(&exclud_dx10_6) or substr(dx(j),1,1) in(&exclud_dx10_1) then DELETE=1;
 end;
-IF ALLERGY ne 1 then delete;
+IF INCLUDE ne 1 then delete;
 IF DELETE  =  1 then delete;
+*if clm_drg_cd notin(&includ_drg) then delete;
 run; 
 %mend;
 %claims_rev(source=rif2016.OUTpatient_claims_01, rev_cohort=rif2016.OUTpatient_revenue_01, include_cohort=pop_04_OUT_2016_1, ccn=ccn2016);
@@ -427,11 +428,12 @@ set include_cohort2;
 &pop_hcpcs_cd=put(&hcpcs_cd,$hcpcs.);
 array dx(25) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
 do j=1 to &diag_cd_max;
-	if substr(dx(j),1,3) in(&includ_dx10_3) or substr(dx(j),1,2) in(&includ_dx10_2) then ALLERGY=1;
-	if substr(dx(j),1,3) in(&exclud_dx10_3) or substr(dx(j),1,1) in(&exclud_dx10_1) then DELETE=1;
+	if substr(dx(j),1,3) in(&includ_dx10_3) or substr(dx(j),1,2) in(&includ_dx10_2) then INCLUDE=1;
+	if substr(dx(j),1,6) in(&exclud_dx10_6) or substr(dx(j),1,1) in(&exclud_dx10_1) then DELETE=1;
 end;
-IF ALLERGY ne 1 then delete;
+IF INCLUDE ne 1 then delete;
 IF DELETE  =  1 then delete;
+*if clm_drg_cd notin(&includ_drg) then delete;
 run; 
 %mend;
 %claims_rev(source=rif2016.bcarrier_claims_01, rev_cohort=rif2016.bcarrier_line_01, include_cohort=pop_04_CAR_2016_1);
