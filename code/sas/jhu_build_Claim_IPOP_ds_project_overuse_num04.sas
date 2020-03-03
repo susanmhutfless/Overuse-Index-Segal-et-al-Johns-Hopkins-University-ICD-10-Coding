@@ -31,7 +31,7 @@ Actor				Hospitalists, cardiologists, internists, FPs
 *%let includ_drg = ;
 
 /** Exclusion criteria **/
-%let exclud_dx10_6 =	'T460X1' 'T460X2' 'T460X3' 'T460X4' 'T460X52'	; 														;
+%let exclud_dx10_6 =	'T460X1' 'T460X2' 'T460X3' 'T460X4' 'T460X5'	; 														;
 
 
 /** Label pop specific variables  instructions **/
