@@ -23,7 +23,7 @@ Actor				Hospitalists, cardiologists, internists, FPs
 /*** start of indicator specific variables ***/
 
 /*inclusion criteria (options: CPT/HCPCS, ICD procedure, ICD diagnosis, DRG)*/
-%let includ_hcpcs =		'80162'	
+%let includ_hcpcs =		'80162'		;
 
 *%let includ_pr10 =	; 
 
