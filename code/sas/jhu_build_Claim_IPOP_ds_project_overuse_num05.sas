@@ -21,7 +21,8 @@ Indicator
 
 			[this can be reported among all patients with foot imaging]
 
-Timing		Inclusionary diagnosis on the same claim as the CPT code and no exclusionary code (same code) in the preceding 30 days, restrict to age over 5 years
+Timing		Inclusionary diagnosis on the same claim as the CPT code and no exclusionary code (same code) in the preceding 30 days, 
+			restrict to age over 5 years
 
 Setting		Inpatient or outpatient (including ED)	
 
@@ -47,7 +48,11 @@ Actor		ED doc, family medicine, internal medicine, pediatrics, orthopedists, PMR
 					'BQ2Q' 'BQ2X' 'BQ2Y' 'BQ3J' 'BQ3K'
 					'BQ3L' 'BQ3M' 'BQ3P' 'BQ3Q'				;
 
+*include applies to day of procedure;
 %let includ_dx10_3 ='S90' 'S91' 'S92' 'S93' 'S94' 'S95'
+					'S96' 'S97' 'S98' 'S99'			;
+*exclude applies to 30 days before the procedure;
+%let exclud_dx10_3 ='S90' 'S91' 'S92' 'S93' 'S94' 'S95'
 					'S96' 'S97' 'S98' 'S99'			;
 %let includ_drg = ;
 
@@ -115,7 +120,7 @@ Actor		ED doc, family medicine, internal medicine, pediatrics, orthopedists, PMR
 %let  diag_cd_min        = 1                 	;
 %let  diag_cd_max        = 25                 	;
 
-%let  proc_pfx           = icd_prcdr_cd         ;
+%let  proc_pfx           = substr(icd_prcdr_cd         ;
 %let  proc_cd_min        = 1                 	;
 %let  proc_cd_max        = 25                 	;
 
@@ -216,31 +221,31 @@ select *
 from  
 	&source
 where
-		icd_prcdr_cd1 in(&includ_pr10) or
-		icd_prcdr_cd2 in(&includ_pr10) or
-		icd_prcdr_cd3 in(&includ_pr10) or
-		icd_prcdr_cd4 in(&includ_pr10) or
-		icd_prcdr_cd5 in(&includ_pr10) or
-		icd_prcdr_cd6 in(&includ_pr10) or
-		icd_prcdr_cd7 in(&includ_pr10) or
-		icd_prcdr_cd8 in(&includ_pr10) or
-		icd_prcdr_cd9 in(&includ_pr10) or
-		icd_prcdr_cd10 in(&includ_pr10) or
-		icd_prcdr_cd11 in(&includ_pr10) or
-		icd_prcdr_cd12 in(&includ_pr10) or
-		icd_prcdr_cd13 in(&includ_pr10) or
-		icd_prcdr_cd14 in(&includ_pr10) or
-		icd_prcdr_cd15 in(&includ_pr10) or
-		icd_prcdr_cd16 in(&includ_pr10) or
-		icd_prcdr_cd17 in(&includ_pr10) or
-		icd_prcdr_cd18 in(&includ_pr10) or
-		icd_prcdr_cd19 in(&includ_pr10) or
-		icd_prcdr_cd20 in(&includ_pr10) or
-		icd_prcdr_cd21 in(&includ_pr10) or
-		icd_prcdr_cd22 in(&includ_pr10) or
-		icd_prcdr_cd23 in(&includ_pr10) or
-		icd_prcdr_cd24 in(&includ_pr10) or
-		icd_prcdr_cd25 in(&includ_pr10)		;
+		substr(icd_prcdr_cd1,1,4) in(&includ_pr10_4) or
+		substr(icd_prcdr_cd2,1,4) in(&includ_pr10_4) or
+		substr(icd_prcdr_cd3,1,4) in(&includ_pr10_4) or
+		substr(icd_prcdr_cd4,1,4) in(&includ_pr10_4) or
+		substr(icd_prcdr_cd5,1,4) in(&includ_pr10_4) or
+		substr(icd_prcdr_cd6,1,4) in(&includ_pr10_4) or
+		substr(icd_prcdr_cd7,1,4) in(&includ_pr10_4) or
+		substr(icd_prcdr_cd8,1,4) in(&includ_pr10_4) or
+		substr(icd_prcdr_cd9,1,4) in(&includ_pr10_4) or
+		substr(icd_prcdr_cd10,1,4) in(&includ_pr10_4) or
+		substr(icd_prcdr_cd11,1,4) in(&includ_pr10_4) or
+		substr(icd_prcdr_cd12,1,4) in(&includ_pr10_4) or
+		substr(icd_prcdr_cd13,1,4) in(&includ_pr10_4) or
+		substr(icd_prcdr_cd14,1,4) in(&includ_pr10_4) or
+		substr(icd_prcdr_cd15,1,4) in(&includ_pr10_4) or
+		substr(icd_prcdr_cd16,1,4) in(&includ_pr10_4) or
+		substr(icd_prcdr_cd17,1,4) in(&includ_pr10_4) or
+		substr(icd_prcdr_cd18,1,4) in(&includ_pr10_4) or
+		substr(icd_prcdr_cd19,1,4) in(&includ_pr10_4) or
+		substr(icd_prcdr_cd20,1,4) in(&includ_pr10_4) or
+		substr(icd_prcdr_cd21,1,4) in(&includ_pr10_4) or
+		substr(icd_prcdr_cd22,1,4) in(&includ_pr10_4) or
+		substr(icd_prcdr_cd23,1,4) in(&includ_pr10_4) or
+		substr(icd_prcdr_cd24,1,4) in(&includ_pr10_4) or
+		substr(icd_prcdr_cd25,1,4) in(&includ_pr10_4)		;
 quit;
 /* link to CCN */
 proc sql;
@@ -259,7 +264,7 @@ Data &include_cohort (keep=  &vars_to_keep_ip);
 set include_cohort2;  
 array pr(25) &proc_pfx.&proc_cd_min - &proc_pfx.&proc_cd_max;
 do i=1 to &diag_cd_max;
-	if pr(i) in(&includ_pr10) then &flag_popped=1;
+	if pr(i) in(&includ_pr10_4) then &flag_popped=1;
 end; 
 &flag_popped_dt=&clm_beg_dt_in; 
 	format &flag_popped_dt date9.; 						label &flag_popped_dt			=	&flag_popped_dt_label;
@@ -281,12 +286,11 @@ end;
 &pop_OP_PHYSN_SPCLTY_CD=&OP_PHYSN_SPCLTY_CD;
 array dx(25) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
 do j=1 to &diag_cd_max;
-	if dx(j) in(&includ_dx10) then preop_visit=1;
-	if substr(dx(j),1,3) in(&EXCLUD_dx10_3) then DELETE=1;	*will make the 180 day exclusion after merge inp, out, car;		
+	if dx(j) in(&includ_dx10_3) then trauma=1;	
 end;
 if &flag_popped ne 1 then delete;
-IF preop_visit ne 1 then delete;
-IF DELETE  =  1 then delete; *this is for same day lung dx only;
+IF trauma ne 1 then delete;
+if &pop_age<5 then delete;
 *if clm_drg_cd notin(&includ_drg) then delete;
 run; 
 %mend;
@@ -372,31 +376,31 @@ select *
 from  
 	&source
 where
-		icd_prcdr_cd1 in(&includ_pr10) or
-		icd_prcdr_cd2 in(&includ_pr10) or
-		icd_prcdr_cd3 in(&includ_pr10) or
-		icd_prcdr_cd4 in(&includ_pr10) or
-		icd_prcdr_cd5 in(&includ_pr10) or
-		icd_prcdr_cd6 in(&includ_pr10) or
-		icd_prcdr_cd7 in(&includ_pr10) or
-		icd_prcdr_cd8 in(&includ_pr10) or
-		icd_prcdr_cd9 in(&includ_pr10) or
-		icd_prcdr_cd10 in(&includ_pr10) or
-		icd_prcdr_cd11 in(&includ_pr10) or
-		icd_prcdr_cd12 in(&includ_pr10) or
-		icd_prcdr_cd13 in(&includ_pr10) or
-		icd_prcdr_cd14 in(&includ_pr10) or
-		icd_prcdr_cd15 in(&includ_pr10) or
-		icd_prcdr_cd16 in(&includ_pr10) or
-		icd_prcdr_cd17 in(&includ_pr10) or
-		icd_prcdr_cd18 in(&includ_pr10) or
-		icd_prcdr_cd19 in(&includ_pr10) or
-		icd_prcdr_cd20 in(&includ_pr10) or
-		icd_prcdr_cd21 in(&includ_pr10) or
-		icd_prcdr_cd22 in(&includ_pr10) or
-		icd_prcdr_cd23 in(&includ_pr10) or
-		icd_prcdr_cd24 in(&includ_pr10) or
-		icd_prcdr_cd25 in(&includ_pr10)		;
+		substr(icd_prcdr_cd1,1,4) in(&includ_pr10_4) or
+		substr(icd_prcdr_cd2,1,4) in(&includ_pr10_4) or
+		substr(icd_prcdr_cd3,1,4) in(&includ_pr10_4) or
+		substr(icd_prcdr_cd4,1,4) in(&includ_pr10_4) or
+		substr(icd_prcdr_cd5,1,4) in(&includ_pr10_4) or
+		substr(icd_prcdr_cd6,1,4) in(&includ_pr10_4) or
+		substr(icd_prcdr_cd7,1,4) in(&includ_pr10_4) or
+		substr(icd_prcdr_cd8,1,4) in(&includ_pr10_4) or
+		substr(icd_prcdr_cd9,1,4) in(&includ_pr10_4) or
+		substr(icd_prcdr_cd10,1,4) in(&includ_pr10_4) or
+		substr(icd_prcdr_cd11,1,4) in(&includ_pr10_4) or
+		substr(icd_prcdr_cd12,1,4) in(&includ_pr10_4) or
+		substr(icd_prcdr_cd13,1,4) in(&includ_pr10_4) or
+		substr(icd_prcdr_cd14,1,4) in(&includ_pr10_4) or
+		substr(icd_prcdr_cd15,1,4) in(&includ_pr10_4) or
+		substr(icd_prcdr_cd16,1,4) in(&includ_pr10_4) or
+		substr(icd_prcdr_cd17,1,4) in(&includ_pr10_4) or
+		substr(icd_prcdr_cd18,1,4) in(&includ_pr10_4) or
+		substr(icd_prcdr_cd19,1,4) in(&includ_pr10_4) or
+		substr(icd_prcdr_cd20,1,4) in(&includ_pr10_4) or
+		substr(icd_prcdr_cd21,1,4) in(&includ_pr10_4) or
+		substr(icd_prcdr_cd22,1,4) in(&includ_pr10_4) or
+		substr(icd_prcdr_cd23,1,4) in(&includ_pr10_4) or
+		substr(icd_prcdr_cd24,1,4) in(&includ_pr10_4) or
+		substr(icd_prcdr_cd25,1,4) in(&includ_pr10_4)		;
 quit;
 /* link to CCN */
 proc sql;
@@ -413,7 +417,7 @@ Data &include_cohort (keep = &vars_to_keep_op);
 set include_cohort2;  
 array pr(25) &proc_pfx.&diag_cd_min - &proc_pfx.&diag_cd_max;
 do i=1 to &diag_cd_max;
-	if pr(i) in(&includ_pr10) then &flag_popped=1;
+	if pr(i) in(&includ_pr10_4) then &flag_popped=1;
 end; 
 &flag_popped_dt=&clm_from_dt; 
 	format &flag_popped_dt date9.; 			label &flag_popped_dt	=	&flag_popped_dt_label;
@@ -428,12 +432,11 @@ end;
 &pop_OP_PHYSN_SPCLTY_CD=&OP_PHYSN_SPCLTY_CD; format &pop_OP_PHYSN_SPCLTY_CD speccd.;
 array dx(25) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
 do j=1 to &diag_cd_max;
-	if dx(j) in(&includ_dx10) then preop_visit=1;
-	if substr(dx(j),1,3) in(&EXCLUD_dx10_3) then DELETE=1;
+	if dx(j) in(&includ_dx10_3) then trauma=1;	
 end;
 if &flag_popped ne 1 then delete;
-IF preop_visit ne 1 then delete;
-IF DELETE  =  1 then delete;
+IF trauma ne 1 then delete;
+if &pop_age<5 then delete;
 run; 
 %mend;
 %claims_rev(source=rif2016.OUTpatient_claims_01, rev_cohort=rif2016.OUTpatient_revenue_01, include_cohort=pop_05_out_2016_1, ccn=ccn2016);
@@ -520,31 +523,31 @@ select *
 from  
 	&source
 where
-		icd_prcdr_cd1 in(&includ_pr10) or
-		icd_prcdr_cd2 in(&includ_pr10) or
-		icd_prcdr_cd3 in(&includ_pr10) or
-		icd_prcdr_cd4 in(&includ_pr10) or
-		icd_prcdr_cd5 in(&includ_pr10) or
-		icd_prcdr_cd6 in(&includ_pr10) or
-		icd_prcdr_cd7 in(&includ_pr10) or
-		icd_prcdr_cd8 in(&includ_pr10) or
-		icd_prcdr_cd9 in(&includ_pr10) or
-		icd_prcdr_cd10 in(&includ_pr10) or
-		icd_prcdr_cd11 in(&includ_pr10) or
-		icd_prcdr_cd12 in(&includ_pr10) or
-		icd_prcdr_cd13 in(&includ_pr10) or
-		icd_prcdr_cd14 in(&includ_pr10) or
-		icd_prcdr_cd15 in(&includ_pr10) or
-		icd_prcdr_cd16 in(&includ_pr10) or
-		icd_prcdr_cd17 in(&includ_pr10) or
-		icd_prcdr_cd18 in(&includ_pr10) or
-		icd_prcdr_cd19 in(&includ_pr10) or
-		icd_prcdr_cd20 in(&includ_pr10) or
-		icd_prcdr_cd21 in(&includ_pr10) or
-		icd_prcdr_cd22 in(&includ_pr10) or
-		icd_prcdr_cd23 in(&includ_pr10) or
-		icd_prcdr_cd24 in(&includ_pr10) or
-		icd_prcdr_cd25 in(&includ_pr10)		;
+		substr(icd_prcdr_cd1,1,4) in(&includ_pr10_4) or
+		substr(icd_prcdr_cd2,1,4) in(&includ_pr10_4) or
+		substr(icd_prcdr_cd3,1,4) in(&includ_pr10_4) or
+		substr(icd_prcdr_cd4,1,4) in(&includ_pr10_4) or
+		substr(icd_prcdr_cd5,1,4) in(&includ_pr10_4) or
+		substr(icd_prcdr_cd6,1,4) in(&includ_pr10_4) or
+		substr(icd_prcdr_cd7,1,4) in(&includ_pr10_4) or
+		substr(icd_prcdr_cd8,1,4) in(&includ_pr10_4) or
+		substr(icd_prcdr_cd9,1,4) in(&includ_pr10_4) or
+		substr(icd_prcdr_cd10,1,4) in(&includ_pr10_4) or
+		substr(icd_prcdr_cd11,1,4) in(&includ_pr10_4) or
+		substr(icd_prcdr_cd12,1,4) in(&includ_pr10_4) or
+		substr(icd_prcdr_cd13,1,4) in(&includ_pr10_4) or
+		substr(icd_prcdr_cd14,1,4) in(&includ_pr10_4) or
+		substr(icd_prcdr_cd15,1,4) in(&includ_pr10_4) or
+		substr(icd_prcdr_cd16,1,4) in(&includ_pr10_4) or
+		substr(icd_prcdr_cd17,1,4) in(&includ_pr10_4) or
+		substr(icd_prcdr_cd18,1,4) in(&includ_pr10_4) or
+		substr(icd_prcdr_cd19,1,4) in(&includ_pr10_4) or
+		substr(icd_prcdr_cd20,1,4) in(&includ_pr10_4) or
+		substr(icd_prcdr_cd21,1,4) in(&includ_pr10_4) or
+		substr(icd_prcdr_cd22,1,4) in(&includ_pr10_4) or
+		substr(icd_prcdr_cd23,1,4) in(&includ_pr10_4) or
+		substr(icd_prcdr_cd24,1,4) in(&includ_pr10_4) or
+		substr(icd_prcdr_cd25,1,4) in(&includ_pr10_4)		;
 quit;
 /* link to CCN */
 proc sql;
@@ -561,7 +564,7 @@ Data &include_cohort (keep = &vars_to_keep_car);
 set include_cohort2; 
 array pr(25) &proc_pfx.&diag_cd_min - &proc_pfx.&diag_cd_max;
 do i=1 to &diag_cd_max;
-	if pr(i) in(&includ_pr10) then &flag_popped=1;
+	if pr(i) in(&includ_pr10_4) then &flag_popped=1;
 end;  
 &flag_popped_dt=&clm_from_dt; 
 	format &flag_popped_dt date9.; 			label &flag_popped_dt	=	&flag_popped_dt_label;
@@ -576,12 +579,11 @@ end;
 &pop_OP_PHYSN_SPCLTY_CD=&OP_PHYSN_SPCLTY_CD; format &pop_OP_PHYSN_SPCLTY_CD speccd.;
 array dx(25) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
 do j=1 to &diag_cd_max;
-	if dx(j) in(&includ_dx10) then preop_visit=1;
-	if substr(dx(j),1,3) in(&EXCLUD_dx10_3) then DELETE=1;
+	if dx(j) in(&includ_dx10_3) then trauma=1;	
 end;
 if &flag_popped ne 1 then delete;
-IF preop_visit ne 1 then delete;
-IF DELETE  =  1 then delete;
+IF trauma ne 1 then delete;
+if &pop_age<5 then delete;
 run; 
 %mend;
 %claims_rev(source=rif2016.bcarrier_claims_01, rev_cohort=rif2016.bcarrier_line_01, include_cohort=pop_05_CAR_2016_1, ccn=ccn2016);
@@ -836,8 +838,8 @@ from
 	exclude_cohort1			 b
 where 
 		a.&bene_id=b.&bene_id 
-		and (	(a.&flag_popped_dt-180) <=&clm_beg_dt_in <=a.&flag_popped_dt	)
-	;
+		and (	(a.&flag_popped_dt-30) < &clm_beg_dt_in <a.&flag_popped_dt	)
+	; /*note that for this measure it is < and not <=*/
 quit;
 Data exclude_cohort2 (keep=  bene_id &flag_popped_dt DELETE); 
 set exclude_cohort1;  
