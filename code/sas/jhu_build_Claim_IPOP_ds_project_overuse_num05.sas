@@ -21,7 +21,8 @@ Indicator
 
 			[this can be reported among all patients with foot imaging]
 
-Timing		Inclusionary diagnosis on the same claim as the CPT code and no exclusionary code (same code) in the preceding 30 days, 
+Timing		Inclusionary diagnosis on the same claim as the CPT code 
+			and no exclusionary code (same code) in the preceding 30 days, 
 			restrict to age over 5 years
 
 Setting		Inpatient or outpatient (including ED)	
@@ -838,8 +839,8 @@ from
 	exclude_cohort1			 b
 where 
 		a.&bene_id=b.&bene_id 
-		and (	(a.&flag_popped_dt-30) < &clm_beg_dt_in <a.&flag_popped_dt	)
-	; /*note that for this measure it is < and not <=*/
+		and (	(a.&flag_popped_dt-30) <= &clm_beg_dt_in <a.&flag_popped_dt	)
+	; /*note that for this measure it is < and not <= for the popped_dt*/
 quit;
 Data exclude_cohort2 (keep=  bene_id &flag_popped_dt DELETE); 
 set exclude_cohort1;  
