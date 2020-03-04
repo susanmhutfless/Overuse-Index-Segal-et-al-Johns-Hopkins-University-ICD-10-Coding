@@ -43,7 +43,7 @@ Actor		Emergency room doctors, neurologists, primary care
 %let includ_pr10 =
 					'B030Y0Z' 'B030YZZ' 'B030ZZZ'	;
 
-%let includ_dx10 =			'S060X0A' 'S060X1A ' 'S060X9A'  ;
+%let includ_dx10 =	'S060X0A' 'S060X1A' 'S060X9A'  	;
 
 %let includ_drg = ;
 
@@ -776,114 +776,4 @@ data &permlib..pop_06_in_out; set pop_06_in_out; run;
 
 
 
-
-
-*start lookback;
-*merge inpatient/outpatient and lookback 180 days in inpatient/outpatient carrier 
-	for the exclusionary diagnosis;
-/*** this section is related to IP - inpatient claims--for exclusion ***/
-%macro claims_rev(source=,  exclude_cohort=);
-proc sql;
-	create table exclude_cohort1 (compress=yes) as
-select * 
-from 
-&source (keep = bene_id &clm_beg_dt_in &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max)
-where 
-	    icd_dgns_cd1,1,3) in(&EXCLUD_dx10_3) or
-		icd_dgns_cd2,1,3) in(&EXCLUD_dx10_3) or
-		icd_dgns_cd3,1,3) in(&EXCLUD_dx10_3) or
-		icd_dgns_cd4,1,3) in(&EXCLUD_dx10_3) or
-		icd_dgns_cd5,1,3) in(&EXCLUD_dx10_3) or
-		icd_dgns_cd6,1,3) in(&EXCLUD_dx10_3) or
-		icd_dgns_cd7,1,3) in(&EXCLUD_dx10_3) or
-		icd_dgns_cd8,1,3) in(&EXCLUD_dx10_3) or
-		icd_dgns_cd9,1,3) in(&EXCLUD_dx10_3) or
-		icd_dgns_cd10,1,3) in(&EXCLUD_dx10_3) or
-		icd_dgns_cd11,1,3) in(&EXCLUD_dx10_3) or
-		icd_dgns_cd12,1,3) in(&EXCLUD_dx10_3) or
-		icd_dgns_cd13,1,3) in(&EXCLUD_dx10_3) or
-		icd_dgns_cd14,1,3) in(&EXCLUD_dx10_3) or
-		icd_dgns_cd15,1,3) in(&EXCLUD_dx10_3) or
-		icd_dgns_cd16,1,3) in(&EXCLUD_dx10_3) or
-		icd_dgns_cd17,1,3) in(&EXCLUD_dx10_3) or
-		icd_dgns_cd18,1,3) in(&EXCLUD_dx10_3) or
-		icd_dgns_cd19,1,3) in(&EXCLUD_dx10_3) or
-		icd_dgns_cd20,1,3) in(&EXCLUD_dx10_3) or
-		icd_dgns_cd21,1,3) in(&EXCLUD_dx10_3) or
-		icd_dgns_cd22,1,3) in(&EXCLUD_dx10_3) or
-		icd_dgns_cd23,1,3) in(&EXCLUD_dx10_3) or
-		icd_dgns_cd24,1,3) in(&EXCLUD_dx10_3) or
-		icd_dgns_cd25,1,3) in(&EXCLUD_dx10_3)		;
-quit;
-proc sql;
-	create table exclude_cohort2 (compress=yes) as
-select  a.&flag_popped_dt, b.*
-from 
-
-/*start*/
-	&permlib..pop_06_in_out	 a, 
-	exclude_cohort1			 b
-where 
-		a.&bene_id=b.&bene_id 
-		and (	(a.&flag_popped_dt-30) <= &clm_beg_dt_in <a.&flag_popped_dt	)
-	; /*note that for this measure it is < and not <= for the popped_dt*/
-quit;
-Data exclude_cohort2 (keep=  bene_id &flag_popped_dt DELETE); 
-set exclude_cohort1;  
-array dx(25) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
-do j=1 to &diag_cd_max;
-	if dx(j) in(&EXCLUD_dx10_3) then DELETE=1;	
-end;
-if DELETE ne 1 then delete;
-run; 
-%mend;
-%claims_rev(source=rif2016.inpatient_claims_01,   exclude_cohort=pop_06_INexclude_2016_1);
-%claims_rev(source=rif2016.inpatient_claims_02,   exclude_cohort=pop_06_INexclude_2016_2);
-%claims_rev(source=rif2016.inpatient_claims_03,   exclude_cohort=pop_06_INexclude_2016_3);
-%claims_rev(source=rif2016.inpatient_claims_04,   exclude_cohort=pop_06_INexclude_2016_4);
-%claims_rev(source=rif2016.inpatient_claims_05,   exclude_cohort=pop_06_INexclude_2016_5);
-%claims_rev(source=rif2016.inpatient_claims_06,   exclude_cohort=pop_06_INexclude_2016_6);
-%claims_rev(source=rif2016.inpatient_claims_07,   exclude_cohort=pop_06_INexclude_2016_7);
-%claims_rev(source=rif2016.inpatient_claims_08,   exclude_cohort=pop_06_INexclude_2016_8);
-%claims_rev(source=rif2016.inpatient_claims_09,   exclude_cohort=pop_06_INexclude_2016_9);
-%claims_rev(source=rif2016.inpatient_claims_10,   exclude_cohort=pop_06_INexclude_2016_10);
-%claims_rev(source=rif2016.inpatient_claims_11,   exclude_cohort=pop_06_INexclude_2016_11);
-%claims_rev(source=rif2016.inpatient_claims_12,   exclude_cohort=pop_06_INexclude_2016_12);
-%claims_rev(source=rif2017.inpatient_claims_01,   exclude_cohort=pop_06_INexclude_2017_1);
-%claims_rev(source=rif2017.inpatient_claims_02,   exclude_cohort=pop_06_INexclude_2017_2);
-%claims_rev(source=rif2017.inpatient_claims_03,   exclude_cohort=pop_06_INexclude_2017_3);
-%claims_rev(source=rif2017.inpatient_claims_04,   exclude_cohort=pop_06_INexclude_2017_4);
-%claims_rev(source=rif2017.inpatient_claims_05,   exclude_cohort=pop_06_INexclude_2017_5);
-%claims_rev(source=rif2017.inpatient_claims_06,   exclude_cohort=pop_06_INexclude_2017_6);
-%claims_rev(source=rif2017.inpatient_claims_07,   exclude_cohort=pop_06_INexclude_2017_7);
-%claims_rev(source=rif2017.inpatient_claims_08,   exclude_cohort=pop_06_INexclude_2017_8);
-%claims_rev(source=rif2017.inpatient_claims_09,   exclude_cohort=pop_06_INexclude_2017_9);
-%claims_rev(source=rif2017.inpatient_claims_10,   exclude_cohort=pop_06_INexclude_2017_10);
-%claims_rev(source=rif2017.inpatient_claims_11,   exclude_cohort=pop_06_INexclude_2017_11);
-%claims_rev(source=rif2017.inpatient_claims_12,   exclude_cohort=pop_06_INexclude_2017_12);
-%claims_rev(source=rifq2018.inpatient_claims_01,  exclude_cohort=pop_06_INexclude_2018_1);
-%claims_rev(source=rifq2018.inpatient_claims_02,  exclude_cohort=pop_06_INexclude_2018_2);
-%claims_rev(source=rifq2018.inpatient_claims_03,  exclude_cohort=pop_06_INexclude_2018_3);
-%claims_rev(source=rifq2018.inpatient_claims_04,  exclude_cohort=pop_06_INexclude_2018_4);
-%claims_rev(source=rifq2018.inpatient_claims_05,  exclude_cohort=pop_06_INexclude_2018_5);
-%claims_rev(source=rifq2018.inpatient_claims_06,  exclude_cohort=pop_06_INexclude_2018_6);
-%claims_rev(source=rifq2018.inpatient_claims_07,  exclude_cohort=pop_06_INexclude_2018_7);
-%claims_rev(source=rifq2018.inpatient_claims_08,  exclude_cohort=pop_06_INexclude_2018_8);
-%claims_rev(source=rifq2018.inpatient_claims_09,  exclude_cohort=pop_06_INexclude_2018_9);
-%claims_rev(source=rifq2018.inpatient_claims_10,  exclude_cohort=pop_06_INexclude_2018_10);
-%claims_rev(source=rifq2018.inpatient_claims_11,  exclude_cohort=pop_06_INexclude_2018_11);
-%claims_rev(source=rifq2018.inpatient_claims_12,  exclude_cohort=pop_06_INexclude_2018_12);
-
-data pop_06_INexclude;
-set pop_06_INexclude_2016_1 pop_06_INexclude_2016_2 pop_06_INexclude_2016_3 pop_06_INexclude_2016_4 pop_06_INexclude_2016_5 pop_06_INexclude_2016_6
-	pop_06_INexclude_2016_7 pop_06_INexclude_2016_8 pop_06_INexclude_2016_9 pop_06_INexclude_2016_10 pop_06_INexclude_2016_11 pop_06_INexclude_2016_12
-	pop_06_INexclude_2017_1 pop_06_INexclude_2017_2 pop_06_INexclude_2017_3 pop_06_INexclude_2017_4 pop_06_INexclude_2017_5 pop_06_INexclude_2017_6
-	pop_06_INexclude_2017_7 pop_06_INexclude_2017_8 pop_06_INexclude_2017_9 pop_06_INexclude_2017_10 pop_06_INexclude_2017_11 pop_06_INexclude_2017_12
-	pop_06_INexclude_2018_1 pop_06_INexclude_2018_2 pop_06_INexclude_2018_3 pop_06_INexclude_2018_4 pop_06_INexclude_2018_5 pop_06_INexclude_2018_6
-	pop_06_INexclude_2018_7 pop_06_INexclude_2018_8 pop_06_INexclude_2018_9 pop_06_INexclude_2018_10 pop_06_INexclude_2018_11 pop_06_INexclude_2018_12
-;
-
-run;
-/* get rid of duplicate rows by bene & pop date */
-proc sort data=pop_06_INexclude; by &bene_id &flag_popped_dt; run;
 
