@@ -7,7 +7,7 @@
 /*** Indicator description ***/
 /* Description and codes from .xlsx file  "ICD-10 conversions_12_17-19" */
 
-/* Indicator 02 */
+/* Indicator 03 */
 
 
 /*Description from Excel file
@@ -20,7 +20,9 @@ Indicator
 
 			[this can be reported among all patients with preoperative chest X-ray]
 
-Timing		Procedure code is associated with the Inclusionary diagnsosis code(same claim) with NO exclusionary diagnosis codes 
+Timing		Procedure code 
+			*ALERT: is associated with the Inclusionary diagnsosis code(same claim) removed inclusion dx code on 04mar2020*
+			with NO exclusionary diagnosis codes 
 			within 180 days preceding procedure code	
 
 System		Anesthesia	
@@ -42,14 +44,14 @@ Actor		Anesthesiologists, primary care
 
 %let includ_pr10 =
 					'BW03ZZZ'					;
-%let includ_dx10 =
+*%let includ_dx10_5 =
 					'Z0181'					;
 %let includ_drg = ;
 
 
 /** Exclusion criteria **/
 
-%let EXCLUD_dx10_3= 			'J00' 'J01' 'J02' 'J03' 'J04' 'J05' 'J06' 
+%let EXCLUD_dx10_3= 'J00' 'J01' 'J02' 'J03' 'J04' 'J05' 'J06' 
 					'J09' 'J10' 'J11' 'J12' 'J13' 'J14' 'J15' 
 					'J16' 'J17' 'J18' 'J20' 'J21' 'J22' 'J30' 
 					'J31' 'J32' 'J33' 'J34' 'J35' 'J36' 'J37'
@@ -283,11 +285,11 @@ end;
 &pop_OP_PHYSN_SPCLTY_CD=&OP_PHYSN_SPCLTY_CD;
 array dx(25) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
 do j=1 to &diag_cd_max;
-	if dx(j) in(&includ_dx10) then preop_visit=1;
+	*if dx(j) = substr(&includ_dx10_5,1,5) then preop_visit=1;
 	if substr(dx(j),1,3) in(&EXCLUD_dx10_3) then DELETE=1;	*will make the 180 day exclusion after merge inp, out, car;		
 end;
 if &flag_popped ne 1 then delete;
-IF preop_visit ne 1 then delete;
+*IF preop_visit ne 1 then delete;
 IF DELETE  =  1 then delete; *this is for same day lung dx only;
 *if clm_drg_cd notin(&includ_drg) then delete;
 run; 
@@ -431,11 +433,11 @@ end;
 &pop_OP_PHYSN_SPCLTY_CD=&OP_PHYSN_SPCLTY_CD; format &pop_OP_PHYSN_SPCLTY_CD speccd.;
 array dx(25) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
 do j=1 to &diag_cd_max;
-	if dx(j) in(&includ_dx10) then preop_visit=1;
+	*if dx(j) = substr(&includ_dx10_5,1,5) then preop_visit=1;
 	if substr(dx(j),1,3) in(&EXCLUD_dx10_3) then DELETE=1;
 end;
 if &flag_popped ne 1 then delete;
-IF preop_visit ne 1 then delete;
+*IF preop_visit ne 1 then delete;
 IF DELETE  =  1 then delete;
 run; 
 %mend;
@@ -579,11 +581,11 @@ end;
 &pop_OP_PHYSN_SPCLTY_CD=&OP_PHYSN_SPCLTY_CD; format &pop_OP_PHYSN_SPCLTY_CD speccd.;
 array dx(25) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
 do j=1 to &diag_cd_max;
-	if dx(j) in(&includ_dx10) then preop_visit=1;
+	*if dx(j) = substr(&includ_dx10_5,1,5) then preop_visit=1;
 	if substr(dx(j),1,3) in(&EXCLUD_dx10_3) then DELETE=1;
 end;
 if &flag_popped ne 1 then delete;
-IF preop_visit ne 1 then delete;
+*IF preop_visit ne 1 then delete;
 IF DELETE  =  1 then delete;
 run; 
 %mend;
