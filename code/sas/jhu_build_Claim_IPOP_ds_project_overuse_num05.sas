@@ -408,10 +408,11 @@ proc sql;
 	create table include_cohort2 (compress=yes) as
 select *
 from 
-	include_cohort1b a,
-	&permlib..ahrq_ccn b
+	&permlib..ahrq_ccn a,
+	include_cohort1b b,
+	include_cohort1c c	
 where 
-	a.prvdr_num = b.&ccn
+	b.prvdr_num = a.&ccn or c.prvdr_num = a.&ccn
 ;
 quit;
 Data &include_cohort (keep = &vars_to_keep_op); 
@@ -508,6 +509,7 @@ where
 	&hcpcs_cd in (&includ_hcpcs);
 quit;
 /* pull claim info for those with HCPCS (need to do this to get dx codes)*/
+/*Carrier does NOT have icd procedure codes--so that section of code does not exist for carrier*/
 proc sql;
 	create table include_cohort1b (compress=yes) as
 select a.&hcpcs_cd, a.&flag_popped, b.*
@@ -516,39 +518,6 @@ from
 	&source b
 where 
 	(a.&bene_id=b.&bene_id and a.&clm_id=b.&clm_id);
-quit;
-/*pull icd procedure criteria from claims*/
-proc sql;
-	create table include_cohort1c (compress=yes) as
-select *
-from  
-	&source
-where
-		substr(icd_prcdr_cd1,1,4) in(&includ_pr10_4) or
-		substr(icd_prcdr_cd2,1,4) in(&includ_pr10_4) or
-		substr(icd_prcdr_cd3,1,4) in(&includ_pr10_4) or
-		substr(icd_prcdr_cd4,1,4) in(&includ_pr10_4) or
-		substr(icd_prcdr_cd5,1,4) in(&includ_pr10_4) or
-		substr(icd_prcdr_cd6,1,4) in(&includ_pr10_4) or
-		substr(icd_prcdr_cd7,1,4) in(&includ_pr10_4) or
-		substr(icd_prcdr_cd8,1,4) in(&includ_pr10_4) or
-		substr(icd_prcdr_cd9,1,4) in(&includ_pr10_4) or
-		substr(icd_prcdr_cd10,1,4) in(&includ_pr10_4) or
-		substr(icd_prcdr_cd11,1,4) in(&includ_pr10_4) or
-		substr(icd_prcdr_cd12,1,4) in(&includ_pr10_4) or
-		substr(icd_prcdr_cd13,1,4) in(&includ_pr10_4) or
-		substr(icd_prcdr_cd14,1,4) in(&includ_pr10_4) or
-		substr(icd_prcdr_cd15,1,4) in(&includ_pr10_4) or
-		substr(icd_prcdr_cd16,1,4) in(&includ_pr10_4) or
-		substr(icd_prcdr_cd17,1,4) in(&includ_pr10_4) or
-		substr(icd_prcdr_cd18,1,4) in(&includ_pr10_4) or
-		substr(icd_prcdr_cd19,1,4) in(&includ_pr10_4) or
-		substr(icd_prcdr_cd20,1,4) in(&includ_pr10_4) or
-		substr(icd_prcdr_cd21,1,4) in(&includ_pr10_4) or
-		substr(icd_prcdr_cd22,1,4) in(&includ_pr10_4) or
-		substr(icd_prcdr_cd23,1,4) in(&includ_pr10_4) or
-		substr(icd_prcdr_cd24,1,4) in(&includ_pr10_4) or
-		substr(icd_prcdr_cd25,1,4) in(&includ_pr10_4)		;
 quit;
 /* link to CCN */
 proc sql;
@@ -563,10 +532,6 @@ where
 quit;
 Data &include_cohort (keep = &vars_to_keep_car); 
 set include_cohort2; 
-array pr(25) &proc_pfx.&diag_cd_min - &proc_pfx.&diag_cd_max;
-do i=1 to &diag_cd_max;
-	if substr(pr(i),1,4) in(&includ_pr10_4) then &flag_popped=1;
-end;  
 &flag_popped_dt=&clm_from_dt; 
 	format &flag_popped_dt date9.; 			label &flag_popped_dt	=	&flag_popped_dt_label;
 &flag_popped=1; 							label &flag_popped		=	&flag_popped_label;

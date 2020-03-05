@@ -407,11 +407,12 @@ quit;
 proc sql;
 	create table include_cohort2 (compress=yes) as
 select *
-from 
-	include_cohort1b a,
-	&permlib..ahrq_ccn b
+from  
+	&permlib..ahrq_ccn a,
+	include_cohort1b b,
+	include_cohort1c c	
 where 
-	a.prvdr_num = b.&ccn
+	b.prvdr_num = a.&ccn or c.prvdr_num = a.&ccn
 ;
 quit;
 Data &include_cohort (keep = &vars_to_keep_op); 
@@ -498,6 +499,7 @@ proc sort data=pop_03_OUT nodupkey; by bene_id &flag_popped_dt; run;
 
 
 /**Do same for Carrier file that we did for Outpatient**/
+/*Carrier does NOT have icd procedure codes--so that section of code does not exist for carrier*/
 %macro claims_rev(source=, rev_cohort=, include_cohort=, ccn=);
 /* identify hcpcs  */
 proc sql;
@@ -518,39 +520,6 @@ from
 where 
 	(a.&bene_id=b.&bene_id and a.&clm_id=b.&clm_id);
 quit;
-/*pull icd procedure criteria from claims*/
-proc sql;
-	create table include_cohort1c (compress=yes) as
-select *
-from  
-	&source
-where
-		icd_prcdr_cd1 in(&includ_pr10) or
-		icd_prcdr_cd2 in(&includ_pr10) or
-		icd_prcdr_cd3 in(&includ_pr10) or
-		icd_prcdr_cd4 in(&includ_pr10) or
-		icd_prcdr_cd5 in(&includ_pr10) or
-		icd_prcdr_cd6 in(&includ_pr10) or
-		icd_prcdr_cd7 in(&includ_pr10) or
-		icd_prcdr_cd8 in(&includ_pr10) or
-		icd_prcdr_cd9 in(&includ_pr10) or
-		icd_prcdr_cd10 in(&includ_pr10) or
-		icd_prcdr_cd11 in(&includ_pr10) or
-		icd_prcdr_cd12 in(&includ_pr10) or
-		icd_prcdr_cd13 in(&includ_pr10) or
-		icd_prcdr_cd14 in(&includ_pr10) or
-		icd_prcdr_cd15 in(&includ_pr10) or
-		icd_prcdr_cd16 in(&includ_pr10) or
-		icd_prcdr_cd17 in(&includ_pr10) or
-		icd_prcdr_cd18 in(&includ_pr10) or
-		icd_prcdr_cd19 in(&includ_pr10) or
-		icd_prcdr_cd20 in(&includ_pr10) or
-		icd_prcdr_cd21 in(&includ_pr10) or
-		icd_prcdr_cd22 in(&includ_pr10) or
-		icd_prcdr_cd23 in(&includ_pr10) or
-		icd_prcdr_cd24 in(&includ_pr10) or
-		icd_prcdr_cd25 in(&includ_pr10)		;
-quit;
 /* link to CCN */
 proc sql;
 	create table include_cohort2 (compress=yes) as
@@ -563,11 +532,7 @@ where
 ;
 quit;
 Data &include_cohort (keep = &vars_to_keep_car); 
-set include_cohort2; 
-array pr(25) &proc_pfx.&diag_cd_min - &proc_pfx.&diag_cd_max;
-do i=1 to &diag_cd_max;
-	if pr(i) in(&includ_pr10) then &flag_popped=1;
-end;  
+set include_cohort2;  
 &flag_popped_dt=&clm_from_dt; 
 	format &flag_popped_dt date9.; 			label &flag_popped_dt	=	&flag_popped_dt_label;
 &flag_popped=1; 							label &flag_popped		=	&flag_popped_label;
