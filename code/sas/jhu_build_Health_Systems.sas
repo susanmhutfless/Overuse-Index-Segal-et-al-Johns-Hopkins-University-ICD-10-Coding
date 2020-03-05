@@ -283,13 +283,14 @@ run;
 *add in descriptors;
 *--this is set up to use the compendium hospital id for 2016 only;
 proc sort data=&permlib..ccn_inp_outp_count_2013_19; by compendium_hospital_id;
-proc sort data=ahrq_ccn2016; by compendium_hospital_id;
+proc sort data=&permlib..ahrq_ccn; by compendium_hospital_id;
 
 data &permlib..ccn_inp_outp_count_2013_19;
-merge &permlib..ccn_inp_outp_count_2013_19 ahrq_ccn2016; 
+merge &permlib..ccn_inp_outp_count_2013_19 &permlib..ahrq_ccn; 
 by compendium_hospital_id;
 if health_sys_id2016 = ' ' then delete;
 if ccn2016=. then delete;
+if patient_sum<11 then patient_sum=.;
 run;
 
 
