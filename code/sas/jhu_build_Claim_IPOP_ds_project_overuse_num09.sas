@@ -1,5 +1,5 @@
 /********************************************************************
-* Job Name: jhu_build_Claim_IPOP_ds_project_overuse_num06.sas
+* Job Name: jhu_build_Claim_IPOP_ds_project_overuse_num09.sas
 * Job Desc: Input for Inpatient & Outpatient (Including Carrier) Claims 
 * Copyright: Johns Hopkins University - SegalLab & HutflessLab 2019
 ********************************************************************/
@@ -7,28 +7,25 @@
 /*** Indicator description ***/
 /* Description and codes from .xlsx file  "ICD-10 conversions_12_17-19" */
 
-/* Indicator 06 */
+/* Indicator 09 */
 
 
-/*Description from Excel file
-(New) Number 		6	
-Indicator 		MRI in individuals with mild traumatic brain injury
+(New) Number 		9	
+Indicator 	Abdomen CT use of contrast material (w and w/o)
 
-			Motivator:  patients with mild TBI are unlikely to have a brain hemorrhage 
+Motivator: 	If one has the results of an abdominal CT with contrast, there is no added information on doing and billing for one without contrast
 
-			Indicator:  brain MRI in individuals presenting with mild TBI
+Indicator: 	abdominal CTs on the same day with and without contrast
 
-			[this can be reported among all patients with brain MRI]
+			[this can be reported among all patients with abdominal CTs]
 
-Timing		Procedure code is associated with the inclusionary diagnosis code (same claim) 
-			seen in an ED or outpatient setting
+Timing		ICD-10-PCS codes or  CPT code (w and without)   OR  CPT code for w/ and CPT for w/o on same day
 
-Setting		Outpatient (including ED); not inpatient	
+Setting		Inpatient or outpatient (including ED)	
 
-System		ED	
+System		GI	
 
-Actor		Emergency room doctors, neurologists, primary care
-*/
+Actor		Hospitalists, ED, primary care, gastroenterologists
 
 
 /*** start of indicator specific variables ***/
@@ -38,43 +35,43 @@ Actor		Emergency room doctors, neurologists, primary care
 %global includ_pr10;
 
 %let includ_hcpcs =
-					'70551'	'70552'	'70553'				;
+					'74150'	'74160'	'74170'			;
 
 %let includ_pr10 =
-					'B030Y0Z' 'B030YZZ' 'B030ZZZ'	;
+					'BW2000Z' 'BW2010Z' 'BW20Y0Z'	;
 
-%let includ_dx10 =	'S060X0A' 'S060X1A' 'S060X9A'  	;
+%let includ_dx10 =	;
 
 %let includ_drg = ;
 
 /** Exclusion criteria: None **/
 
 /** Label pop specific variables  instructions **/
-%let 	flag_popped             		= popped06 								;
-%let 	flag_popped_label				= 'indicator 06 popped'					;	
-%let	flag_popped_dt					= popped06_dt							;
-%let 	flag_popped_dt_label			= 'indicator 06 date patient popped (IP=clm_admsn_dt OP=clm_from_dt)'	;
-%let 	pop_age							= pop_06_age							;				
-%let	pop_age_label					= 'age eligible for pop 06'				;
-%let	pop_los							= pop_06_los							;
+%let 	flag_popped             		= popped09 								;
+%let 	flag_popped_label				= 'indicator 09 popped'					;	
+%let	flag_popped_dt					= popped09_dt							;
+%let 	flag_popped_dt_label			= 'indicator 09 date patient popped (IP=clm_admsn_dt OP=clm_from_dt)'	;
+%let 	pop_age							= pop_09_age							;				
+%let	pop_age_label					= 'age eligible for pop 09'				;
+%let	pop_los							= pop_09_los							;
 %let	pop_los_label					= 'length of stay when patient popped'	;
-%let	pop_year						= pop_06_year							;
-%let	pop_nch_clm_type_cd				= pop_06_nch_clm_type_cd				;
-%let  	pop_CLM_IP_ADMSN_TYPE_CD		= pop_06_CLM_IP_ADMSN_TYPE_CD			;
-%let	pop_clm_fac_type_cd				= pop_06_clm_fac_type_cd				;
-%let	pop_clm_src_ip_admsn_cd			= pop_06_clm_src_ip_admsn_cd			;
-%let	pop_ptnt_dschrg_stus_cd  		= pop_06_ptnt_dschrg_stus_cd			;
-%let	pop_admtg_dgns_cd				= pop_06_admtg_dgns_cd					;
-%let	pop_icd_dgns_cd1				= pop_06_icd_dgns_cd1					;
-%let	pop_clm_drg_cd					= pop_06_clm_drg_cd						;
-%let	pop_hcpcs_cd					= pop_06_hcpcs_cd						;
-%let	pop_OP_PHYSN_SPCLTY_CD			= pop_06_OP_PHYSN_SPCLTY_CD				;
-%let	pop_nch_clm_type_cd				= pop_06_nch_clm_type_cd				;
-%let	pop_nch_clm_type_cd_label		= 'claim/facility type for pop 06' 		;
-%let	pop_CLM_IP_ADMSN_TYPE_CD_label	= 'inpatient admission type code for pop 06'	;
-%let  	pop_clm_fac_type_cd_label		= 'inpatient clm_fac_type_cd for pop 06';
-%let	pop_clm_src_ip_admsn_cd_label	= 'clm_src_ip_admsn_cd for pop 06'		;
-%let	pop_ptnt_dschrg_stus_cd_label	= 'discharge status code for pop 06'	;	
+%let	pop_year						= pop_09_year							;
+%let	pop_nch_clm_type_cd				= pop_09_nch_clm_type_cd				;
+%let  	pop_CLM_IP_ADMSN_TYPE_CD		= pop_09_CLM_IP_ADMSN_TYPE_CD			;
+%let	pop_clm_fac_type_cd				= pop_09_clm_fac_type_cd				;
+%let	pop_clm_src_ip_admsn_cd			= pop_09_clm_src_ip_admsn_cd			;
+%let	pop_ptnt_dschrg_stus_cd  		= pop_09_ptnt_dschrg_stus_cd			;
+%let	pop_admtg_dgns_cd				= pop_09_admtg_dgns_cd					;
+%let	pop_icd_dgns_cd1				= pop_09_icd_dgns_cd1					;
+%let	pop_clm_drg_cd					= pop_09_clm_drg_cd						;
+%let	pop_hcpcs_cd					= pop_09_hcpcs_cd						;
+%let	pop_OP_PHYSN_SPCLTY_CD			= pop_09_OP_PHYSN_SPCLTY_CD				;
+%let	pop_nch_clm_type_cd				= pop_09_nch_clm_type_cd				;
+%let	pop_nch_clm_type_cd_label		= 'claim/facility type for pop 09' 		;
+%let	pop_CLM_IP_ADMSN_TYPE_CD_label	= 'inpatient admission type code for pop 09'	;
+%let  	pop_clm_fac_type_cd_label		= 'inpatient clm_fac_type_cd for pop 09';
+%let	pop_clm_src_ip_admsn_cd_label	= 'clm_src_ip_admsn_cd for pop 09'		;
+%let	pop_ptnt_dschrg_stus_cd_label	= 'discharge status code for pop 09'	;	
 
 
 /*** end of indicator specific variables ***/
@@ -273,59 +270,59 @@ end;
 &pop_OP_PHYSN_SPCLTY_CD=&OP_PHYSN_SPCLTY_CD;
 array dx(25) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
 do j=1 to &diag_cd_max;
-	if dx(j) in(&includ_dx10) then trauma=1;	
+	if dx(j) in(&includ_pr10) then include=1;	
 end;
 if &flag_popped ne 1 then delete;
-IF trauma ne 1 then delete;
+IF include ne 1 then delete;
 if &pop_age<5 then delete;
 *if clm_drg_cd notin(&includ_drg) then delete;
 run; 
 %mend;
-%claims_rev(source=rif2016.inpatient_claims_01, rev_cohort=rif2016.inpatient_revenue_01, include_cohort=pop_06_IN_2016_1, ccn=ccn2016);
+%claims_rev(source=rif2016.inpatient_claims_01, rev_cohort=rif2016.inpatient_revenue_01, include_cohort=pop_09_IN_2016_1, ccn=ccn2016);
 *will see errors of duplicate variables at table 2--when included hcpcs and icd source at same time got cartesian join error;
-%claims_rev(source=rif2016.inpatient_claims_02, rev_cohort=rif2016.inpatient_revenue_02, include_cohort=pop_06_IN_2016_2, ccn=ccn2016);
-%claims_rev(source=rif2016.inpatient_claims_03, rev_cohort=rif2016.inpatient_revenue_03, include_cohort=pop_06_IN_2016_3, ccn=ccn2016);
-%claims_rev(source=rif2016.inpatient_claims_04, rev_cohort=rif2016.inpatient_revenue_04, include_cohort=pop_06_IN_2016_4, ccn=ccn2016);
-%claims_rev(source=rif2016.inpatient_claims_05, rev_cohort=rif2016.inpatient_revenue_05, include_cohort=pop_06_IN_2016_5, ccn=ccn2016);
-%claims_rev(source=rif2016.inpatient_claims_06, rev_cohort=rif2016.inpatient_revenue_06, include_cohort=pop_06_IN_2016_6, ccn=ccn2016);
-%claims_rev(source=rif2016.inpatient_claims_07, rev_cohort=rif2016.inpatient_revenue_07, include_cohort=pop_06_IN_2016_7, ccn=ccn2016);
-%claims_rev(source=rif2016.inpatient_claims_08, rev_cohort=rif2016.inpatient_revenue_08, include_cohort=pop_06_IN_2016_8, ccn=ccn2016);
-%claims_rev(source=rif2016.inpatient_claims_09, rev_cohort=rif2016.inpatient_revenue_09, include_cohort=pop_06_IN_2016_9, ccn=ccn2016);
-%claims_rev(source=rif2016.inpatient_claims_10, rev_cohort=rif2016.inpatient_revenue_10, include_cohort=pop_06_IN_2016_10, ccn=ccn2016);
-%claims_rev(source=rif2016.inpatient_claims_11, rev_cohort=rif2016.inpatient_revenue_11, include_cohort=pop_06_IN_2016_11, ccn=ccn2016);
-%claims_rev(source=rif2016.inpatient_claims_12, rev_cohort=rif2016.inpatient_revenue_12, include_cohort=pop_06_IN_2016_12, ccn=ccn2016);
-%claims_rev(source=rif2017.inpatient_claims_01, rev_cohort=rif2017.inpatient_revenue_01, include_cohort=pop_06_IN_2017_1, ccn=ccn2016);
-%claims_rev(source=rif2017.inpatient_claims_02, rev_cohort=rif2017.inpatient_revenue_02, include_cohort=pop_06_IN_2017_2, ccn=ccn2016);
-%claims_rev(source=rif2017.inpatient_claims_03, rev_cohort=rif2017.inpatient_revenue_03, include_cohort=pop_06_IN_2017_3, ccn=ccn2016);
-%claims_rev(source=rif2017.inpatient_claims_04, rev_cohort=rif2017.inpatient_revenue_04, include_cohort=pop_06_IN_2017_4, ccn=ccn2016);
-%claims_rev(source=rif2017.inpatient_claims_05, rev_cohort=rif2017.inpatient_revenue_05, include_cohort=pop_06_IN_2017_5, ccn=ccn2016);
-%claims_rev(source=rif2017.inpatient_claims_06, rev_cohort=rif2017.inpatient_revenue_06, include_cohort=pop_06_IN_2017_6, ccn=ccn2016);
+%claims_rev(source=rif2016.inpatient_claims_02, rev_cohort=rif2016.inpatient_revenue_02, include_cohort=pop_09_IN_2016_2, ccn=ccn2016);
+%claims_rev(source=rif2016.inpatient_claims_03, rev_cohort=rif2016.inpatient_revenue_03, include_cohort=pop_09_IN_2016_3, ccn=ccn2016);
+%claims_rev(source=rif2016.inpatient_claims_04, rev_cohort=rif2016.inpatient_revenue_04, include_cohort=pop_09_IN_2016_4, ccn=ccn2016);
+%claims_rev(source=rif2016.inpatient_claims_05, rev_cohort=rif2016.inpatient_revenue_05, include_cohort=pop_09_IN_2016_5, ccn=ccn2016);
+%claims_rev(source=rif2016.inpatient_claims_06, rev_cohort=rif2016.inpatient_revenue_06, include_cohort=pop_09_IN_2016_6, ccn=ccn2016);
+%claims_rev(source=rif2016.inpatient_claims_07, rev_cohort=rif2016.inpatient_revenue_07, include_cohort=pop_09_IN_2016_7, ccn=ccn2016);
+%claims_rev(source=rif2016.inpatient_claims_08, rev_cohort=rif2016.inpatient_revenue_08, include_cohort=pop_09_IN_2016_8, ccn=ccn2016);
+%claims_rev(source=rif2016.inpatient_claims_09, rev_cohort=rif2016.inpatient_revenue_09, include_cohort=pop_09_IN_2016_9, ccn=ccn2016);
+%claims_rev(source=rif2016.inpatient_claims_10, rev_cohort=rif2016.inpatient_revenue_10, include_cohort=pop_09_IN_2016_10, ccn=ccn2016);
+%claims_rev(source=rif2016.inpatient_claims_11, rev_cohort=rif2016.inpatient_revenue_11, include_cohort=pop_09_IN_2016_11, ccn=ccn2016);
+%claims_rev(source=rif2016.inpatient_claims_12, rev_cohort=rif2016.inpatient_revenue_12, include_cohort=pop_09_IN_2016_12, ccn=ccn2016);
+%claims_rev(source=rif2017.inpatient_claims_01, rev_cohort=rif2017.inpatient_revenue_01, include_cohort=pop_09_IN_2017_1, ccn=ccn2016);
+%claims_rev(source=rif2017.inpatient_claims_02, rev_cohort=rif2017.inpatient_revenue_02, include_cohort=pop_09_IN_2017_2, ccn=ccn2016);
+%claims_rev(source=rif2017.inpatient_claims_03, rev_cohort=rif2017.inpatient_revenue_03, include_cohort=pop_09_IN_2017_3, ccn=ccn2016);
+%claims_rev(source=rif2017.inpatient_claims_04, rev_cohort=rif2017.inpatient_revenue_04, include_cohort=pop_09_IN_2017_4, ccn=ccn2016);
+%claims_rev(source=rif2017.inpatient_claims_05, rev_cohort=rif2017.inpatient_revenue_05, include_cohort=pop_09_IN_2017_5, ccn=ccn2016);
+%claims_rev(source=rif2017.inpatient_claims_06, rev_cohort=rif2017.inpatient_revenue_06, include_cohort=pop_09_IN_2017_6, ccn=ccn2016);
 %claims_rev(source=rif2017.inpatient_claims_07, rev_cohort=rif2017.inpatient_revenue_07, include_cohort=pop_06_IN_2017_7, ccn=ccn2016);
 %claims_rev(source=rif2017.inpatient_claims_08, rev_cohort=rif2017.inpatient_revenue_08, include_cohort=pop_06_IN_2017_8, ccn=ccn2016);
-%claims_rev(source=rif2017.inpatient_claims_09, rev_cohort=rif2017.inpatient_revenue_09, include_cohort=pop_06_IN_2017_9, ccn=ccn2016);
-%claims_rev(source=rif2017.inpatient_claims_10, rev_cohort=rif2017.inpatient_revenue_10, include_cohort=pop_06_IN_2017_10, ccn=ccn2016);
-%claims_rev(source=rif2017.inpatient_claims_11, rev_cohort=rif2017.inpatient_revenue_11, include_cohort=pop_06_IN_2017_11, ccn=ccn2016);
-%claims_rev(source=rif2017.inpatient_claims_12, rev_cohort=rif2017.inpatient_revenue_12, include_cohort=pop_06_IN_2017_12, ccn=ccn2016);
-%claims_rev(source=rifq2018.inpatient_claims_01, rev_cohort=rifq2018.inpatient_revenue_01, include_cohort=pop_06_IN_2018_1, ccn=ccn2016);
-%claims_rev(source=rifq2018.inpatient_claims_02, rev_cohort=rifq2018.inpatient_revenue_02, include_cohort=pop_06_IN_2018_2, ccn=ccn2016);
-%claims_rev(source=rifq2018.inpatient_claims_03, rev_cohort=rifq2018.inpatient_revenue_03, include_cohort=pop_06_IN_2018_3, ccn=ccn2016);
-%claims_rev(source=rifq2018.inpatient_claims_04, rev_cohort=rifq2018.inpatient_revenue_04, include_cohort=pop_06_IN_2018_4, ccn=ccn2016);
-%claims_rev(source=rifq2018.inpatient_claims_05, rev_cohort=rifq2018.inpatient_revenue_05, include_cohort=pop_06_IN_2018_5, ccn=ccn2016);
-%claims_rev(source=rifq2018.inpatient_claims_06, rev_cohort=rifq2018.inpatient_revenue_06, include_cohort=pop_06_IN_2018_6, ccn=ccn2016);
-%claims_rev(source=rifq2018.inpatient_claims_07, rev_cohort=rifq2018.inpatient_revenue_07, include_cohort=pop_06_IN_2018_7, ccn=ccn2016);
-%claims_rev(source=rifq2018.inpatient_claims_08, rev_cohort=rifq2018.inpatient_revenue_08, include_cohort=pop_06_IN_2018_8, ccn=ccn2016);
-%claims_rev(source=rifq2018.inpatient_claims_09, rev_cohort=rifq2018.inpatient_revenue_09, include_cohort=pop_06_IN_2018_9, ccn=ccn2016);
-%claims_rev(source=rifq2018.inpatient_claims_10, rev_cohort=rifq2018.inpatient_revenue_10, include_cohort=pop_06_IN_2018_10, ccn=ccn2016);
-%claims_rev(source=rifq2018.inpatient_claims_11, rev_cohort=rifq2018.inpatient_revenue_11, include_cohort=pop_06_IN_2018_11, ccn=ccn2016);
-%claims_rev(source=rifq2018.inpatient_claims_12, rev_cohort=rifq2018.inpatient_revenue_12, include_cohort=pop_06_IN_2018_12, ccn=ccn2016);
+%claims_rev(source=rif2017.inpatient_claims_09, rev_cohort=rif2017.inpatient_revenue_09, include_cohort=pop_09_IN_2017_9, ccn=ccn2016);
+%claims_rev(source=rif2017.inpatient_claims_10, rev_cohort=rif2017.inpatient_revenue_10, include_cohort=pop_09_IN_2017_10, ccn=ccn2016);
+%claims_rev(source=rif2017.inpatient_claims_11, rev_cohort=rif2017.inpatient_revenue_11, include_cohort=pop_09_IN_2017_11, ccn=ccn2016);
+%claims_rev(source=rif2017.inpatient_claims_12, rev_cohort=rif2017.inpatient_revenue_12, include_cohort=pop_09_IN_2017_12, ccn=ccn2016);
+%claims_rev(source=rifq2018.inpatient_claims_01, rev_cohort=rifq2018.inpatient_revenue_01, include_cohort=pop_09_IN_2018_1, ccn=ccn2016);
+%claims_rev(source=rifq2018.inpatient_claims_02, rev_cohort=rifq2018.inpatient_revenue_02, include_cohort=pop_09_IN_2018_2, ccn=ccn2016);
+%claims_rev(source=rifq2018.inpatient_claims_03, rev_cohort=rifq2018.inpatient_revenue_03, include_cohort=pop_09_IN_2018_3, ccn=ccn2016);
+%claims_rev(source=rifq2018.inpatient_claims_04, rev_cohort=rifq2018.inpatient_revenue_04, include_cohort=pop_09_IN_2018_4, ccn=ccn2016);
+%claims_rev(source=rifq2018.inpatient_claims_05, rev_cohort=rifq2018.inpatient_revenue_05, include_cohort=pop_09_IN_2018_5, ccn=ccn2016);
+%claims_rev(source=rifq2018.inpatient_claims_06, rev_cohort=rifq2018.inpatient_revenue_06, include_cohort=pop_09_IN_2018_6, ccn=ccn2016);
+%claims_rev(source=rifq2018.inpatient_claims_07, rev_cohort=rifq2018.inpatient_revenue_07, include_cohort=pop_09_IN_2018_7, ccn=ccn2016);
+%claims_rev(source=rifq2018.inpatient_claims_08, rev_cohort=rifq2018.inpatient_revenue_08, include_cohort=pop_09_IN_2018_8, ccn=ccn2016);
+%claims_rev(source=rifq2018.inpatient_claims_09, rev_cohort=rifq2018.inpatient_revenue_09, include_cohort=pop_09_IN_2018_9, ccn=ccn2016);
+%claims_rev(source=rifq2018.inpatient_claims_10, rev_cohort=rifq2018.inpatient_revenue_10, include_cohort=pop_09_IN_2018_10, ccn=ccn2016);
+%claims_rev(source=rifq2018.inpatient_claims_11, rev_cohort=rifq2018.inpatient_revenue_11, include_cohort=pop_09_IN_2018_11, ccn=ccn2016);
+%claims_rev(source=rifq2018.inpatient_claims_12, rev_cohort=rifq2018.inpatient_revenue_12, include_cohort=pop_09_IN_2018_12, ccn=ccn2016);
 
-data pop_06_IN;
-set pop_06_IN_2016_1 pop_06_IN_2016_2 pop_06_IN_2016_3 pop_06_IN_2016_4 pop_06_IN_2016_5 pop_06_IN_2016_6
-	pop_06_IN_2016_7 pop_06_IN_2016_8 pop_06_IN_2016_9 pop_06_IN_2016_10 pop_06_IN_2016_11 pop_06_IN_2016_12
-	pop_06_IN_2017_1 pop_06_IN_2017_2 pop_06_IN_2017_3 pop_06_IN_2017_4 pop_06_IN_2017_5 pop_06_IN_2017_6
-	pop_06_IN_2017_7 pop_06_IN_2017_8 pop_06_IN_2017_9 pop_06_IN_2017_10 pop_06_IN_2017_11 pop_06_IN_2017_12
-	pop_06_IN_2018_1 pop_06_IN_2018_2 pop_06_IN_2018_3 pop_06_IN_2018_4 pop_06_IN_2018_5 pop_06_IN_2018_6
-	pop_06_IN_2018_7 pop_06_IN_2018_8 pop_06_IN_2018_9 pop_06_IN_2018_10 pop_06_IN_2018_11 pop_06_IN_2018_12
+data pop_09_IN;
+set pop_09_IN_2016_1 pop_09_IN_2016_2 pop_09_IN_2016_3 pop_09_IN_2016_4 pop_09_IN_2016_5 pop_09_IN_2016_6
+	pop_09_IN_2016_7 pop_09_IN_2016_8 pop_09_IN_2016_9 pop_09_IN_2016_10 pop_09_IN_2016_11 pop_09_IN_2016_12
+	pop_09_IN_2017_1 pop_09_IN_2017_2 pop_09_IN_2017_3 pop_09_IN_2017_4 pop_09_IN_2017_5 pop_09_IN_2017_6
+	pop_09_IN_2017_7 pop_09_IN_2017_8 pop_09_IN_2017_9 pop_09_IN_2017_10 pop_09_IN_2017_11 pop_09_IN_2017_12
+	pop_09_IN_2018_1 pop_09_IN_2018_2 pop_09_IN_2018_3 pop_09_IN_2018_4 pop_09_IN_2018_5 pop_09_IN_2018_6
+	pop_09_IN_2018_7 pop_09_IN_2018_8 pop_09_IN_2018_9 pop_09_IN_2018_10 pop_09_IN_2018_11 pop_09_IN_2018_12
 ;
 if &pop_year<2016 then delete;
 if &pop_year>2018 then delete;
@@ -333,7 +330,7 @@ format bene_state_cd prvdr_state_cd $state. &pop_OP_PHYSN_SPCLTY_CD $speccd. &po
 		&pop_ptnt_dschrg_stus_cd $stuscd.;
 run;
 /* get rid of duplicate rows--keep first occurence so sort by date first */
-proc sort data=pop_06_IN; by &bene_id &flag_popped_dt; run;
+proc sort data=pop_09_IN; by &bene_id &flag_popped_dt; run;
 
 /*** this section is related to OP - OUTpatient claims ***/
 %macro claims_rev(source=, rev_cohort=, include_cohort=, ccn=);
@@ -419,57 +416,57 @@ end;
 &pop_OP_PHYSN_SPCLTY_CD=&OP_PHYSN_SPCLTY_CD; format &pop_OP_PHYSN_SPCLTY_CD speccd.;
 array dx(25) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
 do j=1 to &diag_cd_max;
-	if dx(j) in(&includ_dx10) then trauma=1;	
+	if dx(j) in(&includ_pr10) then include=1;	
 end;
 if &flag_popped ne 1 then delete;
-IF trauma ne 1 then delete;
+IF include ne 1 then delete;
 if &pop_age<5 then delete;
 run; 
 %mend;
-%claims_rev(source=rif2016.OUTpatient_claims_01, rev_cohort=rif2016.OUTpatient_revenue_01, include_cohort=pop_06_out_2016_1, ccn=ccn2016);
-%claims_rev(source=rif2016.OUTpatient_claims_02, rev_cohort=rif2016.OUTpatient_revenue_02, include_cohort=pop_06_out_2016_2, ccn=ccn2016);
-%claims_rev(source=rif2016.OUTpatient_claims_03, rev_cohort=rif2016.OUTpatient_revenue_03, include_cohort=pop_06_out_2016_3, ccn=ccn2016);
-%claims_rev(source=rif2016.OUTpatient_claims_04, rev_cohort=rif2016.OUTpatient_revenue_04, include_cohort=pop_06_out_2016_4, ccn=ccn2016);
-%claims_rev(source=rif2016.OUTpatient_claims_05, rev_cohort=rif2016.OUTpatient_revenue_05, include_cohort=pop_06_out_2016_5, ccn=ccn2016);
-%claims_rev(source=rif2016.OUTpatient_claims_06, rev_cohort=rif2016.OUTpatient_revenue_06, include_cohort=pop_06_out_2016_6, ccn=ccn2016);
-%claims_rev(source=rif2016.OUTpatient_claims_07, rev_cohort=rif2016.OUTpatient_revenue_07, include_cohort=pop_06_out_2016_7, ccn=ccn2016);
-%claims_rev(source=rif2016.OUTpatient_claims_08, rev_cohort=rif2016.OUTpatient_revenue_08, include_cohort=pop_06_out_2016_8, ccn=ccn2016);
-%claims_rev(source=rif2016.OUTpatient_claims_09, rev_cohort=rif2016.OUTpatient_revenue_09, include_cohort=pop_06_out_2016_9, ccn=ccn2016);
-%claims_rev(source=rif2016.OUTpatient_claims_10, rev_cohort=rif2016.OUTpatient_revenue_10, include_cohort=pop_06_out_2016_10, ccn=ccn2016);
-%claims_rev(source=rif2016.OUTpatient_claims_11, rev_cohort=rif2016.OUTpatient_revenue_11, include_cohort=pop_06_out_2016_11, ccn=ccn2016);
-%claims_rev(source=rif2016.OUTpatient_claims_12, rev_cohort=rif2016.OUTpatient_revenue_12, include_cohort=pop_06_out_2016_12, ccn=ccn2016);
-%claims_rev(source=rif2017.OUTpatient_claims_01, rev_cohort=rif2017.OUTpatient_revenue_01, include_cohort=pop_06_out_2017_1, ccn=ccn2016);
-%claims_rev(source=rif2017.OUTpatient_claims_02, rev_cohort=rif2017.OUTpatient_revenue_02, include_cohort=pop_06_out_2017_2, ccn=ccn2016);
-%claims_rev(source=rif2017.OUTpatient_claims_03, rev_cohort=rif2017.OUTpatient_revenue_03, include_cohort=pop_06_out_2017_3, ccn=ccn2016);
-%claims_rev(source=rif2017.OUTpatient_claims_04, rev_cohort=rif2017.OUTpatient_revenue_04, include_cohort=pop_06_out_2017_4, ccn=ccn2016);
-%claims_rev(source=rif2017.OUTpatient_claims_05, rev_cohort=rif2017.OUTpatient_revenue_05, include_cohort=pop_06_out_2017_5, ccn=ccn2016);
-%claims_rev(source=rif2017.OUTpatient_claims_06, rev_cohort=rif2017.OUTpatient_revenue_06, include_cohort=pop_06_out_2017_6, ccn=ccn2016);
-%claims_rev(source=rif2017.OUTpatient_claims_07, rev_cohort=rif2017.OUTpatient_revenue_07, include_cohort=pop_06_out_2017_7, ccn=ccn2016);
-%claims_rev(source=rif2017.OUTpatient_claims_08, rev_cohort=rif2017.OUTpatient_revenue_08, include_cohort=pop_06_out_2017_8, ccn=ccn2016);
-%claims_rev(source=rif2017.OUTpatient_claims_09, rev_cohort=rif2017.OUTpatient_revenue_09, include_cohort=pop_06_out_2017_9, ccn=ccn2016);
-%claims_rev(source=rif2017.OUTpatient_claims_10, rev_cohort=rif2017.OUTpatient_revenue_10, include_cohort=pop_06_out_2017_10, ccn=ccn2016);
-%claims_rev(source=rif2017.OUTpatient_claims_11, rev_cohort=rif2017.OUTpatient_revenue_11, include_cohort=pop_06_out_2017_11, ccn=ccn2016);
-%claims_rev(source=rif2017.OUTpatient_claims_12, rev_cohort=rif2017.OUTpatient_revenue_12, include_cohort=pop_06_out_2017_12, ccn=ccn2016);
-%claims_rev(source=rifq2018.OUTpatient_claims_01, rev_cohort=rifq2018.OUTpatient_revenue_01, include_cohort=pop_06_out_2018_1, ccn=ccn2016);
-%claims_rev(source=rifq2018.OUTpatient_claims_02, rev_cohort=rifq2018.OUTpatient_revenue_02, include_cohort=pop_06_out_2018_2, ccn=ccn2016);
-%claims_rev(source=rifq2018.OUTpatient_claims_03, rev_cohort=rifq2018.OUTpatient_revenue_03, include_cohort=pop_06_out_2018_3, ccn=ccn2016);
-%claims_rev(source=rifq2018.OUTpatient_claims_04, rev_cohort=rifq2018.OUTpatient_revenue_04, include_cohort=pop_06_out_2018_4, ccn=ccn2016);
-%claims_rev(source=rifq2018.OUTpatient_claims_05, rev_cohort=rifq2018.OUTpatient_revenue_05, include_cohort=pop_06_out_2018_5, ccn=ccn2016);
-%claims_rev(source=rifq2018.OUTpatient_claims_06, rev_cohort=rifq2018.OUTpatient_revenue_06, include_cohort=pop_06_out_2018_6, ccn=ccn2016);
-%claims_rev(source=rifq2018.OUTpatient_claims_07, rev_cohort=rifq2018.OUTpatient_revenue_07, include_cohort=pop_06_out_2018_7, ccn=ccn2016);
-%claims_rev(source=rifq2018.OUTpatient_claims_08, rev_cohort=rifq2018.OUTpatient_revenue_08, include_cohort=pop_06_out_2018_8, ccn=ccn2016);
-%claims_rev(source=rifq2018.OUTpatient_claims_09, rev_cohort=rifq2018.OUTpatient_revenue_09, include_cohort=pop_06_out_2018_9, ccn=ccn2016);
-%claims_rev(source=rifq2018.OUTpatient_claims_10, rev_cohort=rifq2018.OUTpatient_revenue_10, include_cohort=pop_06_out_2018_10, ccn=ccn2016);
-%claims_rev(source=rifq2018.OUTpatient_claims_11, rev_cohort=rifq2018.OUTpatient_revenue_11, include_cohort=pop_06_out_2018_11, ccn=ccn2016);
-%claims_rev(source=rifq2018.OUTpatient_claims_12, rev_cohort=rifq2018.OUTpatient_revenue_12, include_cohort=pop_06_out_2018_12, ccn=ccn2016);
+%claims_rev(source=rif2016.OUTpatient_claims_01, rev_cohort=rif2016.OUTpatient_revenue_01, include_cohort=pop_09_out_2016_1, ccn=ccn2016);
+%claims_rev(source=rif2016.OUTpatient_claims_02, rev_cohort=rif2016.OUTpatient_revenue_02, include_cohort=pop_09_out_2016_2, ccn=ccn2016);
+%claims_rev(source=rif2016.OUTpatient_claims_03, rev_cohort=rif2016.OUTpatient_revenue_03, include_cohort=pop_09_out_2016_3, ccn=ccn2016);
+%claims_rev(source=rif2016.OUTpatient_claims_04, rev_cohort=rif2016.OUTpatient_revenue_04, include_cohort=pop_09_out_2016_4, ccn=ccn2016);
+%claims_rev(source=rif2016.OUTpatient_claims_05, rev_cohort=rif2016.OUTpatient_revenue_05, include_cohort=pop_09_out_2016_5, ccn=ccn2016);
+%claims_rev(source=rif2016.OUTpatient_claims_06, rev_cohort=rif2016.OUTpatient_revenue_06, include_cohort=pop_09_out_2016_6, ccn=ccn2016);
+%claims_rev(source=rif2016.OUTpatient_claims_07, rev_cohort=rif2016.OUTpatient_revenue_07, include_cohort=pop_09_out_2016_7, ccn=ccn2016);
+%claims_rev(source=rif2016.OUTpatient_claims_08, rev_cohort=rif2016.OUTpatient_revenue_08, include_cohort=pop_09_out_2016_8, ccn=ccn2016);
+%claims_rev(source=rif2016.OUTpatient_claims_09, rev_cohort=rif2016.OUTpatient_revenue_09, include_cohort=pop_09_out_2016_9, ccn=ccn2016);
+%claims_rev(source=rif2016.OUTpatient_claims_10, rev_cohort=rif2016.OUTpatient_revenue_10, include_cohort=pop_09_out_2016_10, ccn=ccn2016);
+%claims_rev(source=rif2016.OUTpatient_claims_11, rev_cohort=rif2016.OUTpatient_revenue_11, include_cohort=pop_09_out_2016_11, ccn=ccn2016);
+%claims_rev(source=rif2016.OUTpatient_claims_12, rev_cohort=rif2016.OUTpatient_revenue_12, include_cohort=pop_09_out_2016_12, ccn=ccn2016);
+%claims_rev(source=rif2017.OUTpatient_claims_01, rev_cohort=rif2017.OUTpatient_revenue_01, include_cohort=pop_09_out_2017_1, ccn=ccn2016);
+%claims_rev(source=rif2017.OUTpatient_claims_02, rev_cohort=rif2017.OUTpatient_revenue_02, include_cohort=pop_09_out_2017_2, ccn=ccn2016);
+%claims_rev(source=rif2017.OUTpatient_claims_03, rev_cohort=rif2017.OUTpatient_revenue_03, include_cohort=pop_09_out_2017_3, ccn=ccn2016);
+%claims_rev(source=rif2017.OUTpatient_claims_04, rev_cohort=rif2017.OUTpatient_revenue_04, include_cohort=pop_09_out_2017_4, ccn=ccn2016);
+%claims_rev(source=rif2017.OUTpatient_claims_05, rev_cohort=rif2017.OUTpatient_revenue_05, include_cohort=pop_09_out_2017_5, ccn=ccn2016);
+%claims_rev(source=rif2017.OUTpatient_claims_06, rev_cohort=rif2017.OUTpatient_revenue_06, include_cohort=pop_09_out_2017_6, ccn=ccn2016);
+%claims_rev(source=rif2017.OUTpatient_claims_07, rev_cohort=rif2017.OUTpatient_revenue_07, include_cohort=pop_09_out_2017_7, ccn=ccn2016);
+%claims_rev(source=rif2017.OUTpatient_claims_08, rev_cohort=rif2017.OUTpatient_revenue_08, include_cohort=pop_09_out_2017_8, ccn=ccn2016);
+%claims_rev(source=rif2017.OUTpatient_claims_09, rev_cohort=rif2017.OUTpatient_revenue_09, include_cohort=pop_09_out_2017_9, ccn=ccn2016);
+%claims_rev(source=rif2017.OUTpatient_claims_10, rev_cohort=rif2017.OUTpatient_revenue_10, include_cohort=pop_09_out_2017_10, ccn=ccn2016);
+%claims_rev(source=rif2017.OUTpatient_claims_11, rev_cohort=rif2017.OUTpatient_revenue_11, include_cohort=pop_09_out_2017_11, ccn=ccn2016);
+%claims_rev(source=rif2017.OUTpatient_claims_12, rev_cohort=rif2017.OUTpatient_revenue_12, include_cohort=pop_09_out_2017_12, ccn=ccn2016);
+%claims_rev(source=rifq2018.OUTpatient_claims_01, rev_cohort=rifq2018.OUTpatient_revenue_01, include_cohort=pop_09_out_2018_1, ccn=ccn2016);
+%claims_rev(source=rifq2018.OUTpatient_claims_02, rev_cohort=rifq2018.OUTpatient_revenue_02, include_cohort=pop_09_out_2018_2, ccn=ccn2016);
+%claims_rev(source=rifq2018.OUTpatient_claims_03, rev_cohort=rifq2018.OUTpatient_revenue_03, include_cohort=pop_09_out_2018_3, ccn=ccn2016);
+%claims_rev(source=rifq2018.OUTpatient_claims_04, rev_cohort=rifq2018.OUTpatient_revenue_04, include_cohort=pop_09_out_2018_4, ccn=ccn2016);
+%claims_rev(source=rifq2018.OUTpatient_claims_05, rev_cohort=rifq2018.OUTpatient_revenue_05, include_cohort=pop_09_out_2018_5, ccn=ccn2016);
+%claims_rev(source=rifq2018.OUTpatient_claims_06, rev_cohort=rifq2018.OUTpatient_revenue_06, include_cohort=pop_09_out_2018_6, ccn=ccn2016);
+%claims_rev(source=rifq2018.OUTpatient_claims_07, rev_cohort=rifq2018.OUTpatient_revenue_07, include_cohort=pop_09_out_2018_7, ccn=ccn2016);
+%claims_rev(source=rifq2018.OUTpatient_claims_08, rev_cohort=rifq2018.OUTpatient_revenue_08, include_cohort=pop_09_out_2018_8, ccn=ccn2016);
+%claims_rev(source=rifq2018.OUTpatient_claims_09, rev_cohort=rifq2018.OUTpatient_revenue_09, include_cohort=pop_09_out_2018_9, ccn=ccn2016);
+%claims_rev(source=rifq2018.OUTpatient_claims_10, rev_cohort=rifq2018.OUTpatient_revenue_10, include_cohort=pop_09_out_2018_10, ccn=ccn2016);
+%claims_rev(source=rifq2018.OUTpatient_claims_11, rev_cohort=rifq2018.OUTpatient_revenue_11, include_cohort=pop_09_out_2018_11, ccn=ccn2016);
+%claims_rev(source=rifq2018.OUTpatient_claims_12, rev_cohort=rifq2018.OUTpatient_revenue_12, include_cohort=pop_09_out_2018_12, ccn=ccn2016);
 
-data pop_06_out;
-set pop_06_out_2016_1 pop_06_out_2016_2 pop_06_out_2016_3 pop_06_out_2016_4 pop_06_out_2016_5 pop_06_out_2016_6
-	pop_06_out_2016_7 pop_06_out_2016_8 pop_06_out_2016_9 pop_06_out_2016_10 pop_06_out_2016_11 pop_06_out_2016_12
-	pop_06_out_2017_1 pop_06_out_2017_2 pop_06_out_2017_3 pop_06_out_2017_4 pop_06_out_2017_5 pop_06_out_2017_6
-	pop_06_out_2017_7 pop_06_out_2017_8 pop_06_out_2017_9 pop_06_out_2017_10 pop_06_out_2017_11 pop_06_out_2017_12
-	pop_06_out_2018_1 pop_06_out_2018_2 pop_06_out_2018_3 pop_06_out_2018_4 pop_06_out_2018_5 pop_06_out_2018_6
-	pop_06_out_2018_7 pop_06_out_2018_8 pop_06_out_2018_9 pop_06_out_2018_10 pop_06_out_2018_11 pop_06_out_2018_12
+data pop_09_out;
+set pop_09_out_2016_1 pop_09_out_2016_2 pop_09_out_2016_3 pop_09_out_2016_4 pop_09_out_2016_5 pop_09_out_2016_6
+	pop_09_out_2016_7 pop_09_out_2016_8 pop_09_out_2016_9 pop_09_out_2016_10 pop_09_out_2016_11 pop_09_out_2016_12
+	pop_09_out_2017_1 pop_09_out_2017_2 pop_09_out_2017_3 pop_09_out_2017_4 pop_09_out_2017_5 pop_09_out_2017_6
+	pop_09_out_2017_7 pop_09_out_2017_8 pop_09_out_2017_9 pop_09_out_2017_10 pop_09_out_2017_11 pop_09_out_2017_12
+	pop_09_out_2018_1 pop_09_out_2018_2 pop_09_out_2018_3 pop_09_out_2018_4 pop_09_out_2018_5 pop_09_out_2018_6
+	pop_09_out_2018_7 pop_09_out_2018_8 pop_09_out_2018_9 pop_09_out_2018_10 pop_09_out_2018_11 pop_09_out_2018_12
 ;
 if &pop_year<2016 then delete;
 if &pop_year>2018 then delete;
@@ -478,7 +475,7 @@ run;
 *get rid of duplicate rows by bene & DATE---don't sort by bene_id only yet (as we want 1 per person for final analysis)
 	so we can see all of the possible DX, CPT, PR codes possibly associated
 	with the measure during data checks;
-proc sort data=pop_06_OUT nodupkey; by bene_id &flag_popped_dt; run;
+proc sort data=pop_09_OUT nodupkey; by bene_id &flag_popped_dt; run;
 
 
 
@@ -530,64 +527,64 @@ set include_cohort2;
 &pop_OP_PHYSN_SPCLTY_CD=&OP_PHYSN_SPCLTY_CD; format &pop_OP_PHYSN_SPCLTY_CD speccd.;
 array dx(25) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
 do j=1 to &diag_cd_max;
-	if dx(j) in(&includ_dx10) then trauma=1;	
+	if dx(j) in(&includ_pr10) then include=1;	
 end;
 if &flag_popped ne 1 then delete;
-IF trauma ne 1 then delete;
+IF include ne 1 then delete;
 if &pop_age<5 then delete;
 run; 
 %mend;
-%claims_rev(source=rif2016.bcarrier_claims_01, rev_cohort=rif2016.bcarrier_line_01, include_cohort=pop_06_CAR_2016_1, ccn=ccn2016);
-%claims_rev(source=rif2016.bcarrier_claims_02, rev_cohort=rif2016.bcarrier_line_02, include_cohort=pop_06_CAR_2016_2, ccn=ccn2016);
-%claims_rev(source=rif2016.bcarrier_claims_03, rev_cohort=rif2016.bcarrier_line_03, include_cohort=pop_06_CAR_2016_3, ccn=ccn2016);
-%claims_rev(source=rif2016.bcarrier_claims_04, rev_cohort=rif2016.bcarrier_line_04, include_cohort=pop_06_CAR_2016_4, ccn=ccn2016);
-%claims_rev(source=rif2016.bcarrier_claims_05, rev_cohort=rif2016.bcarrier_line_05, include_cohort=pop_06_CAR_2016_5, ccn=ccn2016);
-%claims_rev(source=rif2016.bcarrier_claims_06, rev_cohort=rif2016.bcarrier_line_06, include_cohort=pop_06_CAR_2016_6, ccn=ccn2016);
-%claims_rev(source=rif2016.bcarrier_claims_07, rev_cohort=rif2016.bcarrier_line_07, include_cohort=pop_06_CAR_2016_7, ccn=ccn2016);
-%claims_rev(source=rif2016.bcarrier_claims_08, rev_cohort=rif2016.bcarrier_line_08, include_cohort=pop_06_CAR_2016_8, ccn=ccn2016);
-%claims_rev(source=rif2016.bcarrier_claims_09, rev_cohort=rif2016.bcarrier_line_09, include_cohort=pop_06_CAR_2016_9, ccn=ccn2016);
-%claims_rev(source=rif2016.bcarrier_claims_10, rev_cohort=rif2016.bcarrier_line_10, include_cohort=pop_06_CAR_2016_10, ccn=ccn2016);
-%claims_rev(source=rif2016.bcarrier_claims_11, rev_cohort=rif2016.bcarrier_line_11, include_cohort=pop_06_CAR_2016_11, ccn=ccn2016);
-%claims_rev(source=rif2016.bcarrier_claims_12, rev_cohort=rif2016.bcarrier_line_12, include_cohort=pop_06_CAR_2016_12, ccn=ccn2016);
-%claims_rev(source=rif2017.bcarrier_claims_01, rev_cohort=rif2017.bcarrier_line_01, include_cohort=pop_06_CAR_2017_1, ccn=ccn2016);
-%claims_rev(source=rif2017.bcarrier_claims_02, rev_cohort=rif2017.bcarrier_line_02, include_cohort=pop_06_CAR_2017_2, ccn=ccn2016);
-%claims_rev(source=rif2017.bcarrier_claims_03, rev_cohort=rif2017.bcarrier_line_03, include_cohort=pop_06_CAR_2017_3, ccn=ccn2016);
-%claims_rev(source=rif2017.bcarrier_claims_04, rev_cohort=rif2017.bcarrier_line_04, include_cohort=pop_06_CAR_2017_4, ccn=ccn2016);
-%claims_rev(source=rif2017.bcarrier_claims_05, rev_cohort=rif2017.bcarrier_line_05, include_cohort=pop_06_CAR_2017_5, ccn=ccn2016);
-%claims_rev(source=rif2017.bcarrier_claims_06, rev_cohort=rif2017.bcarrier_line_06, include_cohort=pop_06_CAR_2017_6, ccn=ccn2016);
-%claims_rev(source=rif2017.bcarrier_claims_07, rev_cohort=rif2017.bcarrier_line_07, include_cohort=pop_06_CAR_2017_7, ccn=ccn2016);
-%claims_rev(source=rif2017.bcarrier_claims_08, rev_cohort=rif2017.bcarrier_line_08, include_cohort=pop_06_CAR_2017_8, ccn=ccn2016);
-%claims_rev(source=rif2017.bcarrier_claims_09, rev_cohort=rif2017.bcarrier_line_09, include_cohort=pop_06_CAR_2017_9, ccn=ccn2016);
-%claims_rev(source=rif2017.bcarrier_claims_10, rev_cohort=rif2017.bcarrier_line_10, include_cohort=pop_06_CAR_2017_10, ccn=ccn2016);
-%claims_rev(source=rif2017.bcarrier_claims_11, rev_cohort=rif2017.bcarrier_line_11, include_cohort=pop_06_CAR_2017_11, ccn=ccn2016);
-%claims_rev(source=rif2017.bcarrier_claims_12, rev_cohort=rif2017.bcarrier_line_12, include_cohort=pop_06_CAR_2017_12, ccn=ccn2016);
-%claims_rev(source=rifq2018.bcarrier_claims_01, rev_cohort=rifq2018.bcarrier_line_01, include_cohort=pop_06_CAR_2018_1, ccn=ccn2016);
-%claims_rev(source=rifq2018.bcarrier_claims_02, rev_cohort=rifq2018.bcarrier_line_02, include_cohort=pop_06_CAR_2018_2, ccn=ccn2016);
-%claims_rev(source=rifq2018.bcarrier_claims_03, rev_cohort=rifq2018.bcarrier_line_03, include_cohort=pop_06_CAR_2018_3, ccn=ccn2016);
-%claims_rev(source=rifq2018.bcarrier_claims_04, rev_cohort=rifq2018.bcarrier_line_04, include_cohort=pop_06_CAR_2018_4, ccn=ccn2016);
-%claims_rev(source=rifq2018.bcarrier_claims_05, rev_cohort=rifq2018.bcarrier_line_05, include_cohort=pop_06_CAR_2018_5, ccn=ccn2016);
-%claims_rev(source=rifq2018.bcarrier_claims_06, rev_cohort=rifq2018.bcarrier_line_06, include_cohort=pop_06_CAR_2018_6, ccn=ccn2016);
-%claims_rev(source=rifq2018.bcarrier_claims_07, rev_cohort=rifq2018.bcarrier_line_07, include_cohort=pop_06_CAR_2018_7, ccn=ccn2016);
-%claims_rev(source=rifq2018.bcarrier_claims_08, rev_cohort=rifq2018.bcarrier_line_08, include_cohort=pop_06_CAR_2018_8, ccn=ccn2016);
-%claims_rev(source=rifq2018.bcarrier_claims_09, rev_cohort=rifq2018.bcarrier_line_09, include_cohort=pop_06_CAR_2018_9, ccn=ccn2016);
-%claims_rev(source=rifq2018.bcarrier_claims_10, rev_cohort=rifq2018.bcarrier_line_10, include_cohort=pop_06_CAR_2018_10, ccn=ccn2016);
-%claims_rev(source=rifq2018.bcarrier_claims_11, rev_cohort=rifq2018.bcarrier_line_11, include_cohort=pop_06_CAR_2018_11, ccn=ccn2016);
-%claims_rev(source=rifq2018.bcarrier_claims_12, rev_cohort=rifq2018.bcarrier_line_12, include_cohort=pop_06_CAR_2018_12, ccn=ccn2016);
+%claims_rev(source=rif2016.bcarrier_claims_01, rev_cohort=rif2016.bcarrier_line_01, include_cohort=pop_09_CAR_2016_1, ccn=ccn2016);
+%claims_rev(source=rif2016.bcarrier_claims_02, rev_cohort=rif2016.bcarrier_line_02, include_cohort=pop_09_CAR_2016_2, ccn=ccn2016);
+%claims_rev(source=rif2016.bcarrier_claims_03, rev_cohort=rif2016.bcarrier_line_03, include_cohort=pop_09_CAR_2016_3, ccn=ccn2016);
+%claims_rev(source=rif2016.bcarrier_claims_04, rev_cohort=rif2016.bcarrier_line_04, include_cohort=pop_09_CAR_2016_4, ccn=ccn2016);
+%claims_rev(source=rif2016.bcarrier_claims_05, rev_cohort=rif2016.bcarrier_line_05, include_cohort=pop_09_CAR_2016_5, ccn=ccn2016);
+%claims_rev(source=rif2016.bcarrier_claims_06, rev_cohort=rif2016.bcarrier_line_06, include_cohort=pop_09_CAR_2016_6, ccn=ccn2016);
+%claims_rev(source=rif2016.bcarrier_claims_07, rev_cohort=rif2016.bcarrier_line_07, include_cohort=pop_09_CAR_2016_7, ccn=ccn2016);
+%claims_rev(source=rif2016.bcarrier_claims_08, rev_cohort=rif2016.bcarrier_line_08, include_cohort=pop_09_CAR_2016_8, ccn=ccn2016);
+%claims_rev(source=rif2016.bcarrier_claims_09, rev_cohort=rif2016.bcarrier_line_09, include_cohort=pop_09_CAR_2016_9, ccn=ccn2016);
+%claims_rev(source=rif2016.bcarrier_claims_10, rev_cohort=rif2016.bcarrier_line_10, include_cohort=pop_09_CAR_2016_10, ccn=ccn2016);
+%claims_rev(source=rif2016.bcarrier_claims_11, rev_cohort=rif2016.bcarrier_line_11, include_cohort=pop_09_CAR_2016_11, ccn=ccn2016);
+%claims_rev(source=rif2016.bcarrier_claims_12, rev_cohort=rif2016.bcarrier_line_12, include_cohort=pop_09_CAR_2016_12, ccn=ccn2016);
+%claims_rev(source=rif2017.bcarrier_claims_01, rev_cohort=rif2017.bcarrier_line_01, include_cohort=pop_09_CAR_2017_1, ccn=ccn2016);
+%claims_rev(source=rif2017.bcarrier_claims_02, rev_cohort=rif2017.bcarrier_line_02, include_cohort=pop_09_CAR_2017_2, ccn=ccn2016);
+%claims_rev(source=rif2017.bcarrier_claims_03, rev_cohort=rif2017.bcarrier_line_03, include_cohort=pop_09_CAR_2017_3, ccn=ccn2016);
+%claims_rev(source=rif2017.bcarrier_claims_04, rev_cohort=rif2017.bcarrier_line_04, include_cohort=pop_09_CAR_2017_4, ccn=ccn2016);
+%claims_rev(source=rif2017.bcarrier_claims_05, rev_cohort=rif2017.bcarrier_line_05, include_cohort=pop_09_CAR_2017_5, ccn=ccn2016);
+%claims_rev(source=rif2017.bcarrier_claims_06, rev_cohort=rif2017.bcarrier_line_06, include_cohort=pop_09_CAR_2017_6, ccn=ccn2016);
+%claims_rev(source=rif2017.bcarrier_claims_07, rev_cohort=rif2017.bcarrier_line_07, include_cohort=pop_09_CAR_2017_7, ccn=ccn2016);
+%claims_rev(source=rif2017.bcarrier_claims_08, rev_cohort=rif2017.bcarrier_line_08, include_cohort=pop_09_CAR_2017_8, ccn=ccn2016);
+%claims_rev(source=rif2017.bcarrier_claims_09, rev_cohort=rif2017.bcarrier_line_09, include_cohort=pop_09_CAR_2017_9, ccn=ccn2016);
+%claims_rev(source=rif2017.bcarrier_claims_10, rev_cohort=rif2017.bcarrier_line_10, include_cohort=pop_09_CAR_2017_10, ccn=ccn2016);
+%claims_rev(source=rif2017.bcarrier_claims_11, rev_cohort=rif2017.bcarrier_line_11, include_cohort=pop_09_CAR_2017_11, ccn=ccn2016);
+%claims_rev(source=rif2017.bcarrier_claims_12, rev_cohort=rif2017.bcarrier_line_12, include_cohort=pop_09_CAR_2017_12, ccn=ccn2016);
+%claims_rev(source=rifq2018.bcarrier_claims_01, rev_cohort=rifq2018.bcarrier_line_01, include_cohort=pop_09_CAR_2018_1, ccn=ccn2016);
+%claims_rev(source=rifq2018.bcarrier_claims_02, rev_cohort=rifq2018.bcarrier_line_02, include_cohort=pop_09_CAR_2018_2, ccn=ccn2016);
+%claims_rev(source=rifq2018.bcarrier_claims_03, rev_cohort=rifq2018.bcarrier_line_03, include_cohort=pop_09_CAR_2018_3, ccn=ccn2016);
+%claims_rev(source=rifq2018.bcarrier_claims_04, rev_cohort=rifq2018.bcarrier_line_04, include_cohort=pop_09_CAR_2018_4, ccn=ccn2016);
+%claims_rev(source=rifq2018.bcarrier_claims_05, rev_cohort=rifq2018.bcarrier_line_05, include_cohort=pop_09_CAR_2018_5, ccn=ccn2016);
+%claims_rev(source=rifq2018.bcarrier_claims_06, rev_cohort=rifq2018.bcarrier_line_06, include_cohort=pop_09_CAR_2018_6, ccn=ccn2016);
+%claims_rev(source=rifq2018.bcarrier_claims_07, rev_cohort=rifq2018.bcarrier_line_07, include_cohort=pop_09_CAR_2018_7, ccn=ccn2016);
+%claims_rev(source=rifq2018.bcarrier_claims_08, rev_cohort=rifq2018.bcarrier_line_08, include_cohort=pop_09_CAR_2018_8, ccn=ccn2016);
+%claims_rev(source=rifq2018.bcarrier_claims_09, rev_cohort=rifq2018.bcarrier_line_09, include_cohort=pop_09_CAR_2018_9, ccn=ccn2016);
+%claims_rev(source=rifq2018.bcarrier_claims_10, rev_cohort=rifq2018.bcarrier_line_10, include_cohort=pop_09_CAR_2018_10, ccn=ccn2016);
+%claims_rev(source=rifq2018.bcarrier_claims_11, rev_cohort=rifq2018.bcarrier_line_11, include_cohort=pop_09_CAR_2018_11, ccn=ccn2016);
+%claims_rev(source=rifq2018.bcarrier_claims_12, rev_cohort=rifq2018.bcarrier_line_12, include_cohort=pop_09_CAR_2018_12, ccn=ccn2016);
 
-data pop_06_car;
-set pop_06_car_2016_1 pop_06_car_2016_2 pop_06_car_2016_3 pop_06_car_2016_4 pop_06_car_2016_5 pop_06_car_2016_6
-	pop_06_car_2016_7 pop_06_car_2016_8 pop_06_car_2016_9 pop_06_car_2016_10 pop_06_car_2016_11 pop_06_car_2016_12
-	pop_06_car_2017_1 pop_06_car_2017_2 pop_06_car_2017_3 pop_06_car_2017_4 pop_06_car_2017_5 pop_06_car_2017_6
-	pop_06_car_2017_7 pop_06_car_2017_8 pop_06_car_2017_9 pop_06_car_2017_10 pop_06_car_2017_11 pop_06_car_2017_12
-	pop_06_car_2018_1 pop_06_car_2018_2 pop_06_car_2018_3 pop_06_car_2018_4 pop_06_car_2018_5 pop_06_car_2018_6
-	pop_06_car_2018_7 pop_06_car_2018_8 pop_06_car_2018_9 pop_06_car_2018_10 pop_06_car_2018_11 pop_06_car_2018_12
+data pop_09_car;
+set pop_09_car_2016_1 pop_09_car_2016_2 pop_09_car_2016_3 pop_09_car_2016_4 pop_09_car_2016_5 pop_09_car_2016_6
+	pop_09_car_2016_7 pop_09_car_2016_8 pop_09_car_2016_9 pop_09_car_2016_10 pop_09_car_2016_11 pop_09_car_2016_12
+	pop_09_car_2017_1 pop_09_car_2017_2 pop_09_car_2017_3 pop_09_car_2017_4 pop_09_car_2017_5 pop_09_car_2017_6
+	pop_09_car_2017_7 pop_09_car_2017_8 pop_09_car_2017_9 pop_09_car_2017_10 pop_09_car_2017_11 pop_09_car_2017_12
+	pop_09_car_2018_1 pop_09_car_2018_2 pop_09_car_2018_3 pop_09_car_2018_4 pop_09_car_2018_5 pop_09_car_2018_6
+	pop_09_car_2018_7 pop_09_car_2018_8 pop_09_car_2018_9 pop_09_car_2018_10 pop_09_car_2018_11 pop_09_car_2018_12
 ;
-if pop_06_year<2016 then delete;
-if pop_06_year>2018 then delete;
+if pop_09_year<2016 then delete;
+if pop_09_year>2018 then delete;
 format &pop_OP_PHYSN_SPCLTY_CD prvdr_spclty $speccd. &pop_icd_dgns_cd1 $dgns. &pop_hcpcs_cd $hcpcs.;
 run;
 *get rid of duplicate rows--keep duplicate bene_ids for same reason as OP;
-proc sort data=pop_06_car nodupkey; by bene_id &flag_popped_dt; run;
+proc sort data=pop_09_car nodupkey; by bene_id &flag_popped_dt; run;
 
 /**This section makes summaries for inpatient, outpatient carrier POPPED **/
 *look at inpatient info;
@@ -637,7 +634,7 @@ table  	&gndr_cd /nocum out=&gndr_cd (drop = count); run;
 proc print data=&gndr_cd noobs; run;
 proc means data=&in mean median min max; var  &pop_age &pop_los; run;
 %mend;
-%poppedlook(in=pop_06_IN);
+%poppedlook(in=pop_09_IN);
 		/*bene_state_cd prvdr_state_cd 
 		&pop_OP_PHYSN_SPCLTY_CD &pop_clm_fac_type_cd &pop_ptnt_dschrg_stus_cd
 		&pop_nch_clm_type_cd &pop_CLM_IP_ADMSN_TYPE_CD &pop_clm_src_ip_admsn_cd*/  
@@ -679,7 +676,7 @@ table  	&gndr_cd /nocum out=&gndr_cd (drop = count); run;
 proc print data=&gndr_cd noobs; run;
 proc means data=&in mean median min max; var  &pop_age &pop_los; run;
 %mend;
-%poppedlook(in=pop_06_OUT);
+%poppedlook(in=pop_09_OUT);
 title 'Carrier Popped';
 %macro poppedlook(in=);
 proc freq data=&in order=freq noprint; 
@@ -715,27 +712,27 @@ table  	&gndr_cd /nocum out=&gndr_cd (drop = count); run;
 proc print data=&gndr_cd noobs; run;
 proc means data=&in mean median min max; var  &pop_age &pop_los; run;
 %mend;
-%poppedlook(in=pop_06_car);
+%poppedlook(in=pop_09_car);
 
 *compile all Inpatient and Outpatient Popped into 1 dataset
 		DO NOT INCLUDE CARRIER
 		Keep ONLY the first observation per person;
-data pop_06_in_out 
+data pop_09_in_out 
 	(keep = bene_id &flag_popped &pop_age &flag_popped_dt &pop_year &gndr_cd
 			prvdr_num prvdr_state_cd OP_PHYSN_SPCLTY_CD /*RFR_PHYSN_NPI*/
 			at_physn_npi op_physn_npi org_npi_num ot_physn_npi rndrng_physn_npi
 			bene_race_cd	bene_cnty_cd bene_state_cd 	bene_mlg_cntct_zip_cd);
-set pop_06_IN pop_06_OUT;
+set pop_09_IN pop_09_OUT;
 run;
-proc sort data=pop_06_in_out nodupkey; by bene_id &flag_popped_dt; run;
-proc sort data=pop_06_in_out nodupkey; by bene_id; run;
+proc sort data=pop_09_in_out nodupkey; by bene_id &flag_popped_dt; run;
+proc sort data=pop_09_in_out nodupkey; by bene_id; run;
 title 'Popped (Inpatient and Outpatient (No Carrier) For Analysis';
-proc freq data=pop_06_in_out; 
+proc freq data=pop_09_in_out; 
 table  	&pop_year; run;
-proc contents data=pop_06_in_out; run;
+proc contents data=pop_09_in_out; run;
 
 *save permanent dataset;
-data &permlib..pop_06_in_out; set pop_06_in_out; run;
+data &permlib..pop_09_in_out; set pop_09_in_out; run;
 
 
 
