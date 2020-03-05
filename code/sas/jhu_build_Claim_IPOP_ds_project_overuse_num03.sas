@@ -802,15 +802,15 @@ select  a.&flag_popped_dt, b.*
 from 
 
 /*start*/
-	&permlib..pop_03_in_out	 a, 
+	&permlib..pop_05_in_out	 a, 
 	exclude_cohort1			 b
 where 
 		a.&bene_id=b.&bene_id 
-		and (	(a.&flag_popped_dt-180) <=&clm_beg_dt_in <=a.&flag_popped_dt	)
-	;
+		and (	(a.&flag_popped_dt-30) <= &clm_beg_dt_in <a.&flag_popped_dt	)
+	; /*note that for this measure it is < and not <= for the popped_dt*/
 quit;
-Data exclude_cohort2 (keep=  bene_id &flag_popped_dt DELETE); 
-set exclude_cohort1;  
+Data &exclude_cohort (keep=  bene_id &flag_popped_dt DELETE); 
+set exclude_cohort2;  
 array dx(25) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
 do j=1 to &diag_cd_max;
 	if substr(dx(j),1,3) in(&EXCLUD_dx10_3) then DELETE=1;	
