@@ -152,7 +152,7 @@ Actor		ED doc, family medicine, internal medicine, pediatrics, orthopedists, PMR
 
 /** vars to keep or delete from the different data sources **/
 
-%let vars_to_keep_ip    = 	pop: 
+%let vars_to_keep_ip    = 	pop: &flag_popped_dt
 							&bene_id &clm_id &gndr_cd 
 							&clm_beg_dt_in &clm_end_dt_in &clm_dob  &ptnt_dschrg_stus_cd
 							&nch_clm_type_cd &CLM_IP_ADMSN_TYPE_CD &clm_fac_type_cd &clm_src_ip_admsn_cd 
@@ -164,7 +164,7 @@ Actor		ED doc, family medicine, internal medicine, pediatrics, orthopedists, PMR
 							/*RFR_PHYSN_NPI*/
 							bene_race_cd	bene_cnty_cd
 							bene_state_cd 	bene_mlg_cntct_zip_cd								;                         
-%let vars_to_keep_op	=	pop: 
+%let vars_to_keep_op	=	pop: &flag_popped_dt
 							&bene_id &clm_id &gndr_cd 
 							&clm_from_dt &clm_thru_dt &clm_dob  &ptnt_dschrg_stus_cd
 							&nch_clm_type_cd &clm_fac_type_cd  
@@ -175,7 +175,7 @@ Actor		ED doc, family medicine, internal medicine, pediatrics, orthopedists, PMR
 							compendium_hospital_id
 							bene_race_cd	bene_cnty_cd
 							bene_state_cd 	bene_mlg_cntct_zip_cd								;
-%let vars_to_keep_car	=	pop: 
+%let vars_to_keep_car	=	pop: &flag_popped_dt
 							&bene_id &clm_id &gndr_cd 
 							&clm_from_dt &clm_thru_dt &clm_dob  
 							&nch_clm_type_cd   
