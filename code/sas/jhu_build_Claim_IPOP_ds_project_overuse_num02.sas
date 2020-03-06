@@ -44,6 +44,7 @@ Actor		Allergists, primary care
 %let exclud_dx10_1 =	'C'														;
 %let exclud_dx10_3 =	'D80'	'D81'	'D82'	'D83'	'D84'	'D85'
 						'D86'	'D87'	'D88'	'D89'							;
+%let exclud_dx10_4 = 	'D472'													;
 
 /** Label pop specific variables  instructions **/
 %let 	flag_popped             		= popped02 								;
@@ -244,7 +245,9 @@ set include_cohort3;
 array dx(25) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
 do j=1 to &diag_cd_max;
 	if substr(dx(j),1,3) in(&includ_dx10_3) or substr(dx(j),1,4) in(&includ_dx10_4) then ALLERGY=1;
-	if substr(dx(j),1,3) in(&exclud_dx10_3) or substr(dx(j),1,1) in(&exclud_dx10_1) then DELETE=1;
+	if substr(dx(j),1,4) in(&exclud_dx10_4) or
+	substr(dx(j),1,3) in(&exclud_dx10_3) or 
+	substr(dx(j),1,1) in(&exclud_dx10_1) then DELETE=1;
 end;
 IF ALLERGY ne 1 then delete;
 IF DELETE  =  1 then delete;
@@ -342,7 +345,9 @@ set include_cohort2;
 array dx(25) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
 do j=1 to &diag_cd_max;
 	if substr(dx(j),1,3) in(&includ_dx10_3) or substr(dx(j),1,4) in(&includ_dx10_4) then ALLERGY=1;
-	if substr(dx(j),1,3) in(&exclud_dx10_3) or substr(dx(j),1,1) in(&exclud_dx10_1) then DELETE=1;
+	if substr(dx(j),1,4) in(&exclud_dx10_4) or
+	substr(dx(j),1,3) in(&exclud_dx10_3) or 
+	substr(dx(j),1,1) in(&exclud_dx10_1) then DELETE=1;
 end;
 IF ALLERGY ne 1 then delete;
 IF DELETE  =  1 then delete;
@@ -437,7 +442,9 @@ set include_cohort2;
 array dx(25) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
 do j=1 to &diag_cd_max;
 	if substr(dx(j),1,3) in(&includ_dx10_3) or substr(dx(j),1,4) in(&includ_dx10_4) then ALLERGY=1;
-	if substr(dx(j),1,3) in(&exclud_dx10_3) or substr(dx(j),1,1) in(&exclud_dx10_1) then DELETE=1;
+	if substr(dx(j),1,4) in(&exclud_dx10_4) or
+	substr(dx(j),1,3) in(&exclud_dx10_3) or 
+	substr(dx(j),1,1) in(&exclud_dx10_1) then DELETE=1;
 end;
 IF ALLERGY ne 1 then delete;
 IF DELETE  =  1 then delete;
