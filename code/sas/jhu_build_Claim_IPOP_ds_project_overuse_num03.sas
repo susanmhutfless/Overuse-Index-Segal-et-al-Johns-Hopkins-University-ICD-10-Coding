@@ -44,7 +44,7 @@ Actor		Anesthesiologists, primary care
 
 %let includ_pr10 =
 					'BW03ZZZ'					;
-*%let includ_dx10_5 =
+%let includ_dx10_5 =
 					'Z0181'					;
 %let includ_drg = ;
 
@@ -285,11 +285,11 @@ end;
 &pop_OP_PHYSN_SPCLTY_CD=&OP_PHYSN_SPCLTY_CD;
 array dx(25) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
 do j=1 to &diag_cd_max;
-	*if dx(j) = substr(&includ_dx10_5,1,5) then preop_visit=1;
+	if substr(dx(j),1,5) in(&includ_dx10_5) then preop_visit=1;
 	if substr(dx(j),1,3) in(&EXCLUD_dx10_3) then DELETE=1;	*will make the 180 day exclusion after merge inp, out, car;		
 end;
 if &flag_popped ne 1 then delete;
-*IF preop_visit ne 1 then delete;
+IF preop_visit ne 1 then delete;
 IF DELETE  =  1 then delete; *this is for same day lung dx only;
 *if clm_drg_cd notin(&includ_drg) then delete;
 run; 
@@ -434,13 +434,14 @@ end;
 &pop_OP_PHYSN_SPCLTY_CD=&OP_PHYSN_SPCLTY_CD; format &pop_OP_PHYSN_SPCLTY_CD speccd.;
 array dx(25) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
 do j=1 to &diag_cd_max;
-	*if dx(j) = substr(&includ_dx10_5,1,5) then preop_visit=1;
-	if substr(dx(j),1,3) in(&EXCLUD_dx10_3) then DELETE=1;
+	if substr(dx(j),1,5) in(&includ_dx10_5) then preop_visit=1;
+	if substr(dx(j),1,3) in(&EXCLUD_dx10_3) then DELETE=1;	*will make the 180 day exclusion after merge inp, out, car;		
 end;
 if &flag_popped ne 1 then delete;
-*IF preop_visit ne 1 then delete;
-IF DELETE  =  1 then delete;
-run; 
+IF preop_visit ne 1 then delete;
+IF DELETE  =  1 then delete; *this is for same day lung dx only;
+*if clm_drg_cd notin(&includ_drg) then delete;
+run;  
 %mend;
 %claims_rev(source=rif2016.OUTpatient_claims_01, rev_cohort=rif2016.OUTpatient_revenue_01, include_cohort=pop_03_out_2016_1, ccn=ccn2016);
 %claims_rev(source=rif2016.OUTpatient_claims_02, rev_cohort=rif2016.OUTpatient_revenue_02, include_cohort=pop_03_out_2016_2, ccn=ccn2016);
@@ -546,13 +547,14 @@ set include_cohort2;
 &pop_OP_PHYSN_SPCLTY_CD=&OP_PHYSN_SPCLTY_CD; format &pop_OP_PHYSN_SPCLTY_CD speccd.;
 array dx(25) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
 do j=1 to &diag_cd_max;
-	*if dx(j) = substr(&includ_dx10_5,1,5) then preop_visit=1;
-	if substr(dx(j),1,3) in(&EXCLUD_dx10_3) then DELETE=1;
+	if substr(dx(j),1,5) in(&includ_dx10_5) then preop_visit=1;
+	if substr(dx(j),1,3) in(&EXCLUD_dx10_3) then DELETE=1;	*will make the 180 day exclusion after merge inp, out, car;		
 end;
 if &flag_popped ne 1 then delete;
-*IF preop_visit ne 1 then delete;
-IF DELETE  =  1 then delete;
-run; 
+IF preop_visit ne 1 then delete;
+IF DELETE  =  1 then delete; *this is for same day lung dx only;
+*if clm_drg_cd notin(&includ_drg) then delete;
+run;  
 %mend;
 %claims_rev(source=rif2016.bcarrier_claims_01, rev_cohort=rif2016.bcarrier_line_01, include_cohort=pop_03_CAR_2016_1, ccn=ccn2016);
 %claims_rev(source=rif2016.bcarrier_claims_01, rev_cohort=rif2016.bcarrier_line_01, include_cohort=pop_03_CAR_2016_1, ccn=ccn2016);
