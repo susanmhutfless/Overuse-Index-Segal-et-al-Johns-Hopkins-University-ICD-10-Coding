@@ -761,7 +761,7 @@ data &permlib..pop_03_in_out; set pop_03_in_out; run;
 
 
 
-*start lookback;
+/*start lookback;
 *merge inpatient/outpatient and lookback 180 days in inpatient/outpatient carrier 
 	for the exclusionary diagnosis;
 /*** this section is related to IP - inpatient claims--for exclusion ***/
@@ -802,14 +802,12 @@ proc sql;
 	create table exclude_cohort2 (compress=yes) as
 select  a.&flag_popped_dt, b.*
 from 
-
-/*start*/
-	&permlib..pop_05_in_out	 a, 
+	&permlib..pop_03_in_out	 a, 
 	exclude_cohort1			 b
 where 
 		a.&bene_id=b.&bene_id 
-		and (	(a.&flag_popped_dt-30) <= &clm_beg_dt_in <a.&flag_popped_dt	)
-	; /*note that for this measure it is < and not <= for the popped_dt*/
+		and (	(a.&flag_popped_dt-180) <= &clm_beg_dt_in <=a.&flag_popped_dt	)
+	; 
 quit;
 Data &exclude_cohort (keep=  bene_id &flag_popped_dt DELETE); 
 set exclude_cohort2;  
