@@ -407,7 +407,7 @@ run;
 	with the measure during data checks;
 proc sort data=pop_02_OUT nodupkey; by bene_id &flag_popped_dt; run;
 
-/**Do same for Carrier file that we did for Outpatient**/
+/**Do same for Carrier file that we did for Outpatient except Carrier does not have ICD procedure**/
 %macro claims_rev(source=, rev_cohort=, include_cohort=);
 proc sql;
 create table include_cohort1 (compress=yes) as
