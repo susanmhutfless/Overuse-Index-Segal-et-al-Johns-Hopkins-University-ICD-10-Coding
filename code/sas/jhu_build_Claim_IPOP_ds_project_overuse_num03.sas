@@ -976,7 +976,7 @@ proc sql;
 	create table exclude_cohort1 (compress=yes) as
 select * 
 from 
-&source (keep = bene_id &clm_from_dt &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max)
+&source (keep = bene_id &clm_from_dt icd_dgns_cd1 - icd_dgns_cd12)
 where 
 	    substr(icd_dgns_cd1,1,3) in(&EXCLUD_dx10_3) or
 		substr(icd_dgns_cd2,1,3) in(&EXCLUD_dx10_3) or
@@ -1004,8 +1004,8 @@ where
 quit;
 Data &exclude_cohort (keep=  bene_id &flag_popped_dt DELETE); 
 set exclude_cohort2;  
-array dx(25) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
-do j=1 to &diag_cd_max;
+array dx(12) icd_dgns_cd1 - icd_dgns_cd12;
+do j=1 to 12;
 	if substr(dx(j),1,3) in(&EXCLUD_dx10_3) then DELETE=1;	
 end;
 if DELETE ne 1 then delete;
