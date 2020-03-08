@@ -542,7 +542,6 @@ end;
 if &flag_popped ne 1 then delete;
 IF preop_visit ne 1 then delete;
 IF DELETE  =  1 then delete; *this is for same day lung dx only;
-*if clm_drg_cd notin(&includ_drg) then delete;
 run;  
 %mend;
 %claims_rev(source=rif2016.bcarrier_claims_01, rev_cohort=rif2016.bcarrier_line_01, include_cohort=pop_03_CAR_2016_1, ccn=ccn2016);
@@ -1075,6 +1074,6 @@ by &bene_id &flag_popped_dt;
 if DELETE=1 then delete;
 run;
 
-title 'Popped Inpatient and Outpatient (No Carrier) For Analysis AFTER lookback exclusion';
+title 'Popped Outpatient (No Inpatient, No Carrier) For Analysis AFTER lookback exclusion';
 proc freq data=&permlib..pop_03_in_out; 
 table  	&pop_year; run;
