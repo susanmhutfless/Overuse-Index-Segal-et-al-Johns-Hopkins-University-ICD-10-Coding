@@ -631,7 +631,8 @@ proc means data=&in mean median min max; var  &pop_age &pop_los; run;
 %mend;
 %poppedlook(in=pop_02_car);
 
-*compile all Inpatient and Outpatient Popped into 1 dataset
+*compile Outpatient Popped into 1 dataset
+		DO NOT INCLUDE INPATIENT 
 		DO NOT INCLUDE CARRIER
 		Keep ONLY the first observation per person;
 data pop_02_in_out 
@@ -639,11 +640,11 @@ data pop_02_in_out
 			prvdr_num prvdr_state_cd OP_PHYSN_SPCLTY_CD /*RFR_PHYSN_NPI*/
 			at_physn_npi op_physn_npi org_npi_num ot_physn_npi rndrng_physn_npi
 			bene_race_cd	bene_cnty_cd bene_state_cd 	bene_mlg_cntct_zip_cd);
-set pop_02_IN pop_02_OUT;
+set /*pop_02_IN*/ pop_02_OUT;
 run;
 proc sort data=pop_02_in_out nodupkey; by bene_id &flag_popped_dt; run;
 proc sort data=pop_02_in_out nodupkey; by bene_id; run;
-title 'Popped (Inpatient and Outpatient (No Carrier) For Analysis';
+title 'Popped: Outpatient (No Inpatient, No Carrier) For Analysis';
 proc freq data=pop_02_in_out; 
 table  	&pop_year; run;
 proc contents data=pop_02_in_out; run;
