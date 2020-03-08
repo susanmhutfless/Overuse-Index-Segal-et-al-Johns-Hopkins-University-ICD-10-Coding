@@ -9,7 +9,7 @@
 
 /* Indicator 21 */
 
-/*Description from Excel file
+/*Description from Excel file---edits need to be incorporated to description to match excel file per 06mar2020 changes!!!
 (New) Number 		21	
 Indicator 		Screening for colorectal cancer in adults 80 years and older	
 Indicator
@@ -26,18 +26,10 @@ Actor		IM/FP/GI
 /*** start of indicator specific variables ***/
 
 /*inclusion criteria (options: CPT/HCPCS, ICD procedure, ICD diagnosis, DRG)*/
-%let includ_hcpcs =	'45378'	'45379'	'45380'	'45381'
-					'45382'	'45383'	'45384'	'45385'	
-					'45386'	'45387'	'45388'	'45389'
-					'45390'	'45391'	'45392'	'45393'
-					'45394'	'45395'	'45396'	'45397'
-					'45398'	'G0105'	'G0121'	'45330'
-					'45331'	'45332'	'45333'	'45334'
-					'45335'	'45336'	'45337'	'45338'	
-					'45339'	'45340'	'45341'	'45342'
-					'45343'	'45344'	'45345'	'45346'	
-					'45347'	'45348'	'45349'	'45350'
-					'88305'	'G0104'			;
+%let includ_hcpcs =	'G0104'	'G0105' 'G0106' 'G0120' 'G0121'
+					'45378' '45385'; 
+					*45378 only applies if included with modifer PT;
+					*45385 only applies if included with modifier 33;
 
 *%let includ_pr10 =	; 
 
@@ -45,7 +37,7 @@ Actor		IM/FP/GI
 
 *%let includ_drg = ;
 
-/** Exclusion criteria: Applies to those 80 years old older only (excludes <80) **/
+/** Exclusion criteria: Applies to those 85 years old older only (excludes <85) **/
 
 /** Label pop specific variables  instructions **/
 %let 	flag_popped             		= popped21 								;
@@ -225,9 +217,16 @@ on (
 quit;
 Data &include_cohort (keep=  &vars_to_keep_ip); 
 set include_cohort3;   
+if &hcpcs_cd in('G0104'	'G0105' 'G0106' 'G0120' 'G0121') then &flag_popped=1;
+if &hcpcs_cd = '45378' and
+	(HCPCS_1st_mdfr_cd='PT' or HCPCS_2nd_mdfr_cd='PT' or HCPCS_3rd_mdfr_cd='PT')
+	then &flag_popped=1;
+if &hcpcs_cd = '45385' and
+	(HCPCS_1st_mdfr_cd='33' or HCPCS_2nd_mdfr_cd='33' or HCPCS_3rd_mdfr_cd='33')
+	then &flag_popped=1;				 
+				 										label &flag_popped				=	&flag_popped_label;
 &flag_popped_dt=&clm_beg_dt_in; 
 	format &flag_popped_dt date9.; 						label &flag_popped_dt			=	&flag_popped_dt_label;
-&flag_popped=1; 										label &flag_popped				=	&flag_popped_label;
 &pop_age=(&clm_beg_dt_in-&clm_dob)/365.25; 				label &pop_age					=	&pop_age_label;
 &pop_age=round(&pop_age);
 &pop_los=&clm_end_dt_in-&clm_beg_dt_in;					label &pop_los					=	&pop_los_label;
@@ -248,7 +247,8 @@ do j=1 to &diag_cd_max;
 	if substr(dx(j),1,5) in(&includ_dx10_5) then INCLUDE=1;
 end;
 IF INCLUDE ne 1 then delete;
-if &pop_age<80 then delete;
+if &pop_age<85 then delete;
+if &flag_popped ne 1 then delete;
 *if clm_drg_cd notin(&includ_drg) then delete;
 run; 
 %mend;
@@ -329,9 +329,16 @@ where
 quit;
 Data &include_cohort (keep = &vars_to_keep_op); 
 set include_cohort2;   
-&flag_popped_dt=&clm_from_dt; 
-	format &flag_popped_dt date9.; 			label &flag_popped_dt	=	&flag_popped_dt_label;
-&flag_popped=1; 							label &flag_popped		=	&flag_popped_label;
+if &hcpcs_cd in('G0104'	'G0105' 'G0106' 'G0120' 'G0121') then &flag_popped=1;
+if &hcpcs_cd = '45378' and
+	(HCPCS_1st_mdfr_cd='PT' or HCPCS_2nd_mdfr_cd='PT' or HCPCS_3rd_mdfr_cd='PT')
+	then &flag_popped=1;
+if &hcpcs_cd = '45385' and
+	(HCPCS_1st_mdfr_cd='33' or HCPCS_2nd_mdfr_cd='33' or HCPCS_3rd_mdfr_cd='33')
+	then &flag_popped=1;				 
+				 										label &flag_popped				=	&flag_popped_label;
+&flag_popped_dt=&clm_beg_dt_in; 
+	format &flag_popped_dt date9.; 						label &flag_popped_dt			=	&flag_popped_dt_label;
 &pop_age=(&clm_from_dt-&clm_dob)/365.25; 	label &pop_age			=	&pop_age_label;
 &pop_age=round(&pop_age);
 &pop_los=&clm_thru_dt-&clm_from_dt;			label &pop_los			=	&pop_los_label;
@@ -345,7 +352,8 @@ do j=1 to &diag_cd_max;
 	if substr(dx(j),1,5) in(&includ_dx10_5) then INCLUDE=1;
 end;
 IF INCLUDE ne 1 then delete;
-if &pop_age<80 then delete;
+if &pop_age<85 then delete;
+if &flag_popped ne 1 then delete;
 run; 
 %mend;
 %claims_rev(source=rif2016.OUTpatient_claims_01, rev_cohort=rif2016.OUTpatient_revenue_01, include_cohort=pop_21_OUT_2016_1, ccn=ccn2016);
@@ -424,9 +432,16 @@ where
 quit;
 Data &include_cohort (keep = &vars_to_keep_car); 
 set include_cohort2;   
-&flag_popped_dt=&clm_from_dt; 
-	format &flag_popped_dt date9.; 			label &flag_popped_dt	=	&flag_popped_dt_label;
-&flag_popped=1; 							label &flag_popped		=	&flag_popped_label;
+if &hcpcs_cd in('G0104'	'G0105' 'G0106' 'G0120' 'G0121') then &flag_popped=1;
+if &hcpcs_cd = '45378' and
+	(HCPCS_1st_mdfr_cd='PT' or HCPCS_2nd_mdfr_cd='PT')
+	then &flag_popped=1;
+if &hcpcs_cd = '45385' and
+	(HCPCS_1st_mdfr_cd='33' or HCPCS_2nd_mdfr_cd='33')
+	then &flag_popped=1;				 
+				 										label &flag_popped				=	&flag_popped_label;
+&flag_popped_dt=&clm_beg_dt_in; 
+	format &flag_popped_dt date9.; 						label &flag_popped_dt			=	&flag_popped_dt_label;
 &pop_age=(&clm_from_dt-&clm_dob)/365.25; 	label &pop_age			=	&pop_age_label;
 &pop_age=round(&pop_age);
 &pop_los=&clm_thru_dt-&clm_from_dt;			label &pop_los			=	&pop_los_label;
@@ -439,7 +454,8 @@ do j=1 to &diag_cd_max;
 	if substr(dx(j),1,5) in(&includ_dx10_5) then INCLUDE=1;
 end;
 IF INCLUDE ne 1 then delete;
-if &pop_age<80 then delete;
+if &pop_age<85 then delete;
+if &flag_popped ne 1 then delete;
 run; 
 %mend;
 %claims_rev(source=rif2016.bcarrier_claims_01, rev_cohort=rif2016.bcarrier_line_01, include_cohort=pop_21_CAR_2016_1);
@@ -634,7 +650,7 @@ set pop_21_IN pop_21_OUT;
 run;
 proc sort data=pop_21_in_out nodupkey; by bene_id &flag_popped_dt; run;
 proc sort data=pop_21_in_out nodupkey; by bene_id; run;
-title 'Popped (Inpatient and Outpatient (No Carrier) For Analysis';
+title 'Popped Inpatient and Outpatient (No Carrier) For Analysis';
 proc freq data=pop_21_in_out; 
 table  	&pop_year; run;
 proc contents data=pop_21_in_out; run;

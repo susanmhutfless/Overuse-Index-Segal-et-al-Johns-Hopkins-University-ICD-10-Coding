@@ -754,12 +754,8 @@ proc freq data=pop_03_in_out;
 table  	&pop_year; run;
 proc contents data=pop_03_in_out; run;
 
-*save permanent dataset;
+*save permanent dataset prior to lookback exclusions;
 data &permlib..pop_03_in_out; set pop_03_in_out; run;
-
-
-
-
 
 /*start lookback;
 *merge inpatient/outpatient and lookback 180 days in inpatient/outpatient carrier 
@@ -1054,7 +1050,6 @@ run;
 %claims_rev(source=rifq2018.bcarrier_claims_11,  exclude_cohort=pop_03_CARexclude_2018_11);
 %claims_rev(source=rifq2018.bcarrier_claims_12,  exclude_cohort=pop_03_CARexclude_2018_12);
 
-
 data pop_03_OUTexclude;
 set pop_03_OUTexclude_2015_7 pop_03_OUTexclude_2015_8 pop_03_OUTexclude_2015_9 pop_03_OUTexclude_2015_10 pop_03_OUTexclude_2015_11 pop_03_OUTexclude_2015_12
 	pop_03_OUTexclude_2016_1 pop_03_OUTexclude_2016_2 pop_03_OUTexclude_2016_3 pop_03_OUTexclude_2016_4 pop_03_OUTexclude_2016_5 pop_03_OUTexclude_2016_6
@@ -1084,8 +1079,12 @@ proc sort data=pop_03_exclude NODUPKEY; by &bene_id &flag_popped_dt; run;
 *merge excludes with perm dataset and delete;
 proc sort data=&permlib..pop_03_in_out; by &bene_id &flag_popped_dt; run;
 
-data TRY (drop = delete);
+data &permlib..pop_03_in_out (drop = delete);
 merge &permlib..pop_03_in_out pop_03_exclude;
 by &bene_id &flag_popped_dt;
 if DELETE=1 then delete;
 run;
+
+title 'Popped Inpatient and Outpatient (No Carrier) For Analysis AFTER lookback exclusion';
+proc freq data=&permlib..pop_03_in_out; 
+table  	&pop_year; run;
