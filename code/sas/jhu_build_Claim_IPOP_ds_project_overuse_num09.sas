@@ -7,7 +7,7 @@
 /*** Indicator description ***/
 /* Description and codes from .xlsx file  "ICD-10 conversions_12_17-19" */
 
-/* Indicator 09 */
+/* Indicator 09 *
 
 
 (New) Number 		9	
@@ -185,23 +185,28 @@ Actor		Hospitalists, ED, primary care, gastroenterologists
 /* identify hcpcs  */
 proc sql;
 create table include_cohort1a (compress=yes) as
-select &bene_id, &clm_id, &hcpcs_cd, case when &hcpcs_cd in (&includ_hcpcs) then 1 else 0 end as &flag_popped
+select &bene_id, &clm_id, &hcpcs_cd
 from 
 	&rev_cohort
 where 
-	&hcpcs_cd in (includ_hcpcs_WWO)
-	OR (	&hcpcs_cd in (includ_hcpcs_W) AND &hcpcs_cd in(includ_hcpcs_WO)	);
+	&hcpcs_cd in (&includ_hcpcs_WWO)
+	OR (	&hcpcs_cd in (&includ_hcpcs_W) AND &hcpcs_cd in(&includ_hcpcs_WO)	);
 quit;
 /* pull claim info for those with HCPCS (need to do this to get dx codes)*/
 proc sql;
 	create table include_cohort1b (compress=yes) as
-select a.&hcpcs_cd, a.&flag_popped, b.*
+select a.&hcpcs_cd, b.*
 from 
 	include_cohort1a a, 
 	&source b
 where 
 	(a.&bene_id=b.&bene_id and a.&clm_id=b.&clm_id);
 quit;
+
+**************************************need to array hcpcs dates so 2 rows on same row....*****************************;
+
+
+
 /*pull icd procedure criteria from claims*/
 proc sql;
 	create table include_cohort1c (compress=yes) as
