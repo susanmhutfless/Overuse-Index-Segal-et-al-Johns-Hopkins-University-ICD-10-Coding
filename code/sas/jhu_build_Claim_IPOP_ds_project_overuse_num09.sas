@@ -34,13 +34,16 @@ Actor		Hospitalists, ED, primary care, gastroenterologists
 %global includ_hcpcs;
 %global includ_pr10;
 
-%let includ_hcpcs =
-					'74150'	'74160'	'74170'			;
+%let includ_hcpcs_WO =  '74150'		    ;
+%let includ_hcpcs_W =   '74160'			;
+%let includ_hcpcs_WWO = '74170'			;
+
+
 
 %let includ_pr10 =
 					'BW2000Z' 'BW2010Z' 'BW20Y0Z'	;
 
-%let includ_dx10 =	;
+%let includ_dx10 =	; *there are NO diagnostic inclusion criteria for #9;
 
 %let includ_drg = ;
 
@@ -186,7 +189,8 @@ select &bene_id, &clm_id, &hcpcs_cd, case when &hcpcs_cd in (&includ_hcpcs) then
 from 
 	&rev_cohort
 where 
-	&hcpcs_cd in (&includ_hcpcs);
+	&hcpcs_cd in (includ_hcpcs_WWO)
+	OR (	&hcpcs_cd in (includ_hcpcs_W) AND &hcpcs_cd in(includ_hcpcs_WO)	);
 quit;
 /* pull claim info for those with HCPCS (need to do this to get dx codes)*/
 proc sql;
@@ -268,12 +272,7 @@ end;
 &pop_clm_drg_cd=put(&clm_drg_cd,$drg.);
 &pop_hcpcs_cd=put(&hcpcs_cd,$hcpcs.);
 &pop_OP_PHYSN_SPCLTY_CD=&OP_PHYSN_SPCLTY_CD;
-array dx(25) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
-do j=1 to &diag_cd_max;
-	if dx(j) in(&includ_pr10) then include=1;	
-end;
 if &flag_popped ne 1 then delete;
-IF include ne 1 then delete;
 if &pop_age<5 then delete;
 *if clm_drg_cd notin(&includ_drg) then delete;
 run; 
@@ -414,12 +413,7 @@ end;
 &pop_icd_dgns_cd1=put(&icd_dgns_cd1,$dgns.);
 &pop_hcpcs_cd=put(&hcpcs_cd,$hcpcs.);
 &pop_OP_PHYSN_SPCLTY_CD=&OP_PHYSN_SPCLTY_CD; format &pop_OP_PHYSN_SPCLTY_CD speccd.;
-array dx(25) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
-do j=1 to &diag_cd_max;
-	if dx(j) in(&includ_pr10) then include=1;	
-end;
 if &flag_popped ne 1 then delete;
-IF include ne 1 then delete;
 if &pop_age<5 then delete;
 run; 
 %mend;
@@ -525,12 +519,7 @@ set include_cohort2;
 &pop_icd_dgns_cd1=put(&icd_dgns_cd1,$dgns.);
 &pop_hcpcs_cd=put(&hcpcs_cd,$hcpcs.);
 &pop_OP_PHYSN_SPCLTY_CD=&OP_PHYSN_SPCLTY_CD; format &pop_OP_PHYSN_SPCLTY_CD speccd.;
-array dx(25) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
-do j=1 to &diag_cd_max;
-	if dx(j) in(&includ_pr10) then include=1;	
-end;
 if &flag_popped ne 1 then delete;
-IF include ne 1 then delete;
 if &pop_age<5 then delete;
 run; 
 %mend;
