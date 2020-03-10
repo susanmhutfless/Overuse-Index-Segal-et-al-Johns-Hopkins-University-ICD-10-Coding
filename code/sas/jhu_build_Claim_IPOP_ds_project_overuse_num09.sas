@@ -31,12 +31,13 @@ Actor		Hospitalists, ED, primary care, gastroenterologists
 /*** start of indicator specific variables ***/
 
 /*inclusion criteria*/
-%global includ_hcpcs;
+%global includ_hcpcs 	includ_hcpcs_WO	includ_hcpcs_W	includ_hcpcs_WWO;
 %global includ_pr10;
 
-%let includ_hcpcs_WO =  '74150'		    ;
-%let includ_hcpcs_W =   '74160'			;
-%let includ_hcpcs_WWO = '74170'			;
+%let includ_hcpcs 	 =  '74150' '74160' '74170';
+%let includ_hcpcs_WO =  '74150'		    ; *without contrast;
+%let includ_hcpcs_W =   '74160'			; *with contrast;
+%let includ_hcpcs_WWO = '74170'			; *with and without contrast;
 
 
 
@@ -189,24 +190,38 @@ select &bene_id, &clm_id, &hcpcs_cd
 from 
 	&rev_cohort
 where 
-	&hcpcs_cd in (&includ_hcpcs_WWO)
-	OR (	&hcpcs_cd in (&includ_hcpcs_W) AND &hcpcs_cd in(&includ_hcpcs_WO)	);
+	&hcpcs_cd in (&includ_hcpcs);
 quit;
+/*array to identify those with hcpcs with and without based on the _w and _wo claims on same clm_id*/
+/*there will be a few hundred out of thousands of duplices with this proc sort nodupkey*/
+proc sort data=include_cohort1a nodupkey out=include_cohort1aa; by &bene_id &clm_id &hcpcs_cd; run;
+
+proc transpose data=include_cohort1aa out=hcpcs_transpose1 (drop = _name_ _label_) prefix=hcpcs_cd;
+    by bene_id clm_id ;
+    var &hcpcs_cd;
+run;
+proc print data = hcpcs_transpose1 (obs=10);
+run; *check max number of hcpcps codes for the next step;
+
+data hcpcs_transpose2;* (drop = &hcpcs_cd:);
+set hcpcs_transpose1;
+if     hcpcs_cd1 in (&includ_hcpcs_WWO)
+	OR hcpcs_cd2 in (&includ_hcpcs_WWO)
+	OR (	hcpcs_cd1 in (&includ_hcpcs_W) AND hcpcs_cd2 in(&includ_hcpcs_WO)	)
+	OR (	hcpcs_cd1 in (&includ_hcpcs_WO) AND hcpcs_cd2 in(&includ_hcpcs_W)	)
+then &flag_popped=1;
+if &flag_popped ne 1 then delete;
+run;
 /* pull claim info for those with HCPCS (need to do this to get dx codes)*/
 proc sql;
 	create table include_cohort1b (compress=yes) as
-select a.&hcpcs_cd, b.*
+select a.*, b.*
 from 
-	include_cohort1a a, 
+	hcpcs_transpose2 a, 
 	&source b
 where 
 	(a.&bene_id=b.&bene_id and a.&clm_id=b.&clm_id);
 quit;
-
-**************************************need to array hcpcs dates so 2 rows on same row....*****************************;
-
-
-
 /*pull icd procedure criteria from claims*/
 proc sql;
 	create table include_cohort1c (compress=yes) as
