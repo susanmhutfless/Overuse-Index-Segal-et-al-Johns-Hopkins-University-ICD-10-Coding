@@ -32,11 +32,16 @@ Actor		Hospitalists, ED, primary care, pulmonologists
 /*** start of indicator specific variables ***/
 
 /*inclusion criteria*/
-%global includ_hcpcs;
+%global includ_hcpcs 	includ_hcpcs_WO	includ_hcpcs_W	includ_hcpcs_WWO;
 %global includ_pr10;
 
+%let includ_hcpcs 	 =  '71270' '71250' '71260';
+%let includ_hcpcs_WO =  '71250'		    ; *without contrast;
+%let includ_hcpcs_W =   '71260'			; *with contrast;
+%let includ_hcpcs_WWO = '71270'			; *with and without contrast;
+
 %let includ_hcpcs =
-					'71270' '71250' '71260'			;
+								;
 
 %let includ_pr10 =
 					'BP2W1ZZ' 'BP2WYZZ' 'BP2W0ZZ'				;
@@ -183,18 +188,37 @@ Actor		Hospitalists, ED, primary care, pulmonologists
 /* identify hcpcs  */
 proc sql;
 create table include_cohort1a (compress=yes) as
-select &bene_id, &clm_id, &hcpcs_cd, case when &hcpcs_cd in (&includ_hcpcs) then 1 else 0 end as &flag_popped
+select &bene_id, &clm_id, &hcpcs_cd
 from 
 	&rev_cohort
 where 
 	&hcpcs_cd in (&includ_hcpcs);
 quit;
+/*array to identify those with hcpcs with and without based on the _w and _wo claims on same clm_id*/
+/*there will be a few hundred out of thousands of duplices with this proc sort nodupkey*/
+proc sort data=include_cohort1a nodupkey out=include_cohort1aa; by &bene_id &clm_id &hcpcs_cd; run;
+proc transpose data=include_cohort1aa out=hcpcs_transpose1 (drop = _name_ _label_) prefix=hcpcs_cd;
+    by bene_id clm_id ;
+    var &hcpcs_cd;
+run;
+/*proc print data = hcpcs_transpose1 (obs=10);
+run; *check max number of hcpcps codes for the next step;*/
+
+data hcpcs_transpose2;* (drop = &hcpcs_cd:);
+set hcpcs_transpose1;
+if     hcpcs_cd1 in (&includ_hcpcs_WWO)
+	OR hcpcs_cd2 in (&includ_hcpcs_WWO)
+	OR (	hcpcs_cd1 in (&includ_hcpcs_W) AND hcpcs_cd2 in(&includ_hcpcs_WO)	)
+	OR (	hcpcs_cd1 in (&includ_hcpcs_WO) AND hcpcs_cd2 in(&includ_hcpcs_W)	)
+then &flag_popped=1;
+if &flag_popped ne 1 then delete;
+run;
 /* pull claim info for those with HCPCS (need to do this to get dx codes)*/
 proc sql;
 	create table include_cohort1b (compress=yes) as
-select a.&hcpcs_cd, a.&flag_popped, b.*
+select a.*, b.*
 from 
-	include_cohort1a a, 
+	hcpcs_transpose2 a, 
 	&source b
 where 
 	(a.&bene_id=b.&bene_id and a.&clm_id=b.&clm_id);
@@ -244,9 +268,9 @@ where
 	b.prvdr_num = a.&ccn or c.prvdr_num = a.&ccn
 ;
 quit;
-/*set info about pop, brining in any DX code inclusions & exclusions on same day as qualifying procedure*/
-Data &include_cohort (keep=  &vars_to_keep_ip); 
-set include_cohort2;  
+/*set info about op, brining in any DX code inclusions & exclusions on same day as qualifying procedure*/
+Data &include_cohort (keep=  &vars_to_keep_ip pop_hcpcs_cd:); 
+set include_cohort2;   
 array pr(25) &proc_pfx.&proc_cd_min - &proc_pfx.&proc_cd_max;
 do i=1 to &diag_cd_max;
 	if pr(i) in(&includ_pr10) then &flag_popped=1;
@@ -267,15 +291,10 @@ end;
 &pop_admtg_dgns_cd=put(&admtg_dgns_cd,$dgns.);
 &pop_icd_dgns_cd1=put(&icd_dgns_cd1,$dgns.);
 &pop_clm_drg_cd=put(&clm_drg_cd,$drg.);
-&pop_hcpcs_cd=put(&hcpcs_cd,$hcpcs.);
+pop_hcpcs_cd1=put(hcpcs_cd1,$hcpcs.);
+pop_hcpcs_cd2=put(hcpcs_cd2,$hcpcs.);
 &pop_OP_PHYSN_SPCLTY_CD=&OP_PHYSN_SPCLTY_CD;
-array dx(25) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
-do j=1 to &diag_cd_max;
-	if pr(j) in(&includ_pr10) then include=1;	
-end;
 if &flag_popped ne 1 then delete;
-IF include ne 1 then delete;
-if &pop_age<5 then delete;
 *if clm_drg_cd notin(&includ_drg) then delete;
 run; 
 %mend;
@@ -338,18 +357,37 @@ proc sort data=pop_22_IN; by &bene_id &flag_popped_dt; run;
 /* identify hcpcs  */
 proc sql;
 create table include_cohort1a (compress=yes) as
-select &bene_id, &clm_id, &hcpcs_cd, case when &hcpcs_cd in (&includ_hcpcs) then 1 else 0 end as &flag_popped
+select &bene_id, &clm_id, &hcpcs_cd
 from 
 	&rev_cohort
 where 
 	&hcpcs_cd in (&includ_hcpcs);
 quit;
+/*array to identify those with hcpcs with and without based on the _w and _wo claims on same clm_id*/
+/*there will be a few hundred out of thousands of duplices with this proc sort nodupkey*/
+proc sort data=include_cohort1a nodupkey out=include_cohort1aa; by &bene_id &clm_id &hcpcs_cd; run;
+proc transpose data=include_cohort1aa out=hcpcs_transpose1 (drop = _name_ _label_) prefix=hcpcs_cd;
+    by bene_id clm_id ;
+    var &hcpcs_cd;
+run;
+/*proc print data = hcpcs_transpose1 (obs=10);
+run; *check max number of hcpcps codes for the next step;*/
+
+data hcpcs_transpose2;* (drop = &hcpcs_cd:);
+set hcpcs_transpose1;
+if     hcpcs_cd1 in (&includ_hcpcs_WWO)
+	OR hcpcs_cd2 in (&includ_hcpcs_WWO)
+	OR (	hcpcs_cd1 in (&includ_hcpcs_W) AND hcpcs_cd2 in(&includ_hcpcs_WO)	)
+	OR (	hcpcs_cd1 in (&includ_hcpcs_WO) AND hcpcs_cd2 in(&includ_hcpcs_W)	)
+then &flag_popped=1;
+if &flag_popped ne 1 then delete;
+run;
 /* pull claim info for those with HCPCS (need to do this to get dx codes)*/
 proc sql;
 	create table include_cohort1b (compress=yes) as
-select a.&hcpcs_cd, a.&flag_popped, b.*
+select a.*, b.*
 from 
-	include_cohort1a a, 
+	hcpcs_transpose2 a, 
 	&source b
 where 
 	(a.&bene_id=b.&bene_id and a.&clm_id=b.&clm_id);
@@ -391,37 +429,33 @@ quit;
 proc sql;
 	create table include_cohort2 (compress=yes) as
 select *
-from 
-	include_cohort1b a,
-	&permlib..ahrq_ccn b
+from
+	&permlib..ahrq_ccn a,
+	include_cohort1b b,
+	include_cohort1c c	
 where 
-	a.prvdr_num = b.&ccn
+	b.prvdr_num = a.&ccn or c.prvdr_num = a.&ccn
 ;
 quit;
-Data &include_cohort (keep = &vars_to_keep_op); 
+Data &include_cohort (keep = &vars_to_keep_op pop_hcpcs_cd:); 
 set include_cohort2;  
-array pr(25) &proc_pfx.&diag_cd_min - &proc_pfx.&diag_cd_max;
-do i=1 to &diag_cd_max;
+array pr(&proc_cd_max) &proc_pfx.&proc_cd_min - &proc_pfx.&proc_cd_max;
+do i=1 to &proc_cd_max;
 	if pr(i) in(&includ_pr10) then &flag_popped=1;
 end; 
 &flag_popped_dt=&clm_from_dt; 
 	format &flag_popped_dt date9.; 			label &flag_popped_dt	=	&flag_popped_dt_label;
-&flag_popped=1; 							label &flag_popped		=	&flag_popped_label;
+				 							label &flag_popped		=	&flag_popped_label;
 &pop_age=(&clm_from_dt-&clm_dob)/365.25; 	label &pop_age			=	&pop_age_label;
 &pop_age=round(&pop_age);
 &pop_los=&clm_thru_dt-&clm_from_dt;			label &pop_los			=	&pop_los_label;
 &pop_year=year(&clm_from_dt);
 &pop_nch_clm_type_cd=put(&nch_clm_type_cd, clm_type_cd.); label &pop_nch_clm_type_cd	=	&pop_nch_clm_type_cd_label;
 &pop_icd_dgns_cd1=put(&icd_dgns_cd1,$dgns.);
-&pop_hcpcs_cd=put(&hcpcs_cd,$hcpcs.);
+pop_hcpcs_cd1=put(hcpcs_cd1,$hcpcs.);
+pop_hcpcs_cd2=put(hcpcs_cd2,$hcpcs.);
 &pop_OP_PHYSN_SPCLTY_CD=&OP_PHYSN_SPCLTY_CD; format &pop_OP_PHYSN_SPCLTY_CD speccd.;
-array dx(25) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
-do j=1 to &diag_cd_max;
-		if pr(j) in(&includ_pr10) then include=1;	
-end;
 if &flag_popped ne 1 then delete;
-IF include ne 1 then delete;
-if &pop_age<5 then delete;
 run; 
 %mend;
 %claims_rev(source=rif2016.OUTpatient_claims_01, rev_cohort=rif2016.OUTpatient_revenue_01, include_cohort=pop_22_out_2016_1, ccn=ccn2016);
@@ -485,43 +519,57 @@ proc sort data=pop_22_OUT nodupkey; by bene_id &flag_popped_dt; run;
 %macro claims_rev(source=, rev_cohort=, include_cohort=, ccn=);
 /* identify hcpcs  */
 proc sql;
-create table include_cohort1 (compress=yes) as
-select &bene_id, &clm_id, &hcpcs_cd, case when &hcpcs_cd in (&includ_hcpcs) then 1 else 0 end as &flag_popped
+create table include_cohort1a (compress=yes) as
+select &bene_id, &clm_id, &hcpcs_cd
 from 
 	&rev_cohort
 where 
 	&hcpcs_cd in (&includ_hcpcs);
 quit;
+/*array to identify those with hcpcs with and without based on the _w and _wo claims on same clm_id*/
+/*there will be a few hundred out of thousands of duplices with this proc sort nodupkey*/
+proc sort data=include_cohort1a nodupkey out=include_cohort1aa; by &bene_id &clm_id &hcpcs_cd; run;
+proc transpose data=include_cohort1aa out=hcpcs_transpose1 (drop = _name_ _label_) prefix=hcpcs_cd;
+    by bene_id clm_id ;
+    var &hcpcs_cd;
+run;
+/*proc print data = hcpcs_transpose1 (obs=10);
+run; *check max number of hcpcps codes for the next step;*/
+
+data hcpcs_transpose2;* (drop = &hcpcs_cd:);
+set hcpcs_transpose1;
+if     hcpcs_cd1 in (&includ_hcpcs_WWO)
+	OR hcpcs_cd2 in (&includ_hcpcs_WWO)
+	OR (	hcpcs_cd1 in (&includ_hcpcs_W) AND hcpcs_cd2 in(&includ_hcpcs_WO)	)
+	OR (	hcpcs_cd1 in (&includ_hcpcs_WO) AND hcpcs_cd2 in(&includ_hcpcs_W)	)
+then &flag_popped=1;
+if &flag_popped ne 1 then delete;
+run;
 /* pull claim info for those with HCPCS (need to do this to get dx codes)*/
 proc sql;
 	create table include_cohort2 (compress=yes) as
-select a.&hcpcs_cd, a.&flag_popped, b.*
+select a.*, b.*
 from 
-	include_cohort1 a, 
+	hcpcs_transpose2 a, 
 	&source b
 where 
 	(a.&bene_id=b.&bene_id and a.&clm_id=b.&clm_id);
 quit;
-Data &include_cohort (keep = &vars_to_keep_car); 
+Data &include_cohort (keep = &vars_to_keep_car pop_hcpcs_cd:); 
 set include_cohort2; 
 &flag_popped_dt=&clm_from_dt; 
 	format &flag_popped_dt date9.; 			label &flag_popped_dt	=	&flag_popped_dt_label;
-&flag_popped=1; 							label &flag_popped		=	&flag_popped_label;
+											label &flag_popped		=	&flag_popped_label;
 &pop_age=(&clm_from_dt-&clm_dob)/365.25; 	label &pop_age			=	&pop_age_label;
 &pop_age=round(&pop_age);
 &pop_los=&clm_thru_dt-&clm_from_dt;			label &pop_los			=	&pop_los_label;
 &pop_year=year(&clm_from_dt);
 &pop_nch_clm_type_cd=put(&nch_clm_type_cd, clm_type_cd.); label &pop_nch_clm_type_cd	=	&pop_nch_clm_type_cd_label;
 &pop_icd_dgns_cd1=put(&icd_dgns_cd1,$dgns.);
-&pop_hcpcs_cd=put(&hcpcs_cd,$hcpcs.);
+pop_hcpcs_cd1=put(hcpcs_cd1,$hcpcs.);
+pop_hcpcs_cd2=put(hcpcs_cd2,$hcpcs.);
 &pop_OP_PHYSN_SPCLTY_CD=&OP_PHYSN_SPCLTY_CD; format &pop_OP_PHYSN_SPCLTY_CD speccd.;
-array dx(25) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
-do j=1 to &diag_cd_max;
-		if pr(j) in(&includ_pr10) then include=1;	
-end;
 if &flag_popped ne 1 then delete;
-IF include ne 1 then delete;
-if &pop_age<5 then delete;
 run; 
 %mend;
 %claims_rev(source=rif2016.bcarrier_claims_01, rev_cohort=rif2016.bcarrier_line_01, include_cohort=pop_22_CAR_2016_1, ccn=ccn2016);
@@ -596,8 +644,16 @@ table  	&pop_year /nocum out=&pop_year (drop = count); run;
 proc print data=&pop_year noobs; run;
 
 proc freq data=&in order=freq noprint; 
-table  	&pop_hcpcs_cd /nocum out=&pop_hcpcs_cd (drop = count); run;
-proc print data=&pop_hcpcs_cd noobs; where percent>1; run;
+table  	pop_hcpcs_cd1 /nocum out=pop_hcpcs_cd1 (drop = count); run;
+proc print data=pop_hcpcs_cd1 noobs; where percent>1; run;
+
+proc freq data=&in order=freq noprint; 
+table  	pop_hcpcs_cd2 /nocum out=pop_hcpcs_cd2 (drop = count); run;
+proc print data=pop_hcpcs_cd2 noobs; where percent>1; run;
+
+proc freq data=&in order=freq noprint; 
+table  	pop_hcpcs_cd3 /nocum out=pop_hcpcs_cd3 (drop = count); run;
+proc print data=pop_hcpcs_cd3 noobs; where percent>1; run;
 
 proc freq data=&in order=freq noprint; 
 table  	&pop_clm_drg_cd /nocum out=&pop_clm_drg_cd (drop = count); run;
@@ -646,8 +702,16 @@ table  	&pop_year /nocum out=&pop_year (drop = count); run;
 proc print data=&pop_year noobs; run;
 
 proc freq data=&in order=freq noprint; 
-table  	&pop_hcpcs_cd /nocum out=&pop_hcpcs_cd (drop = count); run;
-proc print data=&pop_hcpcs_cd noobs; where percent>1; run;
+table  	pop_hcpcs_cd1 /nocum out=pop_hcpcs_cd1 (drop = count); run;
+proc print data=pop_hcpcs_cd1 noobs; where percent>1; run;
+
+proc freq data=&in order=freq noprint; 
+table  	pop_hcpcs_cd2 /nocum out=pop_hcpcs_cd2 (drop = count); run;
+proc print data=pop_hcpcs_cd2 noobs; where percent>1; run;
+
+proc freq data=&in order=freq noprint; 
+table  	pop_hcpcs_cd3 /nocum out=pop_hcpcs_cd3 (drop = count); run;
+proc print data=pop_hcpcs_cd3 noobs; where percent>1; run;
 
 proc freq data=&in order=freq noprint; 
 table  	&pop_icd_dgns_cd1 /nocum out=&pop_icd_dgns_cd1 (drop = count); run;
@@ -678,8 +742,16 @@ table  	&pop_year /nocum out=&pop_year (drop = count); run;
 proc print data=&pop_year noobs; run;
 
 proc freq data=&in order=freq noprint; 
-table  	&pop_hcpcs_cd /nocum out=&pop_hcpcs_cd (drop = count); run;
-proc print data=&pop_hcpcs_cd noobs; where percent>1; run;
+table  	pop_hcpcs_cd1 /nocum out=pop_hcpcs_cd1 (drop = count); run;
+proc print data=pop_hcpcs_cd1 noobs; where percent>1; run;
+
+proc freq data=&in order=freq noprint; 
+table  	pop_hcpcs_cd2 /nocum out=pop_hcpcs_cd2 (drop = count); run;
+proc print data=pop_hcpcs_cd2 noobs; where percent>1; run;
+
+proc freq data=&in order=freq noprint; 
+table  	pop_hcpcs_cd3 /nocum out=pop_hcpcs_cd3 (drop = count); run;
+proc print data=pop_hcpcs_cd3 noobs; where percent>1; run;
 
 proc freq data=&in order=freq noprint; 
 table  	&pop_icd_dgns_cd1 /nocum out=&pop_icd_dgns_cd1 (drop = count); run;
@@ -705,7 +777,6 @@ proc means data=&in mean median min max; var  &pop_age &pop_los; run;
 %poppedlook(in=pop_22_car);
 
 *compile all Inpatient and Outpatient Popped into 1 dataset
-		DO NOT INCLUDE INPATIENT
 		DO NOT INCLUDE CARRIER
 		Keep ONLY the first observation per person;
 data pop_22_in_out 
@@ -713,11 +784,11 @@ data pop_22_in_out
 			prvdr_num prvdr_state_cd OP_PHYSN_SPCLTY_CD /*RFR_PHYSN_NPI*/
 			at_physn_npi op_physn_npi org_npi_num ot_physn_npi rndrng_physn_npi
 			bene_race_cd	bene_cnty_cd bene_state_cd 	bene_mlg_cntct_zip_cd);
-set /*pop_22_IN*/ pop_22_OUT;
+set pop_22_IN pop_22_OUT;
 run;
 proc sort data=pop_22_in_out nodupkey; by bene_id &flag_popped_dt; run;
 proc sort data=pop_22_in_out nodupkey; by bene_id; run;
-title 'Popped Outpatient (No Inpatient, No Carrier) For Analysis';
+title 'Popped Inpatient or Outpatient (No Carrier) For Analysis';
 proc freq data=pop_22_in_out; 
 table  	&pop_year; run;
 proc contents data=pop_22_in_out; run;
