@@ -59,7 +59,7 @@ Actor		Gynecologist, occasionally general surgeon
 					'0UT97ZZ'	'0UT98ZL'	'0UT98ZZ'
 					'0UT9FZL'	'0UT9FZZ'				;
 
-%let includ_dx10 =  	;
+%let includ_dx10_3 =  'C53'	'C54'	'C55'	'C56'	;
 
 %let includ_drg = ;
 
@@ -290,11 +290,10 @@ end;
 &pop_OP_PHYSN_SPCLTY_CD=&OP_PHYSN_SPCLTY_CD;
 array dx(25) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
 do j=1 to &diag_cd_max;
-	if substr(dx(j),1) in(&includ_dx10_1) then include=1;	
+	if dx(j) in(&includ_dx10_3) then malig=1;	
 end;
 if &flag_popped ne 1 then delete;
-IF include ne 1 then delete;
-if &pop_age<5 then delete;
+IF malig ne 1 then delete;
 *if clm_drg_cd notin(&includ_drg) then delete;
 run; 
 %mend;
@@ -411,10 +410,11 @@ proc sql;
 	create table include_cohort2 (compress=yes) as
 select *
 from 
-	include_cohort1b a,
-	&permlib..ahrq_ccn b
+	&permlib..ahrq_ccn a,
+	include_cohort1b b,
+	include_cohort1c c	
 where 
-	a.prvdr_num = b.&ccn
+	b.prvdr_num = a.&ccn or c.prvdr_num = a.&ccn
 ;
 quit;
 Data &include_cohort (keep = &vars_to_keep_op); 
@@ -425,7 +425,7 @@ do i=1 to &diag_cd_max;
 end; 
 &flag_popped_dt=&clm_from_dt; 
 	format &flag_popped_dt date9.; 			label &flag_popped_dt	=	&flag_popped_dt_label;
-&flag_popped=1; 							label &flag_popped		=	&flag_popped_label;
+											label &flag_popped		=	&flag_popped_label;
 &pop_age=(&clm_from_dt-&clm_dob)/365.25; 	label &pop_age			=	&pop_age_label;
 &pop_age=round(&pop_age);
 &pop_los=&clm_thru_dt-&clm_from_dt;			label &pop_los			=	&pop_los_label;
@@ -436,12 +436,10 @@ end;
 &pop_OP_PHYSN_SPCLTY_CD=&OP_PHYSN_SPCLTY_CD; format &pop_OP_PHYSN_SPCLTY_CD speccd.;
 array dx(25) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
 do j=1 to &diag_cd_max;
-	if substr(dx(j),1) in(&includ_dx10_1) then include=1;	
+	if dx(j) in(&includ_dx10_3) then malig=1;	
 end;
 if &flag_popped ne 1 then delete;
-IF include ne 1 then delete;
-IF trauma ne 1 then delete;
-if &pop_age<5 then delete;
+IF malig ne 1 then delete;
 run; 
 %mend;
 %claims_rev(source=rif2016.OUTpatient_claims_01, rev_cohort=rif2016.OUTpatient_revenue_01, include_cohort=pop_11_out_2016_1, ccn=ccn2016);
@@ -526,7 +524,7 @@ Data &include_cohort (keep = &vars_to_keep_car);
 set include_cohort2; 
 &flag_popped_dt=&clm_from_dt; 
 	format &flag_popped_dt date9.; 			label &flag_popped_dt	=	&flag_popped_dt_label;
-&flag_popped=1; 							label &flag_popped		=	&flag_popped_label;
+				 							label &flag_popped		=	&flag_popped_label;
 &pop_age=(&clm_from_dt-&clm_dob)/365.25; 	label &pop_age			=	&pop_age_label;
 &pop_age=round(&pop_age);
 &pop_los=&clm_thru_dt-&clm_from_dt;			label &pop_los			=	&pop_los_label;
@@ -537,11 +535,10 @@ set include_cohort2;
 &pop_OP_PHYSN_SPCLTY_CD=&OP_PHYSN_SPCLTY_CD; format &pop_OP_PHYSN_SPCLTY_CD speccd.;
 array dx(25) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
 do j=1 to &diag_cd_max;
-	if substr(dx(j),1) in(&includ_dx10_1) then include=1;	
+	if dx(j) in(&includ_dx10_3) then malig=1;	
 end;
 if &flag_popped ne 1 then delete;
-IF include ne 1 then delete;
-if &pop_age<5 then delete;
+IF malig ne 1 then delete;
 run; 
 %mend;
 %claims_rev(source=rif2016.bcarrier_claims_01, rev_cohort=rif2016.bcarrier_line_01, include_cohort=pop_11_CAR_2016_1, ccn=ccn2016);
