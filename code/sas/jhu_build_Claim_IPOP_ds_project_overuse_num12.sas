@@ -11,7 +11,6 @@
 
 
 /*Description from Excel file
-/*Description from Excel file
 (New) Number 		12	
 Indicator 		EEG monitoring in individuals presenting with syncope
 Indicator
@@ -281,7 +280,6 @@ do j=1 to &diag_cd_max;
 end;
 if &flag_popped ne 1 then delete;
 IF include ne 1 then delete;
-if &pop_age<5 then delete;
 *if clm_drg_cd notin(&includ_drg) then delete;
 run; 
 %mend;
@@ -398,10 +396,11 @@ proc sql;
 	create table include_cohort2 (compress=yes) as
 select *
 from 
-	include_cohort1b a,
-	&permlib..ahrq_ccn b
+	&permlib..ahrq_ccn a,
+	include_cohort1b b,
+	include_cohort1c c	
 where 
-	a.prvdr_num = b.&ccn
+	b.prvdr_num = a.&ccn or c.prvdr_num = a.&ccn
 ;
 quit;
 Data &include_cohort (keep = &vars_to_keep_op); 
@@ -412,7 +411,7 @@ do i=1 to &diag_cd_max;
 end; 
 &flag_popped_dt=&clm_from_dt; 
 	format &flag_popped_dt date9.; 			label &flag_popped_dt	=	&flag_popped_dt_label;
-&flag_popped=1; 							label &flag_popped		=	&flag_popped_label;
+				 							label &flag_popped		=	&flag_popped_label;
 &pop_age=(&clm_from_dt-&clm_dob)/365.25; 	label &pop_age			=	&pop_age_label;
 &pop_age=round(&pop_age);
 &pop_los=&clm_thru_dt-&clm_from_dt;			label &pop_los			=	&pop_los_label;
@@ -427,7 +426,6 @@ do j=1 to &diag_cd_max;
 end;
 if &flag_popped ne 1 then delete;
 IF include ne 1 then delete;
-if &pop_age<5 then delete;
 run; 
 %mend;
 %claims_rev(source=rif2016.OUTpatient_claims_01, rev_cohort=rif2016.OUTpatient_revenue_01, include_cohort=pop_12_out_2016_1, ccn=ccn2016);
@@ -500,7 +498,7 @@ where
 quit;
 /* pull claim info for those with HCPCS (need to do this to get dx codes)*/
 proc sql;
-	create table include_cohort1b (compress=yes) as
+	create table include_cohort2 (compress=yes) as
 select a.&hcpcs_cd, a.&flag_popped, b.*
 from 
 	include_cohort1a a, 
@@ -508,22 +506,11 @@ from
 where 
 	(a.&bene_id=b.&bene_id and a.&clm_id=b.&clm_id);
 quit;
-/* link to CCN */
-proc sql;
-	create table include_cohort2 (compress=yes) as
-select *
-from 
-	include_cohort1b a,
-	&permlib..ahrq_ccn b
-where 
-	a.prvdr_num = b.&ccn
-;
-quit;
 Data &include_cohort (keep = &vars_to_keep_car); 
 set include_cohort2; 
 &flag_popped_dt=&clm_from_dt; 
 	format &flag_popped_dt date9.; 			label &flag_popped_dt	=	&flag_popped_dt_label;
-&flag_popped=1; 							label &flag_popped		=	&flag_popped_label;
+				 							label &flag_popped		=	&flag_popped_label;
 &pop_age=(&clm_from_dt-&clm_dob)/365.25; 	label &pop_age			=	&pop_age_label;
 &pop_age=round(&pop_age);
 &pop_los=&clm_thru_dt-&clm_from_dt;			label &pop_los			=	&pop_los_label;
@@ -537,7 +524,6 @@ array dx(25) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
 end;
 if &flag_popped ne 1 then delete;
 IF include ne 1 then delete;
-if &pop_age<5 then delete;
 run; 
 %mend;
 %claims_rev(source=rif2016.bcarrier_claims_01, rev_cohort=rif2016.bcarrier_line_01, include_cohort=pop_12_CAR_2016_1, ccn=ccn2016);
@@ -722,17 +708,18 @@ proc means data=&in mean median min max; var  &pop_age &pop_los; run;
 
 *compile all Inpatient and Outpatient Popped into 1 dataset
 		DO NOT INCLUDE CARRIER
+		DO NOT INCLUDE OUTPATIENT
 		Keep ONLY the first observation per person;
 data pop_12_in_out 
 	(keep = bene_id &flag_popped &pop_age &flag_popped_dt &pop_year &gndr_cd
 			prvdr_num prvdr_state_cd OP_PHYSN_SPCLTY_CD /*RFR_PHYSN_NPI*/
 			at_physn_npi op_physn_npi org_npi_num ot_physn_npi rndrng_physn_npi
 			bene_race_cd	bene_cnty_cd bene_state_cd 	bene_mlg_cntct_zip_cd);
-set pop_12_IN pop_12_OUT;
+set pop_12_IN /*pop_12_OUT*/;
 run;
 proc sort data=pop_12_in_out nodupkey; by bene_id &flag_popped_dt; run;
 proc sort data=pop_12_in_out nodupkey; by bene_id; run;
-title 'Popped (Inpatient and Outpatient (No Carrier) For Analysis';
+title 'Popped Inpatient  (No Outpatient, No Carrier) For Analysis';
 proc freq data=pop_12_in_out; 
 table  	&pop_year; run;
 proc contents data=pop_12_in_out; run;

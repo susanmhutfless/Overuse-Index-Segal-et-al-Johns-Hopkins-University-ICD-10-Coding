@@ -292,7 +292,7 @@ pop_hcpcs_cd1=put(hcpcs_cd1,$hcpcs.);
 pop_hcpcs_cd2=put(hcpcs_cd2,$hcpcs.);
 &pop_OP_PHYSN_SPCLTY_CD=&OP_PHYSN_SPCLTY_CD;
 if &flag_popped ne 1 then delete;
-if &pop_age<5 then delete;
+
 *if clm_drg_cd notin(&includ_drg) then delete;
 run; 
 %mend;
@@ -454,7 +454,7 @@ pop_hcpcs_cd1=put(hcpcs_cd1,$hcpcs.);
 pop_hcpcs_cd2=put(hcpcs_cd2,$hcpcs.);
 &pop_OP_PHYSN_SPCLTY_CD=&OP_PHYSN_SPCLTY_CD; format &pop_OP_PHYSN_SPCLTY_CD speccd.;
 if &flag_popped ne 1 then delete;
-if &pop_age<5 then delete;
+
 run; 
 %mend;
 %claims_rev(source=rif2016.OUTpatient_claims_01, rev_cohort=rif2016.OUTpatient_revenue_01, include_cohort=pop_09_out_2016_1, ccn=ccn2016);
@@ -569,7 +569,7 @@ pop_hcpcs_cd1=put(hcpcs_cd1,$hcpcs.);
 pop_hcpcs_cd2=put(hcpcs_cd2,$hcpcs.);
 &pop_OP_PHYSN_SPCLTY_CD=&OP_PHYSN_SPCLTY_CD; format &pop_OP_PHYSN_SPCLTY_CD speccd.;
 if &flag_popped ne 1 then delete;
-if &pop_age<5 then delete;
+
 run; 
 %mend;
 %claims_rev(source=rif2016.bcarrier_claims_01, rev_cohort=rif2016.bcarrier_line_01, include_cohort=pop_09_CAR_2016_1, ccn=ccn2016);
