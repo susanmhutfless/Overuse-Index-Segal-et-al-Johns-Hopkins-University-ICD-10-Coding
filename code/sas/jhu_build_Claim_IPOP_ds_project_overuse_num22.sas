@@ -44,7 +44,7 @@ Actor		Hospitalists, ED, primary care, pulmonologists
 								;
 
 %let includ_pr10 =
-					'BP2W1ZZ' 'BP2WYZZ' 'BP2W0ZZ'				;
+					'BB2400Z', 'BB2410Z', 'BB24Y0Z'				;
 
 %let includ_dx10 =	
 
