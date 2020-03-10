@@ -40,12 +40,10 @@ Actor		Physical therapists?
 %let includ_pr10 =
 					'2W65X0Z' '2W65XZZ'			;
 
-%let includ_dx10 =	  	;
+%let includ_dx10_4 = 'M543' 'M544'	  	;
 
 %let includ_drg = ;
 
-/** Exclusion criteria: 
-%let EXCLUD_dx10_4=			'M543' 'M544'	; 
 
 /** Label pop specific variables  instructions **/
 %let 	flag_popped             		= popped16 								;
@@ -271,11 +269,10 @@ end;
 &pop_OP_PHYSN_SPCLTY_CD=&OP_PHYSN_SPCLTY_CD;
 array dx(25) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
 do j=1 to &diag_cd_max;
-	if substr(dx(j),1,4 in(&exclud_dx10_4) then include=1;	
+	if substr(dx(j),1,4 in(&include_dx10_4) then include=1;	
 end;
 if &flag_popped ne 1 then delete;
-IF include ne 1 then delete;
-if &pop_age<5 then delete;
+IF include = 1 then delete;
 *if clm_drg_cd notin(&includ_drg) then delete;
 run; 
 %mend;
@@ -392,10 +389,11 @@ proc sql;
 	create table include_cohort2 (compress=yes) as
 select *
 from 
-	include_cohort1b a,
-	&permlib..ahrq_ccn b
+	&permlib..ahrq_ccn a,
+	include_cohort1b b,
+	include_cohort1c c	
 where 
-	a.prvdr_num = b.&ccn
+	b.prvdr_num = a.&ccn or c.prvdr_num = a.&ccn
 ;
 quit;
 Data &include_cohort (keep = &vars_to_keep_op); 
@@ -406,7 +404,7 @@ do i=1 to &diag_cd_max;
 end; 
 &flag_popped_dt=&clm_from_dt; 
 	format &flag_popped_dt date9.; 			label &flag_popped_dt	=	&flag_popped_dt_label;
-&flag_popped=1; 							label &flag_popped		=	&flag_popped_label;
+				 							label &flag_popped		=	&flag_popped_label;
 &pop_age=(&clm_from_dt-&clm_dob)/365.25; 	label &pop_age			=	&pop_age_label;
 &pop_age=round(&pop_age);
 &pop_los=&clm_thru_dt-&clm_from_dt;			label &pop_los			=	&pop_los_label;
@@ -417,11 +415,10 @@ end;
 &pop_OP_PHYSN_SPCLTY_CD=&OP_PHYSN_SPCLTY_CD; format &pop_OP_PHYSN_SPCLTY_CD speccd.;
 array dx(25) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
 do j=1 to &diag_cd_max;
-	if substr(dx(j),1,4 in(&exclud_dx10_4) then include=1;	
+	if substr(dx(j),1,4 in(&includ_dx10_4) then include=1;	
 end;
 if &flag_popped ne 1 then delete;
-IF include ne 1 then delete;
-if &pop_age<5 then delete;
+IF include = 1 then delete;
 run; 
 %mend;
 %claims_rev(source=rif2016.OUTpatient_claims_01, rev_cohort=rif2016.OUTpatient_revenue_01, include_cohort=pop_16_out_2016_1, ccn=ccn2016);
@@ -506,7 +503,7 @@ Data &include_cohort (keep = &vars_to_keep_car);
 set include_cohort2; 
 &flag_popped_dt=&clm_from_dt; 
 	format &flag_popped_dt date9.; 			label &flag_popped_dt	=	&flag_popped_dt_label;
-&flag_popped=1; 							label &flag_popped		=	&flag_popped_label;
+											label &flag_popped		=	&flag_popped_label;
 &pop_age=(&clm_from_dt-&clm_dob)/365.25; 	label &pop_age			=	&pop_age_label;
 &pop_age=round(&pop_age);
 &pop_los=&clm_thru_dt-&clm_from_dt;			label &pop_los			=	&pop_los_label;
@@ -517,11 +514,10 @@ set include_cohort2;
 &pop_OP_PHYSN_SPCLTY_CD=&OP_PHYSN_SPCLTY_CD; format &pop_OP_PHYSN_SPCLTY_CD speccd.;
 array dx(25) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
 do j=1 to &diag_cd_max;
-	if substr(dx(j),1,4 in(&exclud_dx10_4) then include=1;	
+	if substr(dx(j),1,4 in(&includ_dx10_4) then include=1;	
 end;
 if &flag_popped ne 1 then delete;
-IF include ne 1 then delete;
-if &pop_age<5 then delete;
+IF include = 1 then delete;
 run; 
 %mend;
 %claims_rev(source=rif2016.bcarrier_claims_01, rev_cohort=rif2016.bcarrier_line_01, include_cohort=pop_16_CAR_2016_1, ccn=ccn2016);
@@ -705,7 +701,6 @@ proc means data=&in mean median min max; var  &pop_age &pop_los; run;
 %poppedlook(in=pop_16_car);
 
 *compile all Inpatient and Outpatient Popped into 1 dataset
-		DO NOT INCLUDE INPATIENT
 		DO NOT INCLUDE CARRIER
 		Keep ONLY the first observation per person;
 data pop_16_in_out 
@@ -713,11 +708,11 @@ data pop_16_in_out
 			prvdr_num prvdr_state_cd OP_PHYSN_SPCLTY_CD /*RFR_PHYSN_NPI*/
 			at_physn_npi op_physn_npi org_npi_num ot_physn_npi rndrng_physn_npi
 			bene_race_cd	bene_cnty_cd bene_state_cd 	bene_mlg_cntct_zip_cd);
-set /*pop_16_IN*/ pop_16_OUT;
+set pop_16_IN pop_16_OUT;
 run;
 proc sort data=pop_16_in_out nodupkey; by bene_id &flag_popped_dt; run;
 proc sort data=pop_16_in_out nodupkey; by bene_id; run;
-title 'Popped Outpatient (No Inpatient, No Carrier) For Analysis';
+title 'Popped Inpatient or Outpatient (No Carrier) For Analysis';
 proc freq data=pop_16_in_out; 
 table  	&pop_year; run;
 proc contents data=pop_16_in_out; run;
