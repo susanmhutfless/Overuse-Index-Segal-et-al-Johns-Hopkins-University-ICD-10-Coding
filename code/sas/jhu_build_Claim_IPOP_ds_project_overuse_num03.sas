@@ -14,16 +14,9 @@
 (New) Number 		3	
 Indicator 			Preoperative chest radiography in the absence of a clinical suspicion for intrathoracic pathology
 Indicator
-			Motivator: this is of little clinical value and leads to cascades of harm
+			
 
-			Indicator: use of preoperative chest xray in people without symptoms or history of lung disease
-
-			[this can be reported among all patients with preoperative chest X-ray]
-
-Timing		Procedure code 
-			*ALERT: is associated with the Inclusionary diagnsosis code(same claim) removed inclusion dx code on 04mar2020*
-			with NO exclusionary diagnosis codes 
-			within 180 days preceding procedure code	
+Timing			
 
 System		Anesthesia	
 
@@ -1063,17 +1056,19 @@ data pop_03_exclude;
 merge pop_03_INexclude pop_03_OUTexclude;
 by &bene_id &flag_popped_dt;
 run;
-proc sort data=pop_03_exclude NODUPKEY; by &bene_id &flag_popped_dt; run;
 
 *merge excludes with perm dataset and delete;
+proc sort data=pop_03_include NODUPKEY; by &bene_id &flag_popped_dt; run;
+proc sort data=pop_03_exclude NODUPKEY; by &bene_id &flag_popped_dt; run;
 proc sort data=&permlib..pop_03_in_out; by &bene_id &flag_popped_dt; run;
 
 data &permlib..pop_03_in_out (drop = delete);
-merge &permlib..pop_03_in_out pop_03_exclude;
+merge &permlib..pop_03_in_out pop_03_exclude pop_03_include;
 by &bene_id &flag_popped_dt;
 if DELETE=1 then delete;
+if INCLUDE ne 1 then delete;
 run;
 
-title 'Popped Outpatient (No Inpatient, No Carrier) For Analysis AFTER lookback exclusion';
+title 'Popped Outpatient (No Inpatient, No Carrier) For Analysis AFTER lookback exclusions';
 proc freq data=&permlib..pop_03_in_out; 
 table  	&pop_year; run;
