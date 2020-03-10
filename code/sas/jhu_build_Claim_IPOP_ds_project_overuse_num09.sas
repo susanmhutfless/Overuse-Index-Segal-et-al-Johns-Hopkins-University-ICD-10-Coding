@@ -519,45 +519,54 @@ proc sort data=pop_09_OUT nodupkey; by bene_id &flag_popped_dt; run;
 /* identify hcpcs  */
 proc sql;
 create table include_cohort1a (compress=yes) as
-select &bene_id, &clm_id, &hcpcs_cd, case when &hcpcs_cd in (&includ_hcpcs) then 1 else 0 end as &flag_popped
+select &bene_id, &clm_id, &hcpcs_cd
 from 
 	&rev_cohort
 where 
 	&hcpcs_cd in (&includ_hcpcs);
 quit;
+/*array to identify those with hcpcs with and without based on the _w and _wo claims on same clm_id*/
+/*there will be a few hundred out of thousands of duplices with this proc sort nodupkey*/
+proc sort data=include_cohort1a nodupkey out=include_cohort1aa; by &bene_id &clm_id &hcpcs_cd; run;
+proc transpose data=include_cohort1aa out=hcpcs_transpose1 (drop = _name_ _label_) prefix=hcpcs_cd;
+    by bene_id clm_id ;
+    var &hcpcs_cd;
+run;
+/*proc print data = hcpcs_transpose1 (obs=10);
+run; *check max number of hcpcps codes for the next step;*/
+
+data hcpcs_transpose2;* (drop = &hcpcs_cd:);
+set hcpcs_transpose1;
+if     hcpcs_cd1 in (&includ_hcpcs_WWO)
+	OR hcpcs_cd2 in (&includ_hcpcs_WWO)
+	OR (	hcpcs_cd1 in (&includ_hcpcs_W) AND hcpcs_cd2 in(&includ_hcpcs_WO)	)
+	OR (	hcpcs_cd1 in (&includ_hcpcs_WO) AND hcpcs_cd2 in(&includ_hcpcs_W)	)
+then &flag_popped=1;
+if &flag_popped ne 1 then delete;
+run;
 /* pull claim info for those with HCPCS (need to do this to get dx codes)*/
 proc sql;
-	create table include_cohort1b (compress=yes) as
-select a.&hcpcs_cd, a.&flag_popped, b.*
+	create table include_cohort2 (compress=yes) as
+select a.*, b.*
 from 
-	include_cohort1a a, 
+	hcpcs_transpose2 a, 
 	&source b
 where 
 	(a.&bene_id=b.&bene_id and a.&clm_id=b.&clm_id);
 quit;
-/* link to CCN */
-proc sql;
-	create table include_cohort2 (compress=yes) as
-select *
-from 
-	include_cohort1b a,
-	&permlib..ahrq_ccn b
-where 
-	a.prvdr_num = b.&ccn
-;
-quit;
-Data &include_cohort (keep = &vars_to_keep_car); 
+Data &include_cohort (keep = &vars_to_keep_car pop_hcpcs_cd:); 
 set include_cohort2; 
 &flag_popped_dt=&clm_from_dt; 
 	format &flag_popped_dt date9.; 			label &flag_popped_dt	=	&flag_popped_dt_label;
-&flag_popped=1; 							label &flag_popped		=	&flag_popped_label;
+											label &flag_popped		=	&flag_popped_label;
 &pop_age=(&clm_from_dt-&clm_dob)/365.25; 	label &pop_age			=	&pop_age_label;
 &pop_age=round(&pop_age);
 &pop_los=&clm_thru_dt-&clm_from_dt;			label &pop_los			=	&pop_los_label;
 &pop_year=year(&clm_from_dt);
 &pop_nch_clm_type_cd=put(&nch_clm_type_cd, clm_type_cd.); label &pop_nch_clm_type_cd	=	&pop_nch_clm_type_cd_label;
 &pop_icd_dgns_cd1=put(&icd_dgns_cd1,$dgns.);
-&pop_hcpcs_cd=put(&hcpcs_cd,$hcpcs.);
+pop_hcpcs_cd1=put(hcpcs_cd1,$hcpcs.);
+pop_hcpcs_cd2=put(hcpcs_cd2,$hcpcs.);
 &pop_OP_PHYSN_SPCLTY_CD=&OP_PHYSN_SPCLTY_CD; format &pop_OP_PHYSN_SPCLTY_CD speccd.;
 if &flag_popped ne 1 then delete;
 if &pop_age<5 then delete;
@@ -693,8 +702,16 @@ table  	&pop_year /nocum out=&pop_year (drop = count); run;
 proc print data=&pop_year noobs; run;
 
 proc freq data=&in order=freq noprint; 
-table  	&pop_hcpcs_cd /nocum out=&pop_hcpcs_cd (drop = count); run;
-proc print data=&pop_hcpcs_cd noobs; where percent>1; run;
+table  	pop_hcpcs_cd1 /nocum out=pop_hcpcs_cd1 (drop = count); run;
+proc print data=pop_hcpcs_cd1 noobs; where percent>1; run;
+
+proc freq data=&in order=freq noprint; 
+table  	pop_hcpcs_cd2 /nocum out=pop_hcpcs_cd2 (drop = count); run;
+proc print data=pop_hcpcs_cd2 noobs; where percent>1; run;
+
+proc freq data=&in order=freq noprint; 
+table  	pop_hcpcs_cd3 /nocum out=pop_hcpcs_cd3 (drop = count); run;
+proc print data=pop_hcpcs_cd3 noobs; where percent>1; run;
 
 proc freq data=&in order=freq noprint; 
 table  	&pop_icd_dgns_cd1 /nocum out=&pop_icd_dgns_cd1 (drop = count); run;
@@ -725,8 +742,16 @@ table  	&pop_year /nocum out=&pop_year (drop = count); run;
 proc print data=&pop_year noobs; run;
 
 proc freq data=&in order=freq noprint; 
-table  	&pop_hcpcs_cd /nocum out=&pop_hcpcs_cd (drop = count); run;
-proc print data=&pop_hcpcs_cd noobs; where percent>1; run;
+table  	pop_hcpcs_cd1 /nocum out=pop_hcpcs_cd1 (drop = count); run;
+proc print data=pop_hcpcs_cd1 noobs; where percent>1; run;
+
+proc freq data=&in order=freq noprint; 
+table  	pop_hcpcs_cd2 /nocum out=pop_hcpcs_cd2 (drop = count); run;
+proc print data=pop_hcpcs_cd2 noobs; where percent>1; run;
+
+proc freq data=&in order=freq noprint; 
+table  	pop_hcpcs_cd3 /nocum out=pop_hcpcs_cd3 (drop = count); run;
+proc print data=pop_hcpcs_cd3 noobs; where percent>1; run;
 
 proc freq data=&in order=freq noprint; 
 table  	&pop_icd_dgns_cd1 /nocum out=&pop_icd_dgns_cd1 (drop = count); run;
