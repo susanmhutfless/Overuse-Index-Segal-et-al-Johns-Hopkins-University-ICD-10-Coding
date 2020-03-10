@@ -733,7 +733,7 @@ set pop_11_IN pop_11_OUT;
 run;
 proc sort data=pop_11_in_out nodupkey; by bene_id &flag_popped_dt; run;
 proc sort data=pop_11_in_out nodupkey; by bene_id; run;
-title 'Popped Outpatient (No Carrier) For Analysis';
+title 'Popped Inpatient and Outpatient (No Carrier) For Analysis';
 proc freq data=pop_11_in_out; 
 table  	&pop_year; run;
 proc contents data=pop_11_in_out; run;
