@@ -393,11 +393,12 @@ quit;
 proc sql;
 	create table include_cohort2 (compress=yes) as
 select *
-from 
-	include_cohort1b a,
-	&permlib..ahrq_ccn b
+from
+	&permlib..ahrq_ccn a,
+	include_cohort1b b,
+	include_cohort1c c	
 where 
-	a.prvdr_num = b.&ccn
+	b.prvdr_num = a.&ccn or c.prvdr_num = a.&ccn
 ;
 quit;
 Data &include_cohort (keep = &vars_to_keep_op); 
