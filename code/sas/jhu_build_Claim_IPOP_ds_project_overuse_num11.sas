@@ -290,7 +290,7 @@ end;
 &pop_OP_PHYSN_SPCLTY_CD=&OP_PHYSN_SPCLTY_CD;
 array dx(25) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
 do j=1 to &diag_cd_max;
-	if dx(j) in(&includ_dx10_3) then malig=1;	
+	if substr(dx(j),1,3) in(&includ_dx10_3) then malig=1;	
 end;
 if &flag_popped ne 1 then delete;
 IF malig = 1 then delete;
