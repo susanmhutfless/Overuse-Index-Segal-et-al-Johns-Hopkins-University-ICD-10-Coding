@@ -43,7 +43,7 @@ Actor		Emergency room doctors, neurologists, primary care
 %let includ_pr10 =
 					'B030Y0Z' 'B030YZZ' 'B030ZZZ'	;
 
-%let includ_dx10 =	'S060X0A' 'S060X1A' 'S060X9A'  	;
+%let includ_dx10 =	'S060X0A' 	;
 
 %let includ_drg = ;
 
