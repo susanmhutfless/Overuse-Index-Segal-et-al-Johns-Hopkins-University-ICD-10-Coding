@@ -35,7 +35,7 @@ Actor		Physical therapists?
 %global includ_pr10;
 
 %let includ_hcpcs =
-					'97012' '97140' 'E0830'			;
+					'97012'		;
 
 %let includ_pr10 =
 					'2W65X0Z' '2W65XZZ'			;
