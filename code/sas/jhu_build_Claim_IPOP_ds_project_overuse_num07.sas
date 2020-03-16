@@ -724,11 +724,11 @@ data pop_07_in_out
 			prvdr_num prvdr_state_cd OP_PHYSN_SPCLTY_CD /*RFR_PHYSN_NPI*/
 			at_physn_npi op_physn_npi org_npi_num ot_physn_npi rndrng_physn_npi
 			bene_race_cd	bene_cnty_cd bene_state_cd 	bene_mlg_cntct_zip_cd);
-set pop_07_IN pop_07_OUT;
+set /*pop_07_IN*/ pop_07_OUT;
 run;
 proc sort data=pop_07_in_out nodupkey; by bene_id &flag_popped_dt; run;
 proc sort data=pop_07_in_out nodupkey; by bene_id; run;
-title 'Popped Inpatient or Outpatient (No Carrier) For Analysis';
+title 'Popped Outpatient (No Inpatient, No Carrier) For Analysis';
 proc freq data=pop_07_in_out; 
 table  	&pop_year; run;
 proc contents data=pop_07_in_out; run;
@@ -1063,7 +1063,9 @@ merge &permlib..pop_07_in_out pop_07_exclude;
 by &bene_id &flag_popped_dt;
 if DELETE=1 then delete;
 run;
+*keep only 1 pop per person;
+proc sort data=&permlib..pop_07_in_out; by &bene_id; run;
 
-title 'Popped Inpatient or Outpatient (No Carrier) For Analysis AFTER lookback exclusion';
+title 'Popped  Outpatient (No Inpatient, No Carrier) For Analysis AFTER lookback exclusion';
 proc freq data=&permlib..pop_07_in_out; 
 table  	&pop_year; run;
