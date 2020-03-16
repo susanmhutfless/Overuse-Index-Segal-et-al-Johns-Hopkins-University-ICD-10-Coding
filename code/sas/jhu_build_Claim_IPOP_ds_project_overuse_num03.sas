@@ -1386,6 +1386,8 @@ by &bene_id &flag_popped_dt;
 if DELETE=1 then delete;
 if INCLUDE ne 1 then delete;
 run;
+*keep only 1 pop per person;
+proc sort data=&permlib..pop_03_in_out; by &bene_id; run;
 
 title 'Popped Outpatient (No Inpatient, No Carrier) For Analysis AFTER lookback exclusions';
 proc freq data=&permlib..pop_03_in_out; 
