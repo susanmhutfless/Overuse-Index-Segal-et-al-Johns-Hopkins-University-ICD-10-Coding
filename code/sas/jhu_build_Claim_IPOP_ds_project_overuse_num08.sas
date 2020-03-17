@@ -33,7 +33,7 @@ Actor		primary care, ENT, allergists
 /*** start of indicator specific variables ***/
 
 /*inclusion criteria*/
-%global includ_hcpcs includ_pr10 includ_dx10_5;
+%global includ_hcpcs includ_pr10 includ_dx10_5 EXCLUD_dx10_4;
 
 %let includ_hcpcs =
 					'70486'	'70487'	'70488'			;
@@ -278,7 +278,7 @@ do j=1 to &diag_cd_max;
 end;
 if &flag_popped ne 1 then delete;
 IF acute ne 1 then delete;
-IF DELETE  =  1 then delete; *this is for same day lung dx only;
+IF DELETE  =  1 then delete; 
 *if clm_drg_cd notin(&includ_drg) then delete;
 run; 
 %mend;
