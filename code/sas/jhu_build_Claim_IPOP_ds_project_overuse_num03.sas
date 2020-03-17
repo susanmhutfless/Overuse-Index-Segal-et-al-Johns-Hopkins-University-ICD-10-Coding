@@ -284,7 +284,7 @@ quit;
 Data &include_cohort (keep=  &vars_to_keep_ip); 
 set include_cohort1c include_cohort1f;  
 array pr(25) &proc_pfx.&proc_cd_min - &proc_pfx.&proc_cd_max;
-do i=1 to &diag_cd_max;
+do i=1 to &proc_cd_max;
 	if pr(i) in(&includ_pr10) then &flag_popped=1;
 end; 
 &flag_popped_dt=&clm_beg_dt_in; 
@@ -377,7 +377,8 @@ proc sort data=pop_03_IN; by &bene_id &flag_popped_dt; run;
 /* identify hcpcs  */
 proc sql;
 create table include_cohort1a (compress=yes) as
-select &bene_id, &clm_id, &hcpcs_cd, case when &hcpcs_cd in (&includ_hcpcs) then 1 else 0 end as &flag_popped
+select &bene_id, &clm_id, &hcpcs_cd, &rev_cntr, 
+		case when &hcpcs_cd in (&includ_hcpcs) then 1 else 0 end as &flag_popped
 from 
 	&rev_cohort
 where 
@@ -386,16 +387,27 @@ quit;
 /* pull claim info for those with HCPCS (need to do this to get dx codes)*/
 proc sql;
 	create table include_cohort1b (compress=yes) as
-select a.&hcpcs_cd, a.&flag_popped, b.*
+select a.&hcpcs_cd, a.&flag_popped, a.&rev_cntr, b.*
 from 
 	include_cohort1a a, 
 	&source b
 where 
 	(a.&bene_id=b.&bene_id and a.&clm_id=b.&clm_id);
 quit;
-/*pull icd procedure criteria from claims*/
+/*link to ccn*/
 proc sql;
 	create table include_cohort1c (compress=yes) as
+select *
+from 
+	&permlib..ahrq_ccn a,
+	include_cohort1b b	
+where 
+	b.prvdr_num = a.&ccn
+;
+quit;
+/*pull icd procedure criteria from claims*/
+proc sql;
+	create table include_cohort1d (compress=yes) as
 select *
 from  
 	&source
@@ -426,22 +438,30 @@ where
 		icd_prcdr_cd24 in(&includ_pr10) or
 		icd_prcdr_cd25 in(&includ_pr10)		;
 quit;
+/*get rev center for ER visit icd identified--consider arraying ed indicator*/
+proc sql;
+	create table include_cohort1e (compress=yes) as
+select a.*, b.&rev_cntr
+from  
+	include_cohort1d a,
+	&rev_cohort		 b
+where a.&bene_id=b.&bene_id and a.&clm_id=b.&clm_id;
+quit;
 /* link to CCN */
 proc sql;
-	create table include_cohort2 (compress=yes) as
+	create table include_cohort1f (compress=yes) as
 select *
-from  
+from 
 	&permlib..ahrq_ccn a,
-	include_cohort1b b,
-	include_cohort1c c	
+	include_cohort1e b	
 where 
-	b.prvdr_num = a.&ccn or c.prvdr_num = a.&ccn
+	b.prvdr_num = a.&ccn
 ;
 quit;
 Data &include_cohort (keep = &vars_to_keep_op); 
-set include_cohort2;  
-array pr(25) &proc_pfx.&diag_cd_min - &proc_pfx.&diag_cd_max;
-do i=1 to &diag_cd_max;
+set include_cohort1c include_cohort1f;  
+array pr(25) &proc_pfx.&proc_cd_min - &proc_pfx.&proc_cd_max;
+do i=1 to &proc_cd_max;
 	if pr(i) in(&includ_pr10) then &flag_popped=1;
 end; 
 &flag_popped_dt=&clm_from_dt; 
@@ -460,6 +480,7 @@ do j=1 to &diag_cd_max;
 	if substr(dx(j),1,5) in(&includ_dx10_5) then preop_visit=1;
 	if substr(dx(j),1,3) in(&EXCLUD_dx10_3) then DELETE=1;	*will make the 180 day exclusion after merge inp, out, car;		
 end;
+if &rev_cntr in(&ED_hcpcs) then delete;
 if &flag_popped ne 1 then delete;
 IF preop_visit ne 1 then delete;
 IF DELETE  =  1 then delete; *this is for same day lung dx only;
