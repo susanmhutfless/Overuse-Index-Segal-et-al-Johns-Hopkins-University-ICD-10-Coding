@@ -493,9 +493,9 @@ proc sort data=pop_03_OUT nodupkey; by bene_id &flag_popped_dt; run;
 
 
 /**Do same for Carrier file that we did for Outpatient**/
-/*Carrier does NOT have icd procedure codes--so that section of code does not exist for carrier*/
+/*Carrier does NOT have icd procedure codes--so that section of code does not exist for carrier*
 %macro claims_rev(source=, rev_cohort=, include_cohort=, ccn=);
-/* identify hcpcs  */
+/* identify hcpcs  *
 proc sql;
 create table include_cohort1 (compress=yes) as
 select &bene_id, &clm_id, &hcpcs_cd, case when &hcpcs_cd in (&includ_hcpcs) then 1 else 0 end as &flag_popped
@@ -504,7 +504,7 @@ from
 where 
 	&hcpcs_cd in (&includ_hcpcs);
 quit;
-/* pull claim info for those with HCPCS (need to do this to get dx codes)*/
+/* pull claim info for those with HCPCS (need to do this to get dx codes)*
 proc sql;
 	create table include_cohort2 (compress=yes) as
 select a.&hcpcs_cd, a.&flag_popped, b.*
@@ -681,7 +681,7 @@ proc print data=&gndr_cd noobs; run;
 proc means data=&in mean median min max; var  &pop_age &pop_los; run;
 %mend;
 %poppedlook(in=pop_03_OUT);
-title 'Carrier Popped';
+/*title 'Carrier Popped';
 %macro poppedlook(in=);
 proc freq data=&in order=freq noprint; 
 table  	&flag_popped /nocum out=&flag_popped; run;
@@ -717,7 +717,7 @@ proc print data=&gndr_cd noobs; run;
 proc means data=&in mean median min max; var  &pop_age &pop_los; run;
 %mend;
 %poppedlook(in=pop_03_car);
-
+*/
 *compile Outpatient Popped into 1 dataset
 		DO NOT INCLUDE INPATIENT
 		DO NOT INCLUDE CARRIER
