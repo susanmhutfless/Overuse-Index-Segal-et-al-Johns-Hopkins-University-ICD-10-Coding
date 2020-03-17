@@ -527,6 +527,15 @@ set pop_01_IN pop_01_OUT;
 run;
 proc sort data=pop_01_in_out nodupkey; by bene_id &flag_popped_dt; run;
 
+proc sort data=pop_01_in_out nodupkey out=pop_01_in_out1; by &bene_id &flag_popped_dt; run;
+proc transpose data=pop_01_in_out1 out=pop_01_in_out_transpose (drop = _name_ _label_) prefix=flag_popped;
+    by &bene_id &flag_popped_dt ;
+    var &flag_popped;
+run;
+data pop_01_in_out_transpose2; set pop_01_in_out_transpose;
+where flag_popped2 ne .;
+run;
+*merge in with the pop_01 if a and b and have those that popped...;
 
 
 
