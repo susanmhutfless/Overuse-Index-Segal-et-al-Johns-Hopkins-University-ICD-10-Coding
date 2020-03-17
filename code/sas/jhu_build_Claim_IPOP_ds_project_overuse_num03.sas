@@ -54,6 +54,13 @@ Actor		Anesthesiologists, primary care
 					'J80' 'J81' 'J82' 'J83' 'J84' 'J85' 'J86' 
 					'J90' 'J91' 'J92' 'J93' 'J94' 				; 
 
+/*exclude if revenue center for inpatient/outpatient includes ED*/
+%global rev_cntr;
+%let rev_cntr = rev_cntr;
+%let ED_hcpcs = '0450' '0451' '0452' '0453' '0454' '0455' '0456'
+				'0457' '0458' '0459' '0981'  					;
+*ed list from https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5905698/;
+
 /** Label pop specific variables  instructions **/
 %let 	flag_popped             		= popped03 								;
 %let 	flag_popped_label				= 'indicator 03 popped'					;	
@@ -71,6 +78,7 @@ Actor		Anesthesiologists, primary care
 %let	pop_ptnt_dschrg_stus_cd  		= pop_03_ptnt_dschrg_stus_cd			;
 %let	pop_admtg_dgns_cd				= pop_03_admtg_dgns_cd					;
 %let	pop_icd_dgns_cd1				= pop_03_icd_dgns_cd1					;
+%let	pop_icd_prcdr_cd1				= pop_03_icd_prcdr_cd1					;
 %let	pop_clm_drg_cd					= pop_03_clm_drg_cd						;
 %let	pop_hcpcs_cd					= pop_03_hcpcs_cd						;
 %let	pop_OP_PHYSN_SPCLTY_CD			= pop_03_OP_PHYSN_SPCLTY_CD				;
@@ -128,6 +136,7 @@ Actor		Anesthesiologists, primary care
 %let  ptnt_dschrg_stus_cd = ptnt_dschrg_stus_cd ;
 %let  admtg_dgns_cd      = admtg_dgns_cd        ;
 %let  icd_dgns_cd1       = icd_dgns_cd1         ;
+%let  icd_prcdr_cd1		 = icd_prcdr_cd1		;
 %let  OP_PHYSN_SPCLTY_CD = OP_PHYSN_SPCLTY_CD   ;
 
 /*** end of section   - study specific variables ***/
@@ -190,7 +199,8 @@ Actor		Anesthesiologists, primary care
 /* identify hcpcs  */
 proc sql;
 create table include_cohort1a (compress=yes) as
-select &bene_id, &clm_id, &hcpcs_cd, case when &hcpcs_cd in (&includ_hcpcs) then 1 else 0 end as &flag_popped
+select &bene_id, &clm_id, &hcpcs_cd, &rev_cntr, 
+		case when &hcpcs_cd in (&includ_hcpcs) then 1 else 0 end as &flag_popped
 from 
 	&rev_cohort
 where 
@@ -199,16 +209,27 @@ quit;
 /* pull claim info for those with HCPCS (need to do this to get dx codes)*/
 proc sql;
 	create table include_cohort1b (compress=yes) as
-select a.&hcpcs_cd, a.&flag_popped, b.*
+select a.&hcpcs_cd, a.&flag_popped, a.&rev_cntr, b.*
 from 
 	include_cohort1a a, 
 	&source b
 where 
 	(a.&bene_id=b.&bene_id and a.&clm_id=b.&clm_id);
 quit;
-/*pull icd procedure criteria from claims*/
+/*link to ccn*/
 proc sql;
 	create table include_cohort1c (compress=yes) as
+select *
+from 
+	&permlib..ahrq_ccn a,
+	include_cohort1b b	
+where 
+	b.prvdr_num = a.&ccn
+;
+quit;
+/*pull icd procedure criteria from claims*/
+proc sql;
+	create table include_cohort1d (compress=yes) as
 select *
 from  
 	&source
@@ -239,21 +260,29 @@ where
 		icd_prcdr_cd24 in(&includ_pr10) or
 		icd_prcdr_cd25 in(&includ_pr10)		;
 quit;
+/*get rev center for ER visit icd identified--consider arraying ed indicator*/
+proc sql;
+	create table include_cohort1e (compress=yes) as
+select a.*, b.&rev_cntr
+from  
+	include_cohort1d a,
+	&rev_cohort		 b
+where a.&bene_id=b.&bene_id and a.&clm_id=b.&clm_id;
+quit;
 /* link to CCN */
 proc sql;
-	create table include_cohort2 (compress=yes) as
+	create table include_cohort1f (compress=yes) as
 select *
 from 
 	&permlib..ahrq_ccn a,
-	include_cohort1b b,
-	include_cohort1c c	
+	include_cohort1e b	
 where 
-	b.prvdr_num = a.&ccn or c.prvdr_num = a.&ccn
+	b.prvdr_num = a.&ccn
 ;
 quit;
 /*set info about pop, brining in any DX code inclusions & exclusions on same day as qualifying procedure*/
 Data &include_cohort (keep=  &vars_to_keep_ip); 
-set include_cohort2;  
+set include_cohort1c include_cohort1f;  
 array pr(25) &proc_pfx.&proc_cd_min - &proc_pfx.&proc_cd_max;
 do i=1 to &diag_cd_max;
 	if pr(i) in(&includ_pr10) then &flag_popped=1;
@@ -281,6 +310,7 @@ do j=1 to &diag_cd_max;
 	if substr(dx(j),1,5) in(&includ_dx10_5) then preop_visit=1;
 	if substr(dx(j),1,3) in(&EXCLUD_dx10_3) then DELETE=1;	*will make the 180 day exclusion after merge inp, out, car;		
 end;
+if &rev_cntr in(&ED_hcpcs) then delete;
 if &flag_popped ne 1 then delete;
 IF preop_visit ne 1 then delete;
 IF DELETE  =  1 then delete; *this is for same day lung dx only;
@@ -608,6 +638,10 @@ title 'Inpatient Popped';
 proc freq data=&in order=freq noprint; 
 table  	&pop_year /nocum out=&pop_year (drop = count); run;
 proc print data=&pop_year noobs; run;
+
+proc freq data=&in order=freq noprint; 
+table  	&pop_icd_prcdr_cd1 /nocum out=&pop_icd_prcdr_cd1 (drop = count); run;
+proc print data=&pop_icd_prcdr_cd1 noobs; where percent>1; run;
 
 proc freq data=&in order=freq noprint; 
 table  	&pop_hcpcs_cd /nocum out=&pop_hcpcs_cd (drop = count); run;
