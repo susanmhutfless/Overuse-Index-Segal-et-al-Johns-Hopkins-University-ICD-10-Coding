@@ -32,7 +32,7 @@ Actor		Anesthesiologists, primary care
 %global includ_hcpcs;
 %global includ_pr10;
 
-%let includ_hcpcs =
+%let includ_hcpcs =	'71010' '71020'
 					'71045'	'71046'					;
 
 %let includ_pr10 =
