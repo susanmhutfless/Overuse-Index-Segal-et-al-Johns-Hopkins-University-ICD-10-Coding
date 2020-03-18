@@ -229,7 +229,7 @@ where
 ;
 quit;
 /*set info about pop, brining in any DX code inclusions & exclusions on same day as qualifying procedure*/
-Data &include_cohort (keep=  &vars_to_keep_ip); 
+Data &include_cohort (keep=  &vars_to_keep_ip bene_death_dt); 
 set include_cohort1c;  
 &flag_popped_dt=&clm_beg_dt_in; 
 	format &flag_popped_dt date9.; 						label &flag_popped_dt			=	&flag_popped_dt_label;
@@ -246,7 +246,7 @@ set include_cohort1c;
 &pop_ptnt_dschrg_stus_cd = &ptnt_dschrg_stus_cd; 		label &pop_ptnt_dschrg_stus_cd 	= 	&pop_ptnt_dschrg_stus_cd;
 &pop_admtg_dgns_cd=put(&admtg_dgns_cd,$dgns.);
 &pop_icd_dgns_cd1=put(&icd_dgns_cd1,$dgns.);
-&pop_icd_prcdr_cd1=&icd_prcdr_cd1;
+&pop_icd_prcdr_cd1=put(&icd_prcdr_cd1, $prcdr.);
 &pop_clm_drg_cd=put(&clm_drg_cd,$drg.);
 &pop_hcpcs_cd=put(&hcpcs_cd,$hcpcs.);
 &pop_OP_PHYSN_SPCLTY_CD=&OP_PHYSN_SPCLTY_CD;
@@ -303,7 +303,8 @@ set pop_01_IN_2016_1 pop_01_IN_2016_2 pop_01_IN_2016_3 pop_01_IN_2016_4 pop_01_I
 if &pop_year<2016 then delete;
 if &pop_year>2018 then delete;
 format bene_state_cd prvdr_state_cd $state. &pop_OP_PHYSN_SPCLTY_CD $speccd. &pop_clm_src_ip_admsn_cd $src1adm.
-		&pop_ptnt_dschrg_stus_cd $stuscd.;
+		&pop_ptnt_dschrg_stus_cd $stuscd. &pop_icd_dgns_cd1 $dgns. &pop_hcpcs_cd $hcpcs. &pop_icd_prcdr_cd1 $prcdr.;
+
 run;
 /* get rid of duplicate rows--keep first occurence so sort by date first */
 proc sort data=pop_01_IN; by &bene_id &flag_popped_dt; run;
@@ -347,7 +348,7 @@ where
 ;
 quit;
 /*set info about pop, brining in any DX code inclusions & exclusions on same day as qualifying procedure*/
-Data &include_cohort (keep=  &vars_to_keep_op); 
+Data &include_cohort (keep=  &vars_to_keep_op bene_death_dt); 
 set include_cohort1c;  
 &flag_popped_dt=&clm_from_dt; 
 	format &flag_popped_dt date9.; 			label &flag_popped_dt	=	&flag_popped_dt_label;
@@ -358,6 +359,7 @@ set include_cohort1c;
 &pop_year=year(&clm_from_dt);
 &pop_nch_clm_type_cd=put(&nch_clm_type_cd, clm_type_cd.); label &pop_nch_clm_type_cd	=	&pop_nch_clm_type_cd_label;
 &pop_icd_dgns_cd1=put(&icd_dgns_cd1,$dgns.);
+&pop_icd_prcdr_cd1=put(&icd_prcdr_cd1, $prcdr.);
 &pop_hcpcs_cd=put(&hcpcs_cd,$hcpcs.);
 &pop_OP_PHYSN_SPCLTY_CD=&OP_PHYSN_SPCLTY_CD; format &pop_OP_PHYSN_SPCLTY_CD speccd.;
 if &flag_popped ne 1 then delete;
@@ -410,7 +412,7 @@ set pop_01_out_2016_1 pop_01_out_2016_2 pop_01_out_2016_3 pop_01_out_2016_4 pop_
 ;
 if &pop_year<2016 then delete;
 if &pop_year>2018 then delete;
-format &pop_OP_PHYSN_SPCLTY_CD $speccd. &pop_icd_dgns_cd1 $dgns. &pop_hcpcs_cd $hcpcs.;
+format &pop_OP_PHYSN_SPCLTY_CD $speccd. &pop_icd_dgns_cd1 $dgns. &pop_hcpcs_cd $hcpcs. &pop_icd_prcdr_cd1 $prcdr.;
 run;
 *get rid of duplicate rows by bene & DATE---don't sort by bene_id only yet (as we want 1 per person for final analysis)
 	so we can see all of the possible DX, CPT, PR codes possibly associated
@@ -534,28 +536,38 @@ proc transpose data=pop_01_in_out1 out=pop_01_in_out_transpose (drop = _name_ _l
     by &bene_id bene_death_dt ;
     var &flag_popped_dt;
 run;
-data pop_01_in_out_transpose2; set pop_01_in_out_transpose;
+data pop_01_in_out_transpose2 (keep = bene_id bene_death_dt ed_count_num); set pop_01_in_out_transpose;
 where flag_popped2 ne .;
+array count(24) flag_popped1-flag_popped24;
+do i=1 to 24;
+	if count(i) ne . then do; ed_count_num=i;end;
+end;
+label ed_count_num='number of times went to ED in 30 days before death';
 run;
 *merge in with the pop_01 if a and b and have those that popped...;
 
+proc sort data=pop_01_in_out; by bene_id bene_death_dt;
+proc sort data=pop_01_in_out_transpose2; by bene_id bene_death_dt;
+run;
+
+data pop_01_in_out_ed; 
+merge pop_01_in_out (in=a) pop_01_in_out_transpose2 (in=b);
+by bene_id bene_death_dt;
+if a and b;
+run;
+proc sort data=pop_01_in_out_ed; by bene_id &flag_popped_dt; run;
+proc sort data=pop_01_in_out_ed; by bene_id; run;
+
+title 'Popped after Counting ED admits in 30 days before death';
+proc means data=pop_01_in_out_ed n min mean median max; var ed_count_num; run;
 
 
-
-
-
-
-
-/*
-
-
-proc sort data=pop_01_in_out nodupkey; by bene_id; run;
-title 'Popped Outpatient (No Inpatient, No Carrier) For Analysis';
-proc freq data=pop_01_in_out; 
+title 'Popped Outpatient (No Inpatient, No Carrier) For Analysis, Require 2 ED admits in 30 days before death';
+proc freq data=pop_01_in_out_ed; 
 table  	&pop_year; run;
-proc contents data=pop_01_in_out; run;
+proc contents data=pop_01_in_out_ed; run;
 
 *save permanent dataset;
-data &permlib..pop_01_in_out; set pop_01_in_out; run;
+data &permlib..pop_01_in_out; set pop_01_in_out_ed; run;
 
 
