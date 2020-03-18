@@ -66,6 +66,7 @@ Actor		primary care, ENT, allergists
 %let	pop_ptnt_dschrg_stus_cd  		= pop_08_ptnt_dschrg_stus_cd			;
 %let	pop_admtg_dgns_cd				= pop_08_admtg_dgns_cd					;
 %let	pop_icd_dgns_cd1				= pop_08_icd_dgns_cd1					;
+%let	pop_icd_prcdr_cd1				= pop_01_icd_prcdr_cd1					;
 %let	pop_clm_drg_cd					= pop_08_clm_drg_cd						;
 %let	pop_hcpcs_cd					= pop_08_hcpcs_cd						;
 %let	pop_OP_PHYSN_SPCLTY_CD			= pop_08_OP_PHYSN_SPCLTY_CD				;
@@ -123,6 +124,7 @@ Actor		primary care, ENT, allergists
 %let  ptnt_dschrg_stus_cd = ptnt_dschrg_stus_cd ;
 %let  admtg_dgns_cd      = admtg_dgns_cd        ;
 %let  icd_dgns_cd1       = icd_dgns_cd1         ;
+%let  icd_PRCDR_cd1       = icd_PRCDR_cd1         ;
 %let  OP_PHYSN_SPCLTY_CD = OP_PHYSN_SPCLTY_CD   ;
 
 /*** end of section   - study specific variables ***/
@@ -268,6 +270,7 @@ end;
 &pop_ptnt_dschrg_stus_cd = &ptnt_dschrg_stus_cd; 		label &pop_ptnt_dschrg_stus_cd 	= 	&pop_ptnt_dschrg_stus_cd;
 &pop_admtg_dgns_cd=put(&admtg_dgns_cd,$dgns.);
 &pop_icd_dgns_cd1=put(&icd_dgns_cd1,$dgns.);
+&pop_icd_prcdr_cd1=put(&icd_prcdr_cd1, $prcdr.);
 &pop_clm_drg_cd=put(&clm_drg_cd,$drg.);
 &pop_hcpcs_cd=put(&hcpcs_cd,$hcpcs.);
 &pop_OP_PHYSN_SPCLTY_CD=&OP_PHYSN_SPCLTY_CD;
@@ -331,7 +334,7 @@ set pop_08_IN_2016_1 pop_08_IN_2016_2 pop_08_IN_2016_3 pop_08_IN_2016_4 pop_08_I
 if &pop_year<2016 then delete;
 if &pop_year>2018 then delete;
 format bene_state_cd prvdr_state_cd $state. &pop_OP_PHYSN_SPCLTY_CD $speccd. &pop_clm_src_ip_admsn_cd $src1adm.
-		&pop_ptnt_dschrg_stus_cd $stuscd.;
+		&pop_ptnt_dschrg_stus_cd $stuscd. &pop_icd_dgns_cd1 $dgns. &pop_hcpcs_cd $hcpcs. &pop_icd_prcdr_cd1 $prcdr.;
 run;
 /* get rid of duplicate rows--keep first occurence so sort by date first */
 proc sort data=pop_08_IN; by &bene_id &flag_popped_dt; run;
@@ -418,6 +421,7 @@ end;
 &pop_year=year(&clm_from_dt);
 &pop_nch_clm_type_cd=put(&nch_clm_type_cd, clm_type_cd.); label &pop_nch_clm_type_cd	=	&pop_nch_clm_type_cd_label;
 &pop_icd_dgns_cd1=put(&icd_dgns_cd1,$dgns.);
+&pop_icd_prcdr_cd1=put(&icd_prcdr_cd1, $prcdr.);
 &pop_hcpcs_cd=put(&hcpcs_cd,$hcpcs.);
 &pop_OP_PHYSN_SPCLTY_CD=&OP_PHYSN_SPCLTY_CD; format &pop_OP_PHYSN_SPCLTY_CD speccd.;
 array dx(25) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
@@ -478,7 +482,7 @@ set pop_08_out_2016_1 pop_08_out_2016_2 pop_08_out_2016_3 pop_08_out_2016_4 pop_
 ;
 if &pop_year<2016 then delete;
 if &pop_year>2018 then delete;
-format &pop_OP_PHYSN_SPCLTY_CD $speccd. &pop_icd_dgns_cd1 $dgns. &pop_hcpcs_cd $hcpcs.;
+format &pop_OP_PHYSN_SPCLTY_CD $speccd. &pop_icd_dgns_cd1 $dgns. &pop_hcpcs_cd $hcpcs. &pop_icd_prcdr_cd1 $prcdr.;
 run;
 *get rid of duplicate rows by bene & DATE---don't sort by bene_id only yet (as we want 1 per person for final analysis)
 	so we can see all of the possible DX, CPT, PR codes possibly associated
@@ -486,7 +490,7 @@ run;
 proc sort data=pop_08_OUT nodupkey; by bene_id &flag_popped_dt; run;
 
 
-
+%macro turn_all_this_off();
 /**Do same for Carrier file that we did for Outpatient**/
 /*Carrier does NOT have icd procedure codes--so that section of code does not exist for carrier*/
 %macro claims_rev(source=, rev_cohort=, include_cohort=, ccn=);
@@ -585,6 +589,8 @@ run;
 *get rid of duplicate rows--keep duplicate bene_ids for same reason as OP;
 proc sort data=pop_08_car nodupkey; by bene_id &flag_popped_dt; run;
 
+%mend; *** from turn_all_this_off;
+
 /**This section makes summaries for inpatient, outpatient carrier POPPED **/
 *look at inpatient info;
 %macro poppedlook(in=);
@@ -607,6 +613,10 @@ proc print data=&pop_year noobs; run;
 proc freq data=&in order=freq noprint; 
 table  	&pop_hcpcs_cd /nocum out=&pop_hcpcs_cd (drop = count); run;
 proc print data=&pop_hcpcs_cd noobs; where percent>1; run;
+
+proc freq data=&in order=freq noprint; 
+table  	&pop_icd_prcdr_cd1 /nocum out=&pop_icd_prcdr_cd1 (drop = count); run;
+proc print data=&pop_icd_prcdr_cd1 noobs; where percent>1; run;
 
 proc freq data=&in order=freq noprint; 
 table  	&pop_clm_drg_cd /nocum out=&pop_clm_drg_cd (drop = count); run;
