@@ -246,6 +246,7 @@ set include_cohort1c;
 &pop_ptnt_dschrg_stus_cd = &ptnt_dschrg_stus_cd; 		label &pop_ptnt_dschrg_stus_cd 	= 	&pop_ptnt_dschrg_stus_cd;
 &pop_admtg_dgns_cd=put(&admtg_dgns_cd,$dgns.);
 &pop_icd_dgns_cd1=put(&icd_dgns_cd1,$dgns.);
+&pop_icd_prcdr_cd1=&icd_prcdr_cd1;
 &pop_clm_drg_cd=put(&clm_drg_cd,$drg.);
 &pop_hcpcs_cd=put(&hcpcs_cd,$hcpcs.);
 &pop_OP_PHYSN_SPCLTY_CD=&OP_PHYSN_SPCLTY_CD;
@@ -522,15 +523,16 @@ data pop_01_in_out
 	(keep = bene_id &flag_popped &pop_age &flag_popped_dt &pop_year &gndr_cd
 			prvdr_num prvdr_state_cd OP_PHYSN_SPCLTY_CD /*RFR_PHYSN_NPI*/
 			at_physn_npi op_physn_npi org_npi_num ot_physn_npi rndrng_physn_npi
-			bene_race_cd	bene_cnty_cd bene_state_cd 	bene_mlg_cntct_zip_cd);
+			bene_race_cd	bene_cnty_cd bene_state_cd 	bene_mlg_cntct_zip_cd
+			bene_death_dt);
 set pop_01_IN pop_01_OUT;
 run;
 proc sort data=pop_01_in_out nodupkey; by bene_id &flag_popped_dt; run;
 
 proc sort data=pop_01_in_out nodupkey out=pop_01_in_out1; by &bene_id &flag_popped_dt; run;
 proc transpose data=pop_01_in_out1 out=pop_01_in_out_transpose (drop = _name_ _label_) prefix=flag_popped;
-    by &bene_id &flag_popped_dt ;
-    var &flag_popped;
+    by &bene_id bene_death_dt ;
+    var &flag_popped_dt;
 run;
 data pop_01_in_out_transpose2; set pop_01_in_out_transpose;
 where flag_popped2 ne .;
