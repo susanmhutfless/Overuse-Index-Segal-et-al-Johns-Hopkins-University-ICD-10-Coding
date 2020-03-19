@@ -30,10 +30,10 @@ Perhaps failure of primary care
 
 /*inclusion criteria (options: CPT/HCPCS, ICD procedure, ICD diagnosis, DRG)*/
 
-/*revenue center for inpatient/outpatient includes ED*/
+/*revenue center for inpatient/outpatient identifies ED*/
 %global rev_cntr;
 %let rev_cntr = rev_cntr;
-%let ED_hcpcs = '0450' '0451' '0452' '0453' '0454' '0455' '0456'
+%let ED_rev_cntr = '0450' '0451' '0452' '0453' '0454' '0455' '0456'
 				'0457' '0458' '0459' '0981'  					;
 *ed list from https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5905698/;
 
@@ -197,7 +197,7 @@ proc sort data=pop_01_vital; by bene_id; run;
 proc sql;
 create table include_cohort1a (compress=yes) as
 select a.&bene_id, a.&clm_id, a.&hcpcs_cd, a.&clm_thru_dt, a.&rev_cntr, 
-		case when a.&rev_cntr in (&ED_hcpcs) then 1 else 0 end as &flag_popped,
+		case when a.&rev_cntr in (&ED_rev_cntr) then 1 else 0 end as &flag_popped,
 		b.*
 from 
 	&rev_cohort a,
@@ -316,7 +316,7 @@ proc sort data=pop_01_IN; by &bene_id &flag_popped_dt; run;
 proc sql;
 create table include_cohort1a (compress=yes) as
 select a.&bene_id, a.&clm_id, a.&hcpcs_cd, a.&clm_thru_dt, a.&rev_cntr, 
-		case when a.&rev_cntr in (&ED_hcpcs) then 1 else 0 end as &flag_popped,
+		case when a.&rev_cntr in (&ED_rev_cntr) then 1 else 0 end as &flag_popped,
 		b.*
 from 
 	&rev_cohort a,
