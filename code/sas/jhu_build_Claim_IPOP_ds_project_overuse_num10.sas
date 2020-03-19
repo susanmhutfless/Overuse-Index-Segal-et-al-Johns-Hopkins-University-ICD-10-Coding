@@ -64,6 +64,7 @@ Actor		ENT docs, maybe allergists
 %let	pop_ptnt_dschrg_stus_cd  		= pop_10_ptnt_dschrg_stus_cd			;
 %let	pop_admtg_dgns_cd				= pop_10_admtg_dgns_cd					;
 %let	pop_icd_dgns_cd1				= pop_10_icd_dgns_cd1					;
+%let	pop_icd_prcdr_cd1				= pop_10_icd_prcdr_cd1					;
 %let	pop_clm_drg_cd					= pop_10_clm_drg_cd						;
 %let	pop_hcpcs_cd					= pop_10_hcpcs_cd						;
 %let	pop_OP_PHYSN_SPCLTY_CD			= pop_10_OP_PHYSN_SPCLTY_CD				;
@@ -121,6 +122,7 @@ Actor		ENT docs, maybe allergists
 %let  ptnt_dschrg_stus_cd = ptnt_dschrg_stus_cd ;
 %let  admtg_dgns_cd      = admtg_dgns_cd        ;
 %let  icd_dgns_cd1       = icd_dgns_cd1         ;
+%let  icd_prcdr_cd1       = icd_prcdr_cd1         ;
 %let  OP_PHYSN_SPCLTY_CD = OP_PHYSN_SPCLTY_CD   ;
 
 /*** end of section   - study specific variables ***/
@@ -266,17 +268,16 @@ end;
 &pop_ptnt_dschrg_stus_cd = &ptnt_dschrg_stus_cd; 		label &pop_ptnt_dschrg_stus_cd 	= 	&pop_ptnt_dschrg_stus_cd;
 &pop_admtg_dgns_cd=put(&admtg_dgns_cd,$dgns.);
 &pop_icd_dgns_cd1=put(&icd_dgns_cd1,$dgns.);
+&pop_icd_prcdr_cd1=put(&icd_prcdr_cd1,$prcdr.);
 &pop_clm_drg_cd=put(&clm_drg_cd,$drg.);
 &pop_hcpcs_cd=put(&hcpcs_cd,$hcpcs.);
 &pop_OP_PHYSN_SPCLTY_CD=&OP_PHYSN_SPCLTY_CD;
 array dx(25) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
 do j=1 to &diag_cd_max;
 	if substr(dx(j),1,4) in(&includ_dx10_4) then include=1;
-	if HCPCS in(&EXCLUD_hcpcs) then DELETE=1;	*will make the 180 day exclusion after merge inp, out, car;		
 end;
 if &flag_popped ne 1 then delete;
 IF include ne 1 then delete;
-IF DELETE  =  1 then delete; *this is for same day cancer dx only;
 *if clm_drg_cd notin(&includ_drg) then delete;
 run; 
 %mend;
@@ -416,17 +417,15 @@ end;
 &pop_year=year(&clm_from_dt);
 &pop_nch_clm_type_cd=put(&nch_clm_type_cd, clm_type_cd.); label &pop_nch_clm_type_cd	=	&pop_nch_clm_type_cd_label;
 &pop_icd_dgns_cd1=put(&icd_dgns_cd1,$dgns.);
+&pop_icd_prcdr_cd1=put(&icd_prcdr_cd1,$prcdr.);
 &pop_hcpcs_cd=put(&hcpcs_cd,$hcpcs.);
 &pop_OP_PHYSN_SPCLTY_CD=&OP_PHYSN_SPCLTY_CD; format &pop_OP_PHYSN_SPCLTY_CD speccd.;
 array dx(25) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
 do j=1 to &diag_cd_max;
 	if substr(dx(j),1,4) in(&includ_dx10_4) then include=1;
-	if HCPCS in(&EXCLUD_hcpcs) then DELETE=1;	*will make the 180 day exclusion after merge inp, out, car;		
 end;
 if &flag_popped ne 1 then delete;
 IF include ne 1 then delete;
-IF DELETE  =  1 then delete; 
-*if clm_drg_cd notin(&includ_drg) then delete;
 run; 
 %mend;
 %claims_rev(source=rif2016.OUTpatient_claims_01, rev_cohort=rif2016.OUTpatient_revenue_01, include_cohort=pop_10_out_2016_1, ccn=ccn2016);
@@ -476,7 +475,7 @@ set pop_10_out_2016_1 pop_10_out_2016_2 pop_10_out_2016_3 pop_10_out_2016_4 pop_
 ;
 if &pop_year<2016 then delete;
 if &pop_year>2018 then delete;
-format &pop_OP_PHYSN_SPCLTY_CD $speccd. &pop_icd_dgns_cd1 $dgns. &pop_hcpcs_cd $hcpcs.;
+format &pop_OP_PHYSN_SPCLTY_CD $speccd. &pop_icd_dgns_cd1 $dgns. &pop_hcpcs_cd $hcpcs. &pop_icd_prcdr_cd1 $prcdr.;
 run;
 *get rid of duplicate rows by bene & DATE---don't sort by bene_id only yet (as we want 1 per person for final analysis)
 	so we can see all of the possible DX, CPT, PR codes possibly associated
@@ -484,7 +483,7 @@ run;
 proc sort data=pop_10_OUT nodupkey; by bene_id &flag_popped_dt; run;
 
 
-
+%macro turn_all_this_off();
 /**Do same for Carrier file that we did for Outpatient**/
 /*Carrier does NOT have icd procedure codes--so that section of code does not exist for carrier*/
 %macro claims_rev(source=, rev_cohort=, include_cohort=, ccn=);
@@ -582,7 +581,7 @@ format &pop_OP_PHYSN_SPCLTY_CD prvdr_spclty $speccd. &pop_icd_dgns_cd1 $dgns. &p
 run;
 *get rid of duplicate rows--keep duplicate bene_ids for same reason as OP;
 proc sort data=pop_10_car nodupkey; by bene_id &flag_popped_dt; run;
-
+%mend; *** from turn_all_this_off;
 /**This section makes summaries for inpatient, outpatient carrier POPPED **/
 *look at inpatient info;
 %macro poppedlook(in=);
@@ -674,6 +673,7 @@ proc print data=&gndr_cd noobs; run;
 proc means data=&in mean median min max; var  &pop_age &pop_los; run;
 %mend;
 %poppedlook(in=pop_10_OUT);
+%macro turn_all_this_off();
 title 'Carrier Popped';
 %macro poppedlook(in=);
 proc freq data=&in order=freq noprint; 
@@ -710,6 +710,7 @@ proc print data=&gndr_cd noobs; run;
 proc means data=&in mean median min max; var  &pop_age &pop_los; run;
 %mend;
 %poppedlook(in=pop_10_car);
+%mend; *** from turn_all_this_off;
 
 *compile Popped into 1 dataset
 		DO NOT INCLUDE CARRIER
