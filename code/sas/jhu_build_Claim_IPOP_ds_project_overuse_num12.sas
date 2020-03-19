@@ -76,6 +76,7 @@ Actor		Neurologists, hospitalists
 %let	pop_ptnt_dschrg_stus_cd  		= pop_12_ptnt_dschrg_stus_cd			;
 %let	pop_admtg_dgns_cd				= pop_12_admtg_dgns_cd					;
 %let	pop_icd_dgns_cd1				= pop_12_icd_dgns_cd1					;
+%let	pop_icd_prcdr_cd1				= pop_12_icd_prcdr_cd1					;
 %let	pop_clm_drg_cd					= pop_12_clm_drg_cd						;
 %let	pop_hcpcs_cd					= pop_12_hcpcs_cd						;
 %let	pop_OP_PHYSN_SPCLTY_CD			= pop_12_OP_PHYSN_SPCLTY_CD				;
@@ -133,6 +134,7 @@ Actor		Neurologists, hospitalists
 %let  ptnt_dschrg_stus_cd = ptnt_dschrg_stus_cd ;
 %let  admtg_dgns_cd      = admtg_dgns_cd        ;
 %let  icd_dgns_cd1       = icd_dgns_cd1         ;
+%let  icd_prcdr_cd1       = icd_prcdr_cd1         ;
 %let  OP_PHYSN_SPCLTY_CD = OP_PHYSN_SPCLTY_CD   ;
 
 /*** end of section   - study specific variables ***/
@@ -278,6 +280,7 @@ end;
 &pop_ptnt_dschrg_stus_cd = &ptnt_dschrg_stus_cd; 		label &pop_ptnt_dschrg_stus_cd 	= 	&pop_ptnt_dschrg_stus_cd;
 &pop_admtg_dgns_cd=put(&admtg_dgns_cd,$dgns.);
 &pop_icd_dgns_cd1=put(&icd_dgns_cd1,$dgns.);
+&pop_icd_prcdr_cd1=put(&icd_prcdr_cd1,$prcdr.);
 &pop_clm_drg_cd=put(&clm_drg_cd,$drg.);
 &pop_hcpcs_cd=put(&hcpcs_cd,$hcpcs.);
 &pop_OP_PHYSN_SPCLTY_CD=&OP_PHYSN_SPCLTY_CD;
@@ -339,11 +342,12 @@ set pop_12_IN_2016_1 pop_12_IN_2016_2 pop_12_IN_2016_3 pop_12_IN_2016_4 pop_12_I
 if &pop_year<2016 then delete;
 if &pop_year>2018 then delete;
 format bene_state_cd prvdr_state_cd $state. &pop_OP_PHYSN_SPCLTY_CD $speccd. &pop_clm_src_ip_admsn_cd $src1adm.
-		&pop_ptnt_dschrg_stus_cd $stuscd.;
+		&pop_ptnt_dschrg_stus_cd $stuscd. &pop_icd_dgns_cd1 $dgns. &pop_icd_prcdr_cd1 $prcdr. &pop_hcpcs_cd $hcpcs.;
 run;
 /* get rid of duplicate rows--keep first occurence so sort by date first */
 proc sort data=pop_12_IN; by &bene_id &flag_popped_dt; run;
 
+%macro turn_all_this_off();
 /*** this section is related to OP - OUTpatient claims ***/
 %macro claims_rev(source=, rev_cohort=, include_cohort=, ccn=);
 /* identify hcpcs  */
@@ -585,6 +589,7 @@ format &pop_OP_PHYSN_SPCLTY_CD prvdr_spclty $speccd. &pop_icd_dgns_cd1 $dgns. &p
 run;
 *get rid of duplicate rows--keep duplicate bene_ids for same reason as OP;
 proc sort data=pop_12_car nodupkey; by bene_id &flag_popped_dt; run;
+%mend; *** from turn_all_this_off;
 
 /**This section makes summaries for inpatient, outpatient carrier POPPED **/
 *look at inpatient info;
@@ -638,6 +643,8 @@ proc means data=&in mean median min max; var  &pop_age &pop_los; run;
 		/*bene_state_cd prvdr_state_cd 
 		&pop_OP_PHYSN_SPCLTY_CD &pop_clm_fac_type_cd &pop_ptnt_dschrg_stus_cd
 		&pop_nch_clm_type_cd &pop_CLM_IP_ADMSN_TYPE_CD &pop_clm_src_ip_admsn_cd*/  
+
+%macro turn_all_this_off();
 title 'Outpatient Popped';
 %macro poppedlook(in=);
 proc freq data=&in order=freq noprint; 
@@ -713,6 +720,7 @@ proc print data=&gndr_cd noobs; run;
 proc means data=&in mean median min max; var  &pop_age &pop_los; run;
 %mend;
 %poppedlook(in=pop_12_car);
+%mend; *** from turn_all_this_off;
 
 *compile all Inpatient and Outpatient Popped into 1 dataset
 		DO NOT INCLUDE CARRIER
