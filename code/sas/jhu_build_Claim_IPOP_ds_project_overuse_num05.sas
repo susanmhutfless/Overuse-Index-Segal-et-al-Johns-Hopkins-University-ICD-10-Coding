@@ -1074,15 +1074,13 @@ by &bene_id &flag_popped_dt;
 run;
 
 *merge excludes with perm dataset and delete;
-proc sort data=pop_05_include NODUPKEY; by &bene_id &flag_popped_dt; run;
 proc sort data=pop_05_exclude NODUPKEY; by &bene_id &flag_popped_dt; run;
 proc sort data=&permlib..pop_05_in_out; by &bene_id &flag_popped_dt; run;
 
 data &permlib..pop_05_in_out (drop = delete);
-merge &permlib..pop_05_in_out pop_05_exclude pop_05_include;
+merge &permlib..pop_05_in_out pop_05_exclude;
 by &bene_id &flag_popped_dt;
 if DELETE=1 then delete;
-if INCLUDE ne 1 then delete;
 run;
 *keep only 1 pop per person;
 proc sort data=&permlib..pop_05_in_out; by &bene_id; run;
