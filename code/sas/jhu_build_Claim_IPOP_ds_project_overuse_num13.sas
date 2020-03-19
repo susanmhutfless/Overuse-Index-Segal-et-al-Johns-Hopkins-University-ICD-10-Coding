@@ -39,7 +39,7 @@ Actor		Neurologists, primary care
 %let includ_pr10 =
 					'B345ZZ3' 'B345ZZZ' 'B348ZZ3' 'B348ZZZ'				;
 
-%let includ_dx10 = 		;
+*%let includ_dx10 = 		;
 
 %let includ_drg = ;
 
@@ -63,6 +63,7 @@ Actor		Neurologists, primary care
 %let	pop_ptnt_dschrg_stus_cd  		= pop_13_ptnt_dschrg_stus_cd			;
 %let	pop_admtg_dgns_cd				= pop_13_admtg_dgns_cd					;
 %let	pop_icd_dgns_cd1				= pop_13_icd_dgns_cd1					;
+%let	pop_icd_prcdr_cd1				= pop_13_icd_prcdr_cd1					;
 %let	pop_clm_drg_cd					= pop_13_clm_drg_cd						;
 %let	pop_hcpcs_cd					= pop_13_hcpcs_cd						;
 %let	pop_OP_PHYSN_SPCLTY_CD			= pop_13_OP_PHYSN_SPCLTY_CD				;
@@ -120,6 +121,7 @@ Actor		Neurologists, primary care
 %let  ptnt_dschrg_stus_cd = ptnt_dschrg_stus_cd ;
 %let  admtg_dgns_cd      = admtg_dgns_cd        ;
 %let  icd_dgns_cd1       = icd_dgns_cd1         ;
+%let  icd_prcdr_cd1       = icd_prcdr_cd1         ;
 %let  OP_PHYSN_SPCLTY_CD = OP_PHYSN_SPCLTY_CD   ;
 
 /*** end of section   - study specific variables ***/
@@ -247,7 +249,7 @@ quit;
 Data &include_cohort (keep=  &vars_to_keep_ip); 
 set include_cohort2;  
 array pr(25) &proc_pfx.&proc_cd_min - &proc_pfx.&proc_cd_max;
-do i=1 to &diag_cd_max;
+do i=1 to &proc_cd_max;
 	if pr(i) in(&includ_pr10) then &flag_popped=1;
 end; 
 &flag_popped_dt=&clm_beg_dt_in; 
@@ -265,6 +267,7 @@ end;
 &pop_ptnt_dschrg_stus_cd = &ptnt_dschrg_stus_cd; 		label &pop_ptnt_dschrg_stus_cd 	= 	&pop_ptnt_dschrg_stus_cd;
 &pop_admtg_dgns_cd=put(&admtg_dgns_cd,$dgns.);
 &pop_icd_dgns_cd1=put(&icd_dgns_cd1,$dgns.);
+&pop_icd_prcdr_cd1=put(&icd_prcdr_cd1,$prcdr.);
 &pop_clm_drg_cd=put(&clm_drg_cd,$drg.);
 &pop_hcpcs_cd=put(&hcpcs_cd,$hcpcs.);
 &pop_OP_PHYSN_SPCLTY_CD=&OP_PHYSN_SPCLTY_CD;
@@ -413,6 +416,7 @@ end;
 &pop_year=year(&clm_from_dt);
 &pop_nch_clm_type_cd=put(&nch_clm_type_cd, clm_type_cd.); label &pop_nch_clm_type_cd	=	&pop_nch_clm_type_cd_label;
 &pop_icd_dgns_cd1=put(&icd_dgns_cd1,$dgns.);
+&pop_icd_prcdr_cd1=put(&icd_prcdr_cd1,$prcdr.);
 &pop_hcpcs_cd=put(&hcpcs_cd,$hcpcs.);
 &pop_OP_PHYSN_SPCLTY_CD=&OP_PHYSN_SPCLTY_CD; format &pop_OP_PHYSN_SPCLTY_CD speccd.;
 array dx(25) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
@@ -421,7 +425,6 @@ do j=1 to &diag_cd_max;
 end;
 if &flag_popped ne 1 then delete;
 IF DELETE  =  1 then delete; 
-*if clm_drg_cd notin(&includ_drg) then delete;
 run;   
 %mend;
 %claims_rev(source=rif2016.OUTpatient_claims_01, rev_cohort=rif2016.OUTpatient_revenue_01, include_cohort=pop_13_out_2016_1, ccn=ccn2016);
@@ -471,7 +474,7 @@ set pop_13_out_2016_1 pop_13_out_2016_2 pop_13_out_2016_3 pop_13_out_2016_4 pop_
 ;
 if &pop_year<2016 then delete;
 if &pop_year>2018 then delete;
-format &pop_OP_PHYSN_SPCLTY_CD $speccd. &pop_icd_dgns_cd1 $dgns. &pop_hcpcs_cd $hcpcs.;
+format &pop_OP_PHYSN_SPCLTY_CD $speccd. &pop_icd_dgns_cd1 $dgns. &pop_icd_prcdr_cd1 $prcdr. &pop_hcpcs_cd $hcpcs.;
 run;
 *get rid of duplicate rows by bene & DATE---don't sort by bene_id only yet (as we want 1 per person for final analysis)
 	so we can see all of the possible DX, CPT, PR codes possibly associated
@@ -479,7 +482,7 @@ run;
 proc sort data=pop_13_OUT nodupkey; by bene_id &flag_popped_dt; run;
 
 
-
+%macro turn_all_this_off();
 /**Do same for Carrier file that we did for Outpatient**/
 /*Carrier does NOT have icd procedure codes--so that section of code does not exist for carrier*/
 %macro claims_rev(source=, rev_cohort=, include_cohort=, ccn=);
@@ -576,6 +579,7 @@ format &pop_OP_PHYSN_SPCLTY_CD prvdr_spclty $speccd. &pop_icd_dgns_cd1 $dgns. &p
 run;
 *get rid of duplicate rows--keep duplicate bene_ids for same reason as OP;
 proc sort data=pop_13_car nodupkey; by bene_id &flag_popped_dt; run;
+%mend; *** from turn_all_this_off;
 
 /**This section makes summaries for inpatient, outpatient carrier POPPED **/
 *look at inpatient info;
@@ -599,6 +603,10 @@ proc print data=&pop_year noobs; run;
 proc freq data=&in order=freq noprint; 
 table  	&pop_hcpcs_cd /nocum out=&pop_hcpcs_cd (drop = count); run;
 proc print data=&pop_hcpcs_cd noobs; where percent>1; run;
+
+proc freq data=&in order=freq noprint; 
+table  	&pop_icd_prcdr_cd1 /nocum out=&pop_icd_prcdr_cd1 (drop = count); run;
+proc print data=&pop_icd_prcdr_cd1 noobs; where percent>1; run;
 
 proc freq data=&in order=freq noprint; 
 table  	&pop_clm_drg_cd /nocum out=&pop_clm_drg_cd (drop = count); run;
@@ -651,6 +659,10 @@ table  	&pop_hcpcs_cd /nocum out=&pop_hcpcs_cd (drop = count); run;
 proc print data=&pop_hcpcs_cd noobs; where percent>1; run;
 
 proc freq data=&in order=freq noprint; 
+table  	&pop_icd_prcdr_cd1 /nocum out=&pop_icd_prcdr_cd1 (drop = count); run;
+proc print data=&pop_icd_prcdr_cd1 noobs; where percent>1; run;
+
+proc freq data=&in order=freq noprint; 
 table  	&pop_icd_dgns_cd1 /nocum out=&pop_icd_dgns_cd1 (drop = count); run;
 proc print data=&pop_icd_dgns_cd1 noobs; where percent>1; run;
 
@@ -668,6 +680,8 @@ proc print data=&gndr_cd noobs; run;
 proc means data=&in mean median min max; var  &pop_age &pop_los; run;
 %mend;
 %poppedlook(in=pop_13_OUT);
+
+%macro turn_all_this_off();
 title 'Carrier Popped';
 %macro poppedlook(in=);
 proc freq data=&in order=freq noprint; 
@@ -704,6 +718,7 @@ proc print data=&gndr_cd noobs; run;
 proc means data=&in mean median min max; var  &pop_age &pop_los; run;
 %mend;
 %poppedlook(in=pop_13_car);
+%mend; *** from turn_all_this_off;
 
 *compile Popped into 1 dataset
 		DO NOT INCLUDE CARRIER
@@ -713,11 +728,11 @@ data pop_13_in_out
 			prvdr_num prvdr_state_cd OP_PHYSN_SPCLTY_CD /*RFR_PHYSN_NPI*/
 			at_physn_npi op_physn_npi org_npi_num ot_physn_npi rndrng_physn_npi
 			bene_race_cd	bene_cnty_cd bene_state_cd 	bene_mlg_cntct_zip_cd);
-set pop_13_IN pop_13_OUT;
+set /*pop_13_IN*/ pop_13_OUT;
 run;
 proc sort data=pop_13_in_out nodupkey; by bene_id &flag_popped_dt; run;
 proc sort data=pop_13_in_out nodupkey; by bene_id; run;
-title 'Popped Inpatient or Outpatient (No Carrier) For Analysis';
+title 'Popped Outpatient (No Inpatient, No Carrier) For Analysis';
 proc freq data=pop_13_in_out; 
 table  	&pop_year; run;
 proc contents data=pop_13_in_out; run;
@@ -1053,6 +1068,6 @@ by &bene_id &flag_popped_dt;
 if DELETE=1 then delete;
 run;
 
-title 'Popped Inpatient or Outpatient (No Carrier) For Analysis AFTER lookback exclusion';
+title 'Popped Outpatient (No Inpatient, No Carrier) For Analysis AFTER lookback exclusion';
 proc freq data=&permlib..pop_13_in_out; 
 table  	&pop_year; run;
