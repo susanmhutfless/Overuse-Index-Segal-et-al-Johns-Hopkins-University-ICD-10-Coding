@@ -488,105 +488,6 @@ run;
 proc sort data=pop_13_OUT nodupkey; by bene_id &flag_popped_dt; run;
 
 
-%macro turn_all_this_off();
-/**Do same for Carrier file that we did for Outpatient**/
-/*Carrier does NOT have icd procedure codes--so that section of code does not exist for carrier*/
-%macro claims_rev(source=, rev_cohort=, include_cohort=, ccn=);
-/* identify hcpcs  */
-proc sql;
-create table include_cohort1 (compress=yes) as
-select &bene_id, &clm_id, &hcpcs_cd, case when &hcpcs_cd in (&includ_hcpcs) then 1 else 0 end as &flag_popped
-from 
-	&rev_cohort
-where 
-	&hcpcs_cd in (&includ_hcpcs);
-quit;
-/* pull claim info for those with HCPCS (need to do this to get dx codes)*/
-proc sql;
-	create table include_cohort2 (compress=yes) as
-select a.&hcpcs_cd, a.&flag_popped, b.*
-from 
-	include_cohort1 a, 
-	&source b
-where 
-	(a.&bene_id=b.&bene_id and a.&clm_id=b.&clm_id);
-quit;
-Data &include_cohort (keep = &vars_to_keep_car); 
-set include_cohort2;  
-&flag_popped_dt=&clm_from_dt; 
-	format &flag_popped_dt date9.; 			label &flag_popped_dt	=	&flag_popped_dt_label;
-											label &flag_popped		=	&flag_popped_label;
-&pop_age=(&clm_from_dt-&clm_dob)/365.25; 	label &pop_age			=	&pop_age_label;
-&pop_age=round(&pop_age);
-&pop_los=&clm_thru_dt-&clm_from_dt;			label &pop_los			=	&pop_los_label;
-&pop_year=year(&clm_from_dt);
-&pop_nch_clm_type_cd=put(&nch_clm_type_cd, clm_type_cd.); label &pop_nch_clm_type_cd	=	&pop_nch_clm_type_cd_label;
-&pop_icd_dgns_cd1=put(&icd_dgns_cd1,$dgns.);
-&pop_hcpcs_cd=put(&hcpcs_cd,$hcpcs.);
-&pop_OP_PHYSN_SPCLTY_CD=&OP_PHYSN_SPCLTY_CD; format &pop_OP_PHYSN_SPCLTY_CD speccd.;
-array dx(25) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
-do j=1 to &diag_cd_max;
-	if substr(dx(j),1,3) in(&EXCLUD_dx10_3) then DELETE=1;	*will make the 180 day exclusion after merge inp, out, car;		
-end;
-if &flag_popped ne 1 then delete;
-IF DELETE  =  1 then delete; 
-*if clm_drg_cd notin(&includ_drg) then delete;
-run; 
-%mend;
-%claims_rev(source=rif2016.bcarrier_claims_01, rev_cohort=rif2016.bcarrier_line_01, include_cohort=pop_13_CAR_2016_1, ccn=ccn2016);
-%claims_rev(source=rif2016.bcarrier_claims_01, rev_cohort=rif2016.bcarrier_line_01, include_cohort=pop_13_CAR_2016_1, ccn=ccn2016);
-%claims_rev(source=rif2016.bcarrier_claims_02, rev_cohort=rif2016.bcarrier_line_02, include_cohort=pop_13_CAR_2016_2, ccn=ccn2016);
-%claims_rev(source=rif2016.bcarrier_claims_03, rev_cohort=rif2016.bcarrier_line_03, include_cohort=pop_13_CAR_2016_3, ccn=ccn2016);
-%claims_rev(source=rif2016.bcarrier_claims_04, rev_cohort=rif2016.bcarrier_line_04, include_cohort=pop_13_CAR_2016_4, ccn=ccn2016);
-%claims_rev(source=rif2016.bcarrier_claims_05, rev_cohort=rif2016.bcarrier_line_05, include_cohort=pop_13_CAR_2016_5, ccn=ccn2016);
-%claims_rev(source=rif2016.bcarrier_claims_06, rev_cohort=rif2016.bcarrier_line_06, include_cohort=pop_13_CAR_2016_6, ccn=ccn2016);
-%claims_rev(source=rif2016.bcarrier_claims_07, rev_cohort=rif2016.bcarrier_line_07, include_cohort=pop_13_CAR_2016_7, ccn=ccn2016);
-%claims_rev(source=rif2016.bcarrier_claims_08, rev_cohort=rif2016.bcarrier_line_08, include_cohort=pop_13_CAR_2016_8, ccn=ccn2016);
-%claims_rev(source=rif2016.bcarrier_claims_09, rev_cohort=rif2016.bcarrier_line_09, include_cohort=pop_13_CAR_2016_9, ccn=ccn2016);
-%claims_rev(source=rif2016.bcarrier_claims_10, rev_cohort=rif2016.bcarrier_line_10, include_cohort=pop_13_CAR_2016_10, ccn=ccn2016);
-%claims_rev(source=rif2016.bcarrier_claims_11, rev_cohort=rif2016.bcarrier_line_11, include_cohort=pop_13_CAR_2016_11, ccn=ccn2016);
-%claims_rev(source=rif2016.bcarrier_claims_12, rev_cohort=rif2016.bcarrier_line_12, include_cohort=pop_13_CAR_2016_12, ccn=ccn2016);
-%claims_rev(source=rif2017.bcarrier_claims_01, rev_cohort=rif2017.bcarrier_line_01, include_cohort=pop_13_CAR_2017_1, ccn=ccn2016);
-%claims_rev(source=rif2017.bcarrier_claims_02, rev_cohort=rif2017.bcarrier_line_02, include_cohort=pop_13_CAR_2017_2, ccn=ccn2016);
-%claims_rev(source=rif2017.bcarrier_claims_03, rev_cohort=rif2017.bcarrier_line_03, include_cohort=pop_13_CAR_2017_3, ccn=ccn2016);
-%claims_rev(source=rif2017.bcarrier_claims_04, rev_cohort=rif2017.bcarrier_line_04, include_cohort=pop_13_CAR_2017_4, ccn=ccn2016);
-%claims_rev(source=rif2017.bcarrier_claims_05, rev_cohort=rif2017.bcarrier_line_05, include_cohort=pop_13_CAR_2017_5, ccn=ccn2016);
-%claims_rev(source=rif2017.bcarrier_claims_06, rev_cohort=rif2017.bcarrier_line_06, include_cohort=pop_13_CAR_2017_6, ccn=ccn2016);
-%claims_rev(source=rif2017.bcarrier_claims_07, rev_cohort=rif2017.bcarrier_line_07, include_cohort=pop_13_CAR_2017_7, ccn=ccn2016);
-%claims_rev(source=rif2017.bcarrier_claims_08, rev_cohort=rif2017.bcarrier_line_08, include_cohort=pop_13_CAR_2017_8, ccn=ccn2016);
-%claims_rev(source=rif2017.bcarrier_claims_09, rev_cohort=rif2017.bcarrier_line_09, include_cohort=pop_13_CAR_2017_9, ccn=ccn2016);
-%claims_rev(source=rif2017.bcarrier_claims_10, rev_cohort=rif2017.bcarrier_line_10, include_cohort=pop_13_CAR_2017_10, ccn=ccn2016);
-%claims_rev(source=rif2017.bcarrier_claims_11, rev_cohort=rif2017.bcarrier_line_11, include_cohort=pop_13_CAR_2017_11, ccn=ccn2016);
-%claims_rev(source=rif2017.bcarrier_claims_12, rev_cohort=rif2017.bcarrier_line_12, include_cohort=pop_13_CAR_2017_12, ccn=ccn2016);
-%claims_rev(source=rifq2018.bcarrier_claims_01, rev_cohort=rifq2018.bcarrier_line_01, include_cohort=pop_13_CAR_2018_1, ccn=ccn2016);
-%claims_rev(source=rifq2018.bcarrier_claims_02, rev_cohort=rifq2018.bcarrier_line_02, include_cohort=pop_13_CAR_2018_2, ccn=ccn2016);
-%claims_rev(source=rifq2018.bcarrier_claims_03, rev_cohort=rifq2018.bcarrier_line_03, include_cohort=pop_13_CAR_2018_3, ccn=ccn2016);
-%claims_rev(source=rifq2018.bcarrier_claims_04, rev_cohort=rifq2018.bcarrier_line_04, include_cohort=pop_13_CAR_2018_4, ccn=ccn2016);
-%claims_rev(source=rifq2018.bcarrier_claims_05, rev_cohort=rifq2018.bcarrier_line_05, include_cohort=pop_13_CAR_2018_5, ccn=ccn2016);
-%claims_rev(source=rifq2018.bcarrier_claims_06, rev_cohort=rifq2018.bcarrier_line_06, include_cohort=pop_13_CAR_2018_6, ccn=ccn2016);
-%claims_rev(source=rifq2018.bcarrier_claims_07, rev_cohort=rifq2018.bcarrier_line_07, include_cohort=pop_13_CAR_2018_7, ccn=ccn2016);
-%claims_rev(source=rifq2018.bcarrier_claims_08, rev_cohort=rifq2018.bcarrier_line_08, include_cohort=pop_13_CAR_2018_8, ccn=ccn2016);
-%claims_rev(source=rifq2018.bcarrier_claims_09, rev_cohort=rifq2018.bcarrier_line_09, include_cohort=pop_13_CAR_2018_9, ccn=ccn2016);
-%claims_rev(source=rifq2018.bcarrier_claims_10, rev_cohort=rifq2018.bcarrier_line_10, include_cohort=pop_13_CAR_2018_10, ccn=ccn2016);
-%claims_rev(source=rifq2018.bcarrier_claims_11, rev_cohort=rifq2018.bcarrier_line_11, include_cohort=pop_13_CAR_2018_11, ccn=ccn2016);
-%claims_rev(source=rifq2018.bcarrier_claims_12, rev_cohort=rifq2018.bcarrier_line_12, include_cohort=pop_13_CAR_2018_12, ccn=ccn2016);
-
-data pop_13_car;
-set pop_13_car_2016_1 pop_13_car_2016_2 pop_13_car_2016_3 pop_13_car_2016_4 pop_13_car_2016_5 pop_13_car_2016_6
-	pop_13_car_2016_7 pop_13_car_2016_8 pop_13_car_2016_9 pop_13_car_2016_10 pop_13_car_2016_11 pop_13_car_2016_12
-	pop_13_car_2017_1 pop_13_car_2017_2 pop_13_car_2017_3 pop_13_car_2017_4 pop_13_car_2017_5 pop_13_car_2017_6
-	pop_13_car_2017_7 pop_13_car_2017_8 pop_13_car_2017_9 pop_13_car_2017_10 pop_13_car_2017_11 pop_13_car_2017_12
-	pop_13_car_2018_1 pop_13_car_2018_2 pop_13_car_2018_3 pop_13_car_2018_4 pop_13_car_2018_5 pop_13_car_2018_6
-	pop_13_car_2018_7 pop_13_car_2018_8 pop_13_car_2018_9 pop_13_car_2018_10 pop_13_car_2018_11 pop_13_car_2018_12
-;
-if pop_13_year<2016 then delete;
-if pop_13_year>2018 then delete;
-format &pop_OP_PHYSN_SPCLTY_CD prvdr_spclty $speccd. &pop_icd_dgns_cd1 $dgns. &pop_hcpcs_cd $hcpcs.;
-run;
-*get rid of duplicate rows--keep duplicate bene_ids for same reason as OP;
-proc sort data=pop_13_car nodupkey; by bene_id &flag_popped_dt; run;
-%mend; *** from turn_all_this_off;
-
 /**This section makes summaries for inpatient, outpatient carrier POPPED **/
 *look at inpatient info;
 %macro poppedlook(in=);
@@ -686,45 +587,6 @@ proc print data=&gndr_cd noobs; run;
 proc means data=&in mean median min max; var  &pop_age &pop_los; run;
 %mend;
 %poppedlook(in=pop_13_OUT);
-
-%macro turn_all_this_off();
-title 'Carrier Popped';
-%macro poppedlook(in=);
-proc freq data=&in order=freq noprint; 
-table  	&flag_popped /nocum out=&flag_popped; run;
-proc print data=&flag_popped noobs; where count>=11; run;
-
-proc freq data=&in order=freq noprint; 
-table  	&pop_year /nocum out=&pop_year (drop = count); run;
-proc print data=&pop_year noobs; run;
-
-proc freq data=&in order=freq noprint; 
-table  	&pop_hcpcs_cd /nocum out=&pop_hcpcs_cd (drop = count); run;
-proc print data=&pop_hcpcs_cd noobs; where percent>1; run;
-
-proc freq data=&in order=freq noprint; 
-table  	&pop_icd_dgns_cd1 /nocum out=&pop_icd_dgns_cd1 (drop = count); run;
-proc print data=&pop_icd_dgns_cd1 noobs; where percent>1; run;
-
-proc freq data=&in order=freq noprint; 
-table  	&pop_OP_PHYSN_SPCLTY_CD /nocum out=&pop_OP_PHYSN_SPCLTY_CD (drop = count); run;
-proc print data=&pop_OP_PHYSN_SPCLTY_CD noobs; run;
-
-proc freq data=&in order=freq noprint; 
-table  	prvdr_spclty /nocum out=prvdr_spclty (drop = count); format prvdr_spclty $speccd.; run;
-proc print data=prvdr_spclty noobs; run;
-
-proc freq data=&in order=freq noprint; 
-table  	&pop_nch_clm_type_cd /nocum out=&pop_nch_clm_type_cd (drop = count); run;
-proc print data=&pop_nch_clm_type_cd noobs; run;
-
-proc freq data=&in order=freq noprint; 
-table  	&gndr_cd /nocum out=&gndr_cd (drop = count); run;
-proc print data=&gndr_cd noobs; run;
-proc means data=&in mean median min max; var  &pop_age &pop_los; run;
-%mend;
-%poppedlook(in=pop_13_car);
-%mend; *** from turn_all_this_off;
 
 *compile Popped into 1 dataset
 		DO NOT INCLUDE CARRIER
@@ -865,7 +727,7 @@ proc sql;
 	create table exclude_cohort1 (compress=yes) as
 select * 
 from 
-&source (keep = bene_id &clm_from_dt &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max)
+&source (keep = bene_id &clm_id &clm_from_dt &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max)
 where 
 	    substr(icd_dgns_cd1,1,3) in(&EXCLUD_dx10_3) or
 		substr(icd_dgns_cd2,1,3) in(&EXCLUD_dx10_3) or
@@ -961,7 +823,7 @@ proc sql;
 	create table exclude_cohort1 (compress=yes) as
 select * 
 from 
-&source (keep = bene_id &clm_from_dt icd_dgns_cd1 - icd_dgns_cd12)
+&source (keep = bene_id &clm_id &clm_thru_dt icd_dgns_cd1 - icd_dgns_cd12)
 where 
 	    substr(icd_dgns_cd1,1,3) in(&EXCLUD_dx10_3) or
 		substr(icd_dgns_cd2,1,3) in(&EXCLUD_dx10_3) or
@@ -984,7 +846,7 @@ from
 	exclude_cohort1			 b
 where 
 		a.&bene_id=b.&bene_id 
-		and (	(a.&flag_popped_dt-180) <= b.&clm_from_dt <=a.&flag_popped_dt	)
+		and (	(a.&flag_popped_dt-180) <= b.&clm_thru_dt <=a.&flag_popped_dt	)
 	; 
 quit;
 Data &exclude_cohort (keep=  bene_id &flag_popped_dt DELETE); 
