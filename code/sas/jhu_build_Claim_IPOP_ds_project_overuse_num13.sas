@@ -1,6 +1,6 @@
 /********************************************************************
 * Job Name: jhu_build_Claim_IPOP_ds_project_overuse_num13.sas
-* Job Desc: Input for Inpatient & Outpatient (Including Carrier) Claims 
+* Job Desc: Input for Inpatient & Outpatient Claims 
 * Copyright: Johns Hopkins University - SegalLab & HutflessLab 2019
 ********************************************************************/
 
