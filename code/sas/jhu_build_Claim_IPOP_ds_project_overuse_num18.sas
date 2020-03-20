@@ -740,9 +740,6 @@ proc contents data=pop_18_in_out; run;
 *save permanent dataset prior to lookback exclusions;
 data &permlib..pop_18_in_out; set pop_18_in_out; run;
 
-if substr(dx(j),1,3) in(&includ_dx10_3) then include=1;
-
-
 /*start lookback;
 *merge inpatient/outpatient and lookback 60 days in inpatient/outpatient carrier 
 	for the INclusionary diagnosis;
