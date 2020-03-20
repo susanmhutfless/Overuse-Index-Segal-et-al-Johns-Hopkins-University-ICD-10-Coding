@@ -749,7 +749,7 @@ proc sql;
 	create table include_cohort1 (compress=yes) as
 select * 
 from 
-&source (keep = bene_id &clm_beg_dt_in &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max)
+&source (keep = bene_id &clm_id &clm_beg_dt_in &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max)
 where 
 	    substr(icd_dgns_cd1,1,3) in(&includ_dx10_3) or
 		substr(icd_dgns_cd2,1,3) in(&includ_dx10_3) or
