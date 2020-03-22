@@ -30,7 +30,7 @@ Actor		Orthopedist or neurosurgeons
 /*** start of indicator specific variables ***/
 
 /*inclusion criteria*/
-%global includ_hcpcs includ_pr10 includ_dx10_5;
+%global includ_hcpcs includ_pr10;
 
 %let includ_hcpcs =
 					'22558' '22585' '22612' '22614'
@@ -269,14 +269,8 @@ end;
 &pop_clm_drg_cd=put(&clm_drg_cd,$drg.);
 &pop_hcpcs_cd=put(&hcpcs_cd,$hcpcs.);
 &pop_OP_PHYSN_SPCLTY_CD=&OP_PHYSN_SPCLTY_CD;
-array dx(25) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
-do j=1 to &diag_cd_max;
-	if substr(dx(j),1,5) in(&includ_dx10_5) then acute=1;
-	if substr(dx(j),1,3) in(&EXCLUD_dx10_4) then DELETE=1;	*will make the 180 day exclusion after merge inp, out, car;		
-end;
+*will make the 60 day exclusion after merge inp, out, car;		
 if &flag_popped ne 1 then delete;
-IF acute ne 1 then delete;
-IF DELETE  =  1 then delete; *this is for same day lung dx only;
 *if clm_drg_cd notin(&includ_drg) then delete;
 run; 
 %mend;
@@ -419,13 +413,7 @@ end;
 &pop_hcpcs_cd=put(&hcpcs_cd,$hcpcs.);
 &pop_OP_PHYSN_SPCLTY_CD=&OP_PHYSN_SPCLTY_CD; format &pop_OP_PHYSN_SPCLTY_CD speccd.;
 array dx(25) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
-do j=1 to &diag_cd_max;
-	if substr(dx(j),1,5) in(&includ_dx10_5) then acute=1;
-	if substr(dx(j),1,3) in(&EXCLUD_dx10_4) then DELETE=1;	*will make the 180 day exclusion after merge inp, out, car;		
-end;
 if &flag_popped ne 1 then delete;
-IF acute ne 1 then delete;
-IF DELETE  =  1 then delete; 
 *if clm_drg_cd notin(&includ_drg) then delete;
 run;  
 %mend;
@@ -520,14 +508,7 @@ set include_cohort2;
 &pop_icd_dgns_cd1=put(&icd_dgns_cd1,$dgns.);
 &pop_hcpcs_cd=put(&hcpcs_cd,$hcpcs.);
 &pop_OP_PHYSN_SPCLTY_CD=&OP_PHYSN_SPCLTY_CD; format &pop_OP_PHYSN_SPCLTY_CD speccd.;
-array dx(25) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
-do j=1 to &diag_cd_max;
-	if substr(dx(j),1,5) in(&includ_dx10_5) then acute=1;
-	if substr(dx(j),1,3) in(&EXCLUD_dx10_4) then DELETE=1;	*will make the 180 day exclusion after merge inp, out, car;		
-end;
 if &flag_popped ne 1 then delete;
-IF acute ne 1 then delete;
-IF DELETE  =  1 then delete; *this is for same day lung dx only;
 run;  
 %mend;
 %claims_rev(source=rif2016.bcarrier_claims_01, rev_cohort=rif2016.bcarrier_line_01, include_cohort=pop_15_CAR_2016_1, ccn=ccn2016);
