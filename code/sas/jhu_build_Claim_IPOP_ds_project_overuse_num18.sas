@@ -257,41 +257,13 @@ where
 	b.prvdr_num = a.&ccn
 ;
 quit;
-/*set info about pop, brining in any DX code inclusions & exclusions on same day as qualifying procedure*/
-Data &include_cohort (keep=  &vars_to_keep_ip); 
+Data &include_cohort; 
 set include_cohort1c include_cohort1e;  
 array pr(25) &proc_pfx.&proc_cd_min - &proc_pfx.&proc_cd_max;
 do i=1 to &diag_cd_max;
 	if pr(i) in(&includ_pr10) then &flag_popped=1;
 end; 
-&flag_popped_dt=&clm_beg_dt_in; 
-	format &flag_popped_dt date9.; 						label &flag_popped_dt			=	&flag_popped_dt_label;
-				 										label &flag_popped				=	&flag_popped_label;
-&pop_age=(&clm_beg_dt_in-&clm_dob)/365.25; 				label &pop_age					=	&pop_age_label;
-&pop_age=round(&pop_age);
-&pop_los=&clm_end_dt_in-&clm_beg_dt_in;					label &pop_los					=	&pop_los_label;
-&pop_year=year(&clm_beg_dt_in);
-&pop_nch_clm_type_cd=put(&nch_clm_type_cd, clm_type_cd.); 
-														label &pop_nch_clm_type_cd		=	&pop_nch_clm_type_cd_label;
-&pop_CLM_IP_ADMSN_TYPE_CD = put(&CLM_IP_ADMSN_TYPE_CD,$IP_ADMSN_TYPE_CD.);
-&pop_clm_fac_type_cd = &clm_fac_type_cd; 				label &pop_clm_fac_type_cd     	= 	&pop_clm_fac_type_cd_label;
-&pop_clm_src_ip_admsn_cd = &clm_src_ip_admsn_cd; 		label &pop_clm_src_ip_admsn_cd 	= 	&pop_clm_src_ip_admsn_cd_label;
-&pop_ptnt_dschrg_stus_cd = &ptnt_dschrg_stus_cd; 		label &pop_ptnt_dschrg_stus_cd 	= 	&pop_ptnt_dschrg_stus_cd;
-&pop_admtg_dgns_cd=put(&admtg_dgns_cd,$dgns.);
-&pop_icd_dgns_cd1=put(&icd_dgns_cd1,$dgns.);
-&pop_icd_prcdr_cd1=put(&icd_prcdr_cd1,$prcdr.);
-&pop_clm_drg_cd=put(&clm_drg_cd,$drg.);
-&pop_hcpcs_cd=put(&hcpcs_cd,$hcpcs.);
-&pop_OP_PHYSN_SPCLTY_CD=&OP_PHYSN_SPCLTY_CD;
-/*array dx(25) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
-do j=1 to &diag_cd_max;
-	if substr(dx(j),1,3) in(&includ_dx10_3) then include=1; *will make the 60 day inclusion after merge inp, out, car;
-	if substr(dx(j),1,1) in(&EXCLUD_dx10_1) then DELETE=1;			
-end;*/
 if &flag_popped ne 1 then delete;
-*IF include ne 1 then delete;
-*IF DELETE  =  1 then delete; *this is for same day DJD/knee trauma dx only;
-*if clm_drg_cd notin(&includ_drg) then delete;
 run; 
 %mend;
 %claims_rev(source=rif2016.inpatient_claims_01, rev_cohort=rif2016.inpatient_revenue_01, include_cohort=pop_18_IN_2016_1, ccn=ccn2016);
@@ -332,7 +304,7 @@ run;
 %claims_rev(source=rifq2018.inpatient_claims_11, rev_cohort=rifq2018.inpatient_revenue_11, include_cohort=pop_18_IN_2018_11, ccn=ccn2016);
 %claims_rev(source=rifq2018.inpatient_claims_12, rev_cohort=rifq2018.inpatient_revenue_12, include_cohort=pop_18_IN_2018_12, ccn=ccn2016);
 
-data pop_18_IN;
+data pop_18_IN (keep=  &vars_to_keep_ip);
 set pop_18_IN_2016_1 pop_18_IN_2016_2 pop_18_IN_2016_3 pop_18_IN_2016_4 pop_18_IN_2016_5 pop_18_IN_2016_6
 	pop_18_IN_2016_7 pop_18_IN_2016_8 pop_18_IN_2016_9 pop_18_IN_2016_10 pop_18_IN_2016_11 pop_18_IN_2016_12
 	pop_18_IN_2017_1 pop_18_IN_2017_2 pop_18_IN_2017_3 pop_18_IN_2017_4 pop_18_IN_2017_5 pop_18_IN_2017_6
@@ -340,6 +312,34 @@ set pop_18_IN_2016_1 pop_18_IN_2016_2 pop_18_IN_2016_3 pop_18_IN_2016_4 pop_18_I
 	pop_18_IN_2018_1 pop_18_IN_2018_2 pop_18_IN_2018_3 pop_18_IN_2018_4 pop_18_IN_2018_5 pop_18_IN_2018_6
 	pop_18_IN_2018_7 pop_18_IN_2018_8 pop_18_IN_2018_9 pop_18_IN_2018_10 pop_18_IN_2018_11 pop_18_IN_2018_12
 ;
+&flag_popped_dt=&clm_beg_dt_in; 
+	format &flag_popped_dt date9.; 						label &flag_popped_dt			=	&flag_popped_dt_label;
+				 										label &flag_popped				=	&flag_popped_label;
+&pop_age=(&clm_beg_dt_in-&clm_dob)/365.25; 				label &pop_age					=	&pop_age_label;
+&pop_age=round(&pop_age);
+&pop_los=&clm_end_dt_in-&clm_beg_dt_in;					label &pop_los					=	&pop_los_label;
+&pop_year=year(&clm_beg_dt_in);
+&pop_nch_clm_type_cd=put(&nch_clm_type_cd, clm_type_cd.); 
+														label &pop_nch_clm_type_cd		=	&pop_nch_clm_type_cd_label;
+&pop_CLM_IP_ADMSN_TYPE_CD = put(&CLM_IP_ADMSN_TYPE_CD,$IP_ADMSN_TYPE_CD.);
+&pop_clm_fac_type_cd = &clm_fac_type_cd; 				label &pop_clm_fac_type_cd     	= 	&pop_clm_fac_type_cd_label;
+&pop_clm_src_ip_admsn_cd = &clm_src_ip_admsn_cd; 		label &pop_clm_src_ip_admsn_cd 	= 	&pop_clm_src_ip_admsn_cd_label;
+&pop_ptnt_dschrg_stus_cd = &ptnt_dschrg_stus_cd; 		label &pop_ptnt_dschrg_stus_cd 	= 	&pop_ptnt_dschrg_stus_cd;
+&pop_admtg_dgns_cd=put(&admtg_dgns_cd,$dgns.);
+&pop_icd_dgns_cd1=put(&icd_dgns_cd1,$dgns.);
+&pop_icd_prcdr_cd1=put(&icd_prcdr_cd1,$prcdr.);
+&pop_clm_drg_cd=put(&clm_drg_cd,$drg.);
+&pop_hcpcs_cd=put(&hcpcs_cd,$hcpcs.);
+&pop_OP_PHYSN_SPCLTY_CD=&OP_PHYSN_SPCLTY_CD;
+/*array dx(25) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
+do j=1 to &diag_cd_max;
+	if substr(dx(j),1,3) in(&includ_dx10_3) then include=1; *will make the 60 day inclusion after merge inp, out, car;
+	if substr(dx(j),1,1) in(&EXCLUD_dx10_1) then DELETE=1;			
+end;*/
+
+*IF include ne 1 then delete;
+*IF DELETE  =  1 then delete; *this is for same day DJD/knee trauma dx only;
+*if clm_drg_cd notin(&includ_drg) then delete;
 if &pop_year<2016 then delete;
 if &pop_year>2018 then delete;
 format bene_state_cd prvdr_state_cd $state. &pop_OP_PHYSN_SPCLTY_CD $speccd. &pop_clm_src_ip_admsn_cd $src1adm.
@@ -425,32 +425,14 @@ where
 ;
 quit;
 /*set info about pop, brining in any DX code inclusions & exclusions on same day as qualifying procedure*/
-Data &include_cohort (keep=  &vars_to_keep_op); 
+Data &include_cohort ; 
 set include_cohort1c include_cohort1e;  
 array pr(25) &proc_pfx.&proc_cd_min - &proc_pfx.&proc_cd_max;
 do i=1 to &diag_cd_max;
 	if pr(i) in(&includ_pr10) then &flag_popped=1;
 end;
-&flag_popped_dt=&clm_from_dt; 
-	format &flag_popped_dt date9.; 			label &flag_popped_dt	=	&flag_popped_dt_label;
-				 							label &flag_popped		=	&flag_popped_label;
-&pop_age=(&clm_from_dt-&clm_dob)/365.25; 	label &pop_age			=	&pop_age_label;
-&pop_age=round(&pop_age);
-&pop_los=&clm_thru_dt-&clm_from_dt;			label &pop_los			=	&pop_los_label;
-&pop_year=year(&clm_from_dt);
-&pop_nch_clm_type_cd=put(&nch_clm_type_cd, clm_type_cd.); label &pop_nch_clm_type_cd	=	&pop_nch_clm_type_cd_label;
-&pop_icd_dgns_cd1=put(&icd_dgns_cd1,$dgns.);
-&pop_icd_prcdr_cd1=put(&icd_prcdr_cd1,$prcdr.);
-&pop_hcpcs_cd=put(&hcpcs_cd,$hcpcs.);
-&pop_OP_PHYSN_SPCLTY_CD=&OP_PHYSN_SPCLTY_CD; format &pop_OP_PHYSN_SPCLTY_CD speccd.;
-/*array dx(25) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
-do j=1 to &diag_cd_max;
-	if substr(dx(j),1,3) in(&includ_dx10_3) then include=1; *will make the 60 day inclusion after merge inp, out, car;
-	if substr(dx(j),1,1) in(&EXCLUD_dx10_1) then DELETE=1;			
-end;*/
 if &flag_popped ne 1 then delete;
-*IF include ne 1 then delete;
-*IF DELETE  =  1 then delete; *this is for same day DJD/knee trauma dx only;
+
 run;  
 %mend;
 %claims_rev(source=rif2016.OUTpatient_claims_01, rev_cohort=rif2016.OUTpatient_revenue_01, include_cohort=pop_18_out_2016_1, ccn=ccn2016);
@@ -490,7 +472,7 @@ run;
 %claims_rev(source=rifq2018.OUTpatient_claims_11, rev_cohort=rifq2018.OUTpatient_revenue_11, include_cohort=pop_18_out_2018_11, ccn=ccn2016);
 %claims_rev(source=rifq2018.OUTpatient_claims_12, rev_cohort=rifq2018.OUTpatient_revenue_12, include_cohort=pop_18_out_2018_12, ccn=ccn2016);
 
-data pop_18_out;
+data pop_18_out (keep=  &vars_to_keep_op);
 set pop_18_out_2016_1 pop_18_out_2016_2 pop_18_out_2016_3 pop_18_out_2016_4 pop_18_out_2016_5 pop_18_out_2016_6
 	pop_18_out_2016_7 pop_18_out_2016_8 pop_18_out_2016_9 pop_18_out_2016_10 pop_18_out_2016_11 pop_18_out_2016_12
 	pop_18_out_2017_1 pop_18_out_2017_2 pop_18_out_2017_3 pop_18_out_2017_4 pop_18_out_2017_5 pop_18_out_2017_6
@@ -498,6 +480,26 @@ set pop_18_out_2016_1 pop_18_out_2016_2 pop_18_out_2016_3 pop_18_out_2016_4 pop_
 	pop_18_out_2018_1 pop_18_out_2018_2 pop_18_out_2018_3 pop_18_out_2018_4 pop_18_out_2018_5 pop_18_out_2018_6
 	pop_18_out_2018_7 pop_18_out_2018_8 pop_18_out_2018_9 pop_18_out_2018_10 pop_18_out_2018_11 pop_18_out_2018_12
 ;
+&flag_popped_dt=&clm_from_dt; 
+	format &flag_popped_dt date9.; 			label &flag_popped_dt	=	&flag_popped_dt_label;
+				 							label &flag_popped		=	&flag_popped_label;
+&pop_age=(&clm_from_dt-&clm_dob)/365.25; 	label &pop_age			=	&pop_age_label;
+&pop_age=round(&pop_age);
+&pop_los=&clm_thru_dt-&clm_from_dt;			label &pop_los			=	&pop_los_label;
+&pop_year=year(&clm_from_dt);
+&pop_nch_clm_type_cd=put(&nch_clm_type_cd, clm_type_cd.); label &pop_nch_clm_type_cd	=	&pop_nch_clm_type_cd_label;
+&pop_icd_dgns_cd1=put(&icd_dgns_cd1,$dgns.);
+&pop_icd_prcdr_cd1=put(&icd_prcdr_cd1,$prcdr.);
+&pop_hcpcs_cd=put(&hcpcs_cd,$hcpcs.);
+&pop_OP_PHYSN_SPCLTY_CD=&OP_PHYSN_SPCLTY_CD; format &pop_OP_PHYSN_SPCLTY_CD speccd.;
+/*array dx(25) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
+do j=1 to &diag_cd_max;
+	if substr(dx(j),1,3) in(&includ_dx10_3) then include=1; *will make the 60 day inclusion after merge inp, out, car;
+	if substr(dx(j),1,1) in(&EXCLUD_dx10_1) then DELETE=1;			
+end;*/
+
+*IF include ne 1 then delete;
+*IF DELETE  =  1 then delete; *this is for same day DJD/knee trauma dx only;
 if &pop_year<2016 then delete;
 if &pop_year>2018 then delete;
 format &pop_OP_PHYSN_SPCLTY_CD $speccd. &pop_icd_dgns_cd1 $dgns. &pop_icd_prcdr_cd1 $prcdr. &pop_hcpcs_cd $hcpcs.;
