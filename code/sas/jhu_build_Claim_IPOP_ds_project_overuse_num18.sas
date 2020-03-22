@@ -140,7 +140,7 @@ Actor		Orthopedists
 
 /** vars to keep or delete from the different data sources **/
 
-%let vars_to_keep_ip    = 	pop: &flag_popped_dt rev_cntr
+%let vars_to_keep_ip    = 	pop: &flag_popped_dt 
 							&bene_id &clm_id &gndr_cd 
 							&clm_beg_dt_in &clm_end_dt_in &clm_dob  &ptnt_dschrg_stus_cd
 							&nch_clm_type_cd &CLM_IP_ADMSN_TYPE_CD &clm_fac_type_cd &clm_src_ip_admsn_cd 
@@ -152,7 +152,7 @@ Actor		Orthopedists
 							/*RFR_PHYSN_NPI*/
 							bene_race_cd	bene_cnty_cd
 							bene_state_cd 	bene_mlg_cntct_zip_cd								;                         
-%let vars_to_keep_op	=	pop: &flag_popped_dt rev_cntr
+%let vars_to_keep_op	=	pop: &flag_popped_dt 
 							&bene_id &clm_id &gndr_cd 
 							&clm_from_dt &clm_thru_dt &clm_dob  &ptnt_dschrg_stus_cd
 							&nch_clm_type_cd &clm_fac_type_cd  
@@ -202,12 +202,22 @@ from
 	&source b
 where 
 	(a.&bene_id=b.&bene_id and a.&clm_id=b.&clm_id);
-quit;
-/*pull icd procedure criteria from claims*/
+quit;/*link to ccn*/
 proc sql;
 	create table include_cohort1c (compress=yes) as
 select *
-from  
+from 
+	&permlib..ahrq_ccn a,
+	include_cohort1b b	
+where 
+	b.prvdr_num = a.&ccn
+;
+quit;
+/*pull icd procedure criteria from claims*/
+proc sql;
+	create table include_cohort1d (compress=yes) as
+select *
+from 
 	&source
 where
 		icd_prcdr_cd1 in(&includ_pr10) or
@@ -238,19 +248,18 @@ where
 quit;
 /* link to CCN */
 proc sql;
-	create table include_cohort2 (compress=yes) as
+	create table include_cohort1e (compress=yes) as
 select *
 from 
 	&permlib..ahrq_ccn a,
-	include_cohort1b b,
-	include_cohort1c c	
+	include_cohort1d b	
 where 
-	b.prvdr_num = a.&ccn or c.prvdr_num = a.&ccn
+	b.prvdr_num = a.&ccn
 ;
 quit;
 /*set info about pop, brining in any DX code inclusions & exclusions on same day as qualifying procedure*/
 Data &include_cohort (keep=  &vars_to_keep_ip); 
-set include_cohort2;  
+set include_cohort1c include_cohort1e;  
 array pr(25) &proc_pfx.&proc_cd_min - &proc_pfx.&proc_cd_max;
 do i=1 to &diag_cd_max;
 	if pr(i) in(&includ_pr10) then &flag_popped=1;
@@ -360,12 +369,22 @@ from
 	&source b
 where 
 	(a.&bene_id=b.&bene_id and a.&clm_id=b.&clm_id);
-quit;
-/*pull icd procedure criteria from claims*/
+quit;/*link to ccn*/
 proc sql;
 	create table include_cohort1c (compress=yes) as
 select *
-from  
+from 
+	&permlib..ahrq_ccn a,
+	include_cohort1b b	
+where 
+	b.prvdr_num = a.&ccn
+;
+quit;
+/*pull icd procedure criteria from claims*/
+proc sql;
+	create table include_cohort1d (compress=yes) as
+select *
+from 
 	&source
 where
 		icd_prcdr_cd1 in(&includ_pr10) or
@@ -396,22 +415,22 @@ where
 quit;
 /* link to CCN */
 proc sql;
-	create table include_cohort2 (compress=yes) as
+	create table include_cohort1e (compress=yes) as
 select *
-from  
+from 
 	&permlib..ahrq_ccn a,
-	include_cohort1b b,
-	include_cohort1c c	
+	include_cohort1d b	
 where 
-	b.prvdr_num = a.&ccn or c.prvdr_num = a.&ccn
+	b.prvdr_num = a.&ccn
 ;
 quit;
-Data &include_cohort (keep = &vars_to_keep_op); 
-set include_cohort2;  
-array pr(25) &proc_pfx.&diag_cd_min - &proc_pfx.&diag_cd_max;
+/*set info about pop, brining in any DX code inclusions & exclusions on same day as qualifying procedure*/
+Data &include_cohort (keep=  &vars_to_keep_op); 
+set include_cohort1c include_cohort1e;  
+array pr(25) &proc_pfx.&proc_cd_min - &proc_pfx.&proc_cd_max;
 do i=1 to &diag_cd_max;
 	if pr(i) in(&includ_pr10) then &flag_popped=1;
-end; 
+end;
 &flag_popped_dt=&clm_from_dt; 
 	format &flag_popped_dt date9.; 			label &flag_popped_dt	=	&flag_popped_dt_label;
 				 							label &flag_popped		=	&flag_popped_label;
