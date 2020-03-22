@@ -304,7 +304,7 @@ run;
 %claims_rev(source=rifq2018.inpatient_claims_11, rev_cohort=rifq2018.inpatient_revenue_11, include_cohort=pop_18_IN_2018_11, ccn=ccn2016);
 %claims_rev(source=rifq2018.inpatient_claims_12, rev_cohort=rifq2018.inpatient_revenue_12, include_cohort=pop_18_IN_2018_12, ccn=ccn2016);
 
-data pop_18_IN (keep=  &vars_to_keep_ip);
+data pop_18_IN (keep=  &vars_to_keep_ip inpatient);
 set pop_18_IN_2016_1 pop_18_IN_2016_2 pop_18_IN_2016_3 pop_18_IN_2016_4 pop_18_IN_2016_5 pop_18_IN_2016_6
 	pop_18_IN_2016_7 pop_18_IN_2016_8 pop_18_IN_2016_9 pop_18_IN_2016_10 pop_18_IN_2016_11 pop_18_IN_2016_12
 	pop_18_IN_2017_1 pop_18_IN_2017_2 pop_18_IN_2017_3 pop_18_IN_2017_4 pop_18_IN_2017_5 pop_18_IN_2017_6
@@ -331,27 +331,27 @@ set pop_18_IN_2016_1 pop_18_IN_2016_2 pop_18_IN_2016_3 pop_18_IN_2016_4 pop_18_I
 &pop_clm_drg_cd=put(&clm_drg_cd,$drg.);
 &pop_hcpcs_cd=put(&hcpcs_cd,$hcpcs.);
 &pop_OP_PHYSN_SPCLTY_CD=&OP_PHYSN_SPCLTY_CD;
-/*array dx(25) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
+array dx(25) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
 do j=1 to &diag_cd_max;
 	if substr(dx(j),1,3) in(&includ_dx10_3) then include=1; *will make the 60 day inclusion after merge inp, out, car;
 	if substr(dx(j),1,1) in(&EXCLUD_dx10_1) then DELETE=1;			
-end;*/
-
-*IF include ne 1 then delete;
-*IF DELETE  =  1 then delete; *this is for same day DJD/knee trauma dx only;
+end;
+IF include ne 1 then delete;
+IF DELETE  =  1 then delete; *this is for same day DJD/knee trauma dx only;
 *if clm_drg_cd notin(&includ_drg) then delete;
 if &pop_year<2016 then delete;
 if &pop_year>2018 then delete;
 format bene_state_cd prvdr_state_cd $state. &pop_OP_PHYSN_SPCLTY_CD $speccd. &pop_clm_src_ip_admsn_cd $src1adm.
 		&pop_ptnt_dschrg_stus_cd $stuscd.;
+inpatient=1; inpatient='indicator that popped in inpatient setting';
 run;
 /* get rid of duplicate rows--keep first occurence so sort by date first */
 proc sort data=pop_18_IN; by &bene_id &flag_popped_dt; run;
 /*proc sort data=pop_18_IN nodupkey; by &bene_id; run;*/
 
-/*** this section is related to OP - OUTpatient claims ***/
+/*** this section is related to OP - OUTpatient claims ***
 %macro claims_rev(source=, rev_cohort=, include_cohort=, ccn=);
-/* identify hcpcs  */
+/* identify hcpcs  *
 proc sql;
 create table include_cohort1a (compress=yes) as
 select &bene_id, &clm_id, &hcpcs_cd, case when &hcpcs_cd in (&includ_hcpcs) then 1 else 0 end as &flag_popped
@@ -360,7 +360,7 @@ from
 where 
 	&hcpcs_cd in (&includ_hcpcs);
 quit;
-/* pull claim info for those with HCPCS (need to do this to get dx codes)*/
+/* pull claim info for those with HCPCS (need to do this to get dx codes)*
 proc sql;
 	create table include_cohort1b (compress=yes) as
 select a.&hcpcs_cd, a.&flag_popped, b.*
@@ -369,7 +369,7 @@ from
 	&source b
 where 
 	(a.&bene_id=b.&bene_id and a.&clm_id=b.&clm_id);
-quit;/*link to ccn*/
+quit;/*link to ccn*
 proc sql;
 	create table include_cohort1c (compress=yes) as
 select *
@@ -380,7 +380,7 @@ where
 	b.prvdr_num = a.&ccn
 ;
 quit;
-/*pull icd procedure criteria from claims*/
+/*pull icd procedure criteria from claims*
 proc sql;
 	create table include_cohort1d (compress=yes) as
 select *
@@ -413,7 +413,7 @@ where
 		icd_prcdr_cd24 in(&includ_pr10) or
 		icd_prcdr_cd25 in(&includ_pr10)		;
 quit;
-/* link to CCN */
+/* link to CCN *
 proc sql;
 	create table include_cohort1e (compress=yes) as
 select *
@@ -424,7 +424,7 @@ where
 	b.prvdr_num = a.&ccn
 ;
 quit;
-/*set info about pop, brining in any DX code inclusions & exclusions on same day as qualifying procedure*/
+/*set info about pop, brining in any DX code inclusions & exclusions on same day as qualifying procedure*
 Data &include_cohort ; 
 set include_cohort1c include_cohort1e;  
 array pr(25) &proc_pfx.&proc_cd_min - &proc_pfx.&proc_cd_max;
@@ -434,7 +434,7 @@ end;
 if &flag_popped ne 1 then delete;
 
 run;  
-%mend;
+%mend;*/
 %claims_rev(source=rif2016.OUTpatient_claims_01, rev_cohort=rif2016.OUTpatient_revenue_01, include_cohort=pop_18_out_2016_1, ccn=ccn2016);
 %claims_rev(source=rif2016.OUTpatient_claims_02, rev_cohort=rif2016.OUTpatient_revenue_02, include_cohort=pop_18_out_2016_2, ccn=ccn2016);
 %claims_rev(source=rif2016.OUTpatient_claims_03, rev_cohort=rif2016.OUTpatient_revenue_03, include_cohort=pop_18_out_2016_3, ccn=ccn2016);
@@ -472,7 +472,7 @@ run;
 %claims_rev(source=rifq2018.OUTpatient_claims_11, rev_cohort=rifq2018.OUTpatient_revenue_11, include_cohort=pop_18_out_2018_11, ccn=ccn2016);
 %claims_rev(source=rifq2018.OUTpatient_claims_12, rev_cohort=rifq2018.OUTpatient_revenue_12, include_cohort=pop_18_out_2018_12, ccn=ccn2016);
 
-data pop_18_out (keep=  &vars_to_keep_op);
+data pop_18_out (keep=  &vars_to_keep_op outpatient);
 set pop_18_out_2016_1 pop_18_out_2016_2 pop_18_out_2016_3 pop_18_out_2016_4 pop_18_out_2016_5 pop_18_out_2016_6
 	pop_18_out_2016_7 pop_18_out_2016_8 pop_18_out_2016_9 pop_18_out_2016_10 pop_18_out_2016_11 pop_18_out_2016_12
 	pop_18_out_2017_1 pop_18_out_2017_2 pop_18_out_2017_3 pop_18_out_2017_4 pop_18_out_2017_5 pop_18_out_2017_6
@@ -492,16 +492,16 @@ set pop_18_out_2016_1 pop_18_out_2016_2 pop_18_out_2016_3 pop_18_out_2016_4 pop_
 &pop_icd_prcdr_cd1=put(&icd_prcdr_cd1,$prcdr.);
 &pop_hcpcs_cd=put(&hcpcs_cd,$hcpcs.);
 &pop_OP_PHYSN_SPCLTY_CD=&OP_PHYSN_SPCLTY_CD; format &pop_OP_PHYSN_SPCLTY_CD speccd.;
-/*array dx(25) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
+array dx(25) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
 do j=1 to &diag_cd_max;
 	if substr(dx(j),1,3) in(&includ_dx10_3) then include=1; *will make the 60 day inclusion after merge inp, out, car;
 	if substr(dx(j),1,1) in(&EXCLUD_dx10_1) then DELETE=1;			
-end;*/
-
-*IF include ne 1 then delete;
-*IF DELETE  =  1 then delete; *this is for same day DJD/knee trauma dx only;
+end;
+IF include ne 1 then delete;
+IF DELETE  =  1 then delete; *this is for same day DJD/knee trauma dx only;
 if &pop_year<2016 then delete;
 if &pop_year>2018 then delete;
+outpatient=1; outpatient='indicator that popped in outpatient setting';
 format &pop_OP_PHYSN_SPCLTY_CD $speccd. &pop_icd_dgns_cd1 $dgns. &pop_icd_prcdr_cd1 $prcdr. &pop_hcpcs_cd $hcpcs.;
 run;
 *get rid of duplicate rows by bene & DATE---don't sort by bene_id only yet (as we want 1 per person for final analysis)
