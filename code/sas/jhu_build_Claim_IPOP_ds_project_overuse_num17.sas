@@ -30,7 +30,7 @@ Actor		Primary care, orthopedists, neurologists
 /*** start of indicator specific variables ***/
 
 /*inclusion criteria*/
-%global includ_hcpcs includ_pr10 includ_dx10_5;
+%global includ_hcpcs includ_pr10 includ_dx10_4;
 
 %let includ_hcpcs =
 					'72148' '72149' '72158'			;
@@ -289,12 +289,12 @@ end;
 &pop_OP_PHYSN_SPCLTY_CD=&OP_PHYSN_SPCLTY_CD;
 array dx(25) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
 do j=1 to &diag_cd_max;
-	if substr(dx(j),1,5) in(&includ_dx10_5) then acute=1;
-	if substr(dx(j),1,3) in(&EXCLUD_dx10_4) then DELETE=1;	*will make the 180 day exclusion after merge inp, out, car;		
+	if substr(dx(j),1,4) in(&includ_dx10_4) then include=1;
+		*will make the 60 day exclusion after merge inp, out, car;		
 end;
 if &flag_popped ne 1 then delete;
-IF acute ne 1 then delete;
-IF DELETE  =  1 then delete; *this is for same day lung dx only;
+IF include ne 1 then delete;
+IF DELETE  =  1 then delete; 
 *if clm_drg_cd notin(&includ_drg) then delete;
 run; 
 %mend;
@@ -438,11 +438,11 @@ end;
 &pop_OP_PHYSN_SPCLTY_CD=&OP_PHYSN_SPCLTY_CD; format &pop_OP_PHYSN_SPCLTY_CD speccd.;
 array dx(25) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
 do j=1 to &diag_cd_max;
-	if substr(dx(j),1,5) in(&includ_dx10_5) then acute=1;
-	if substr(dx(j),1,3) in(&EXCLUD_dx10_4) then DELETE=1;	*will make the 180 day exclusion after merge inp, out, car;		
+	if substr(dx(j),1,4) in(&includ_dx10_4) then include=1;
+		*will make the 60 day exclusion after merge inp, out, car;		
 end;
 if &flag_popped ne 1 then delete;
-IF acute ne 1 then delete;
+IF include ne 1 then delete;
 IF DELETE  =  1 then delete; 
 *if clm_drg_cd notin(&includ_drg) then delete;
 run;  
@@ -540,12 +540,13 @@ set include_cohort2;
 &pop_OP_PHYSN_SPCLTY_CD=&OP_PHYSN_SPCLTY_CD; format &pop_OP_PHYSN_SPCLTY_CD speccd.;
 array dx(25) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
 do j=1 to &diag_cd_max;
-	if substr(dx(j),1,5) in(&includ_dx10_5) then acute=1;
-	if substr(dx(j),1,3) in(&EXCLUD_dx10_4) then DELETE=1;	*will make the 180 day exclusion after merge inp, out, car;		
+	if substr(dx(j),1,4) in(&includ_dx10_4) then include=1;
+		*will make the 60 day exclusion after merge inp, out, car;		
 end;
 if &flag_popped ne 1 then delete;
-IF acute ne 1 then delete;
-IF DELETE  =  1 then delete; *this is for same day lung dx only;
+IF include ne 1 then delete;
+IF DELETE  =  1 then delete; 
+*if clm_drg_cd notin(&includ_drg) then delete;
 run;  
 %mend;
 %claims_rev(source=rif2016.bcarrier_claims_01, rev_cohort=rif2016.bcarrier_line_01, include_cohort=pop_17_CAR_2016_1, ccn=ccn2016);
@@ -750,7 +751,7 @@ proc contents data=pop_17_in_out; run;
 data &permlib..pop_17_in_out; set pop_17_in_out; run;
 
 /*start lookback;
-*merge inpatient/outpatient and lookback 180 days in inpatient/outpatient carrier 
+*merge inpatient/outpatient and lookback 60 days in inpatient/outpatient carrier 
 	for the exclusionary diagnosis;
 /*** this section is related to IP - inpatient claims--for exclusion ***/
 %macro claims_rev(source=,  exclude_cohort=);
@@ -760,31 +761,57 @@ select *
 from 
 &source (keep = bene_id &clm_beg_dt_in &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max)
 where 
-	    substr(icd_dgns_cd1,1,3) in(&EXCLUD_dx10_4) or
-		substr(icd_dgns_cd2,1,3) in(&EXCLUD_dx10_4) or
-		substr(icd_dgns_cd3,1,3) in(&EXCLUD_dx10_4) or
-		substr(icd_dgns_cd4,1,3) in(&EXCLUD_dx10_4) or
-		substr(icd_dgns_cd5,1,3) in(&EXCLUD_dx10_4) or
-		substr(icd_dgns_cd6,1,3) in(&EXCLUD_dx10_4) or
-		substr(icd_dgns_cd7,1,3) in(&EXCLUD_dx10_4) or
-		substr(icd_dgns_cd8,1,3) in(&EXCLUD_dx10_4) or
-		substr(icd_dgns_cd9,1,3) in(&EXCLUD_dx10_4) or
-		substr(icd_dgns_cd10,1,3) in(&EXCLUD_dx10_4) or
-		substr(icd_dgns_cd11,1,3) in(&EXCLUD_dx10_4) or
-		substr(icd_dgns_cd12,1,3) in(&EXCLUD_dx10_4) or
-		substr(icd_dgns_cd13,1,3) in(&EXCLUD_dx10_4) or
-		substr(icd_dgns_cd14,1,3) in(&EXCLUD_dx10_4) or
-		substr(icd_dgns_cd15,1,3) in(&EXCLUD_dx10_4) or
-		substr(icd_dgns_cd16,1,3) in(&EXCLUD_dx10_4) or
-		substr(icd_dgns_cd17,1,3) in(&EXCLUD_dx10_4) or
-		substr(icd_dgns_cd18,1,3) in(&EXCLUD_dx10_4) or
-		substr(icd_dgns_cd19,1,3) in(&EXCLUD_dx10_4) or
-		substr(icd_dgns_cd20,1,3) in(&EXCLUD_dx10_4) or
-		substr(icd_dgns_cd21,1,3) in(&EXCLUD_dx10_4) or
-		substr(icd_dgns_cd22,1,3) in(&EXCLUD_dx10_4) or
-		substr(icd_dgns_cd23,1,3) in(&EXCLUD_dx10_4) or
-		substr(icd_dgns_cd24,1,3) in(&EXCLUD_dx10_4) or
-		substr(icd_dgns_cd25,1,3) in(&EXCLUD_dx10_4)		;
+	    substr(icd_dgns_cd1,1,3) in(&EXCLUD_dx10_3) or
+		substr(icd_dgns_cd2,1,3) in(&EXCLUD_dx10_3) or
+		substr(icd_dgns_cd3,1,3) in(&EXCLUD_dx10_3) or
+		substr(icd_dgns_cd4,1,3) in(&EXCLUD_dx10_3) or
+		substr(icd_dgns_cd5,1,3) in(&EXCLUD_dx10_3) or
+		substr(icd_dgns_cd6,1,3) in(&EXCLUD_dx10_3) or
+		substr(icd_dgns_cd7,1,3) in(&EXCLUD_dx10_3) or
+		substr(icd_dgns_cd8,1,3) in(&EXCLUD_dx10_3) or
+		substr(icd_dgns_cd9,1,3) in(&EXCLUD_dx10_3) or
+		substr(icd_dgns_cd10,1,3) in(&EXCLUD_dx10_3) or
+		substr(icd_dgns_cd11,1,3) in(&EXCLUD_dx10_3) or
+		substr(icd_dgns_cd12,1,3) in(&EXCLUD_dx10_3) or
+		substr(icd_dgns_cd13,1,3) in(&EXCLUD_dx10_3) or
+		substr(icd_dgns_cd14,1,3) in(&EXCLUD_dx10_3) or
+		substr(icd_dgns_cd15,1,3) in(&EXCLUD_dx10_3) or
+		substr(icd_dgns_cd16,1,3) in(&EXCLUD_dx10_3) or
+		substr(icd_dgns_cd17,1,3) in(&EXCLUD_dx10_3) or
+		substr(icd_dgns_cd18,1,3) in(&EXCLUD_dx10_3) or
+		substr(icd_dgns_cd19,1,3) in(&EXCLUD_dx10_3) or
+		substr(icd_dgns_cd20,1,3) in(&EXCLUD_dx10_3) or
+		substr(icd_dgns_cd21,1,3) in(&EXCLUD_dx10_3) or
+		substr(icd_dgns_cd22,1,3) in(&EXCLUD_dx10_3) or
+		substr(icd_dgns_cd23,1,3) in(&EXCLUD_dx10_3) or
+		substr(icd_dgns_cd24,1,3) in(&EXCLUD_dx10_3) or
+		substr(icd_dgns_cd25,1,3) in(&EXCLUD_dx10_3)	
+
+		substr(icd_dgns_cd1,1,4) in(&EXCLUD_dx10_4) or
+		substr(icd_dgns_cd2,1,4) in(&EXCLUD_dx10_4) or
+		substr(icd_dgns_cd3,1,4) in(&EXCLUD_dx10_4) or
+		substr(icd_dgns_cd4,1,4) in(&EXCLUD_dx10_4) or
+		substr(icd_dgns_cd5,1,4) in(&EXCLUD_dx10_4) or
+		substr(icd_dgns_cd6,1,4) in(&EXCLUD_dx10_4) or
+		substr(icd_dgns_cd7,1,4) in(&EXCLUD_dx10_4) or
+		substr(icd_dgns_cd8,1,4) in(&EXCLUD_dx10_4) or
+		substr(icd_dgns_cd9,1,4) in(&EXCLUD_dx10_4) or
+		substr(icd_dgns_cd10,1,4) in(&EXCLUD_dx10_4) or
+		substr(icd_dgns_cd11,1,4) in(&EXCLUD_dx10_4) or
+		substr(icd_dgns_cd12,1,4) in(&EXCLUD_dx10_4) or
+		substr(icd_dgns_cd13,1,4) in(&EXCLUD_dx10_4) or
+		substr(icd_dgns_cd14,1,4) in(&EXCLUD_dx10_4) or
+		substr(icd_dgns_cd15,1,4) in(&EXCLUD_dx10_4) or
+		substr(icd_dgns_cd16,1,4) in(&EXCLUD_dx10_4) or
+		substr(icd_dgns_cd17,1,4) in(&EXCLUD_dx10_4) or
+		substr(icd_dgns_cd18,1,4) in(&EXCLUD_dx10_4) or
+		substr(icd_dgns_cd19,1,4) in(&EXCLUD_dx10_4) or
+		substr(icd_dgns_cd20,1,4) in(&EXCLUD_dx10_4) or
+		substr(icd_dgns_cd21,1,4) in(&EXCLUD_dx10_4) or
+		substr(icd_dgns_cd22,1,4) in(&EXCLUD_dx10_4) or
+		substr(icd_dgns_cd23,1,4) in(&EXCLUD_dx10_4) or
+		substr(icd_dgns_cd24,1,4) in(&EXCLUD_dx10_4) or
+		substr(icd_dgns_cd25,1,4) in(&EXCLUD_dx10_4)	;
 quit;
 proc sql;
 	create table exclude_cohort2 (compress=yes) as
@@ -794,14 +821,15 @@ from
 	exclude_cohort1			 b
 where 
 		a.&bene_id=b.&bene_id 
-		and (	(a.&flag_popped_dt-180) <= b.&clm_beg_dt_in <=a.&flag_popped_dt	)
+		and (	(a.&flag_popped_dt-60) <= b.&clm_beg_dt_in <=a.&flag_popped_dt	)
 	; 
 quit;
 Data &exclude_cohort (keep=  bene_id &flag_popped_dt DELETE); 
 set exclude_cohort2;  
 array dx(25) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
 do j=1 to &diag_cd_max;
-	if substr(dx(j),1,3) in(&EXCLUD_dx10_4) then DELETE=1;	
+	if substr(dx(j),1,3) in(&EXCLUD_dx10_3) then DELETE=1
+	if substr(dx(j),1,4) in(&EXCLUD_dx10_4) then DELETE=1;	
 end;
 if DELETE ne 1 then delete;
 run; 
@@ -870,31 +898,57 @@ select *
 from 
 &source (keep = bene_id &clm_from_dt &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max)
 where 
-	    substr(icd_dgns_cd1,1,3) in(&EXCLUD_dx10_4) or
-		substr(icd_dgns_cd2,1,3) in(&EXCLUD_dx10_4) or
-		substr(icd_dgns_cd3,1,3) in(&EXCLUD_dx10_4) or
-		substr(icd_dgns_cd4,1,3) in(&EXCLUD_dx10_4) or
-		substr(icd_dgns_cd5,1,3) in(&EXCLUD_dx10_4) or
-		substr(icd_dgns_cd6,1,3) in(&EXCLUD_dx10_4) or
-		substr(icd_dgns_cd7,1,3) in(&EXCLUD_dx10_4) or
-		substr(icd_dgns_cd8,1,3) in(&EXCLUD_dx10_4) or
-		substr(icd_dgns_cd9,1,3) in(&EXCLUD_dx10_4) or
-		substr(icd_dgns_cd10,1,3) in(&EXCLUD_dx10_4) or
-		substr(icd_dgns_cd11,1,3) in(&EXCLUD_dx10_4) or
-		substr(icd_dgns_cd12,1,3) in(&EXCLUD_dx10_4) or
-		substr(icd_dgns_cd13,1,3) in(&EXCLUD_dx10_4) or
-		substr(icd_dgns_cd14,1,3) in(&EXCLUD_dx10_4) or
-		substr(icd_dgns_cd15,1,3) in(&EXCLUD_dx10_4) or
-		substr(icd_dgns_cd16,1,3) in(&EXCLUD_dx10_4) or
-		substr(icd_dgns_cd17,1,3) in(&EXCLUD_dx10_4) or
-		substr(icd_dgns_cd18,1,3) in(&EXCLUD_dx10_4) or
-		substr(icd_dgns_cd19,1,3) in(&EXCLUD_dx10_4) or
-		substr(icd_dgns_cd20,1,3) in(&EXCLUD_dx10_4) or
-		substr(icd_dgns_cd21,1,3) in(&EXCLUD_dx10_4) or
-		substr(icd_dgns_cd22,1,3) in(&EXCLUD_dx10_4) or
-		substr(icd_dgns_cd23,1,3) in(&EXCLUD_dx10_4) or
-		substr(icd_dgns_cd24,1,3) in(&EXCLUD_dx10_4) or
-		substr(icd_dgns_cd25,1,3) in(&EXCLUD_dx10_4)		;
+	    substr(icd_dgns_cd1,1,3) in(&EXCLUD_dx10_3) or
+		substr(icd_dgns_cd2,1,3) in(&EXCLUD_dx10_3) or
+		substr(icd_dgns_cd3,1,3) in(&EXCLUD_dx10_3) or
+		substr(icd_dgns_cd4,1,3) in(&EXCLUD_dx10_3) or
+		substr(icd_dgns_cd5,1,3) in(&EXCLUD_dx10_3) or
+		substr(icd_dgns_cd6,1,3) in(&EXCLUD_dx10_3) or
+		substr(icd_dgns_cd7,1,3) in(&EXCLUD_dx10_3) or
+		substr(icd_dgns_cd8,1,3) in(&EXCLUD_dx10_3) or
+		substr(icd_dgns_cd9,1,3) in(&EXCLUD_dx10_3) or
+		substr(icd_dgns_cd10,1,3) in(&EXCLUD_dx10_3) or
+		substr(icd_dgns_cd11,1,3) in(&EXCLUD_dx10_3) or
+		substr(icd_dgns_cd12,1,3) in(&EXCLUD_dx10_3) or
+		substr(icd_dgns_cd13,1,3) in(&EXCLUD_dx10_3) or
+		substr(icd_dgns_cd14,1,3) in(&EXCLUD_dx10_3) or
+		substr(icd_dgns_cd15,1,3) in(&EXCLUD_dx10_3) or
+		substr(icd_dgns_cd16,1,3) in(&EXCLUD_dx10_3) or
+		substr(icd_dgns_cd17,1,3) in(&EXCLUD_dx10_3) or
+		substr(icd_dgns_cd18,1,3) in(&EXCLUD_dx10_3) or
+		substr(icd_dgns_cd19,1,3) in(&EXCLUD_dx10_3) or
+		substr(icd_dgns_cd20,1,3) in(&EXCLUD_dx10_3) or
+		substr(icd_dgns_cd21,1,3) in(&EXCLUD_dx10_3) or
+		substr(icd_dgns_cd22,1,3) in(&EXCLUD_dx10_3) or
+		substr(icd_dgns_cd23,1,3) in(&EXCLUD_dx10_3) or
+		substr(icd_dgns_cd24,1,3) in(&EXCLUD_dx10_3) or
+		substr(icd_dgns_cd25,1,3) in(&EXCLUD_dx10_3)	
+
+		substr(icd_dgns_cd1,1,4) in(&EXCLUD_dx10_4) or
+		substr(icd_dgns_cd2,1,4) in(&EXCLUD_dx10_4) or
+		substr(icd_dgns_cd3,1,4) in(&EXCLUD_dx10_4) or
+		substr(icd_dgns_cd4,1,4) in(&EXCLUD_dx10_4) or
+		substr(icd_dgns_cd5,1,4) in(&EXCLUD_dx10_4) or
+		substr(icd_dgns_cd6,1,4) in(&EXCLUD_dx10_4) or
+		substr(icd_dgns_cd7,1,4) in(&EXCLUD_dx10_4) or
+		substr(icd_dgns_cd8,1,4) in(&EXCLUD_dx10_4) or
+		substr(icd_dgns_cd9,1,4) in(&EXCLUD_dx10_4) or
+		substr(icd_dgns_cd10,1,4) in(&EXCLUD_dx10_4) or
+		substr(icd_dgns_cd11,1,4) in(&EXCLUD_dx10_4) or
+		substr(icd_dgns_cd12,1,4) in(&EXCLUD_dx10_4) or
+		substr(icd_dgns_cd13,1,4) in(&EXCLUD_dx10_4) or
+		substr(icd_dgns_cd14,1,4) in(&EXCLUD_dx10_4) or
+		substr(icd_dgns_cd15,1,4) in(&EXCLUD_dx10_4) or
+		substr(icd_dgns_cd16,1,4) in(&EXCLUD_dx10_4) or
+		substr(icd_dgns_cd17,1,4) in(&EXCLUD_dx10_4) or
+		substr(icd_dgns_cd18,1,4) in(&EXCLUD_dx10_4) or
+		substr(icd_dgns_cd19,1,4) in(&EXCLUD_dx10_4) or
+		substr(icd_dgns_cd20,1,4) in(&EXCLUD_dx10_4) or
+		substr(icd_dgns_cd21,1,4) in(&EXCLUD_dx10_4) or
+		substr(icd_dgns_cd22,1,4) in(&EXCLUD_dx10_4) or
+		substr(icd_dgns_cd23,1,4) in(&EXCLUD_dx10_4) or
+		substr(icd_dgns_cd24,1,4) in(&EXCLUD_dx10_4) or
+		substr(icd_dgns_cd25,1,4) in(&EXCLUD_dx10_4)		;
 quit;
 proc sql;
 	create table exclude_cohort2 (compress=yes) as
@@ -904,14 +958,15 @@ from
 	exclude_cohort1			 b
 where 
 		a.&bene_id=b.&bene_id 
-		and (	(a.&flag_popped_dt-180) <= b.&clm_from_dt <=a.&flag_popped_dt	)
+		and (	(a.&flag_popped_dt-60) <= b.&clm_from_dt <=a.&flag_popped_dt	)
 	; 
 quit;
 Data &exclude_cohort (keep=  bene_id &flag_popped_dt DELETE); 
 set exclude_cohort2;  
 array dx(25) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
 do j=1 to &diag_cd_max;
-	if substr(dx(j),1,3) in(&EXCLUD_dx10_4) then DELETE=1;	
+	if substr(dx(j),1,3) in(&EXCLUD_dx10_3) then DELETE=1
+	if substr(dx(j),1,4) in(&EXCLUD_dx10_4) then DELETE=1;	
 end;
 if DELETE ne 1 then delete;
 run; 
@@ -966,18 +1021,31 @@ select *
 from 
 &source (keep = bene_id &clm_from_dt icd_dgns_cd1 - icd_dgns_cd12)
 where 
-	    substr(icd_dgns_cd1,1,3) in(&EXCLUD_dx10_4) or
-		substr(icd_dgns_cd2,1,3) in(&EXCLUD_dx10_4) or
-		substr(icd_dgns_cd3,1,3) in(&EXCLUD_dx10_4) or
-		substr(icd_dgns_cd4,1,3) in(&EXCLUD_dx10_4) or
-		substr(icd_dgns_cd5,1,3) in(&EXCLUD_dx10_4) or
-		substr(icd_dgns_cd6,1,3) in(&EXCLUD_dx10_4) or
-		substr(icd_dgns_cd7,1,3) in(&EXCLUD_dx10_4) or
-		substr(icd_dgns_cd8,1,3) in(&EXCLUD_dx10_4) or
-		substr(icd_dgns_cd9,1,3) in(&EXCLUD_dx10_4) or
-		substr(icd_dgns_cd10,1,3) in(&EXCLUD_dx10_4) or
-		substr(icd_dgns_cd11,1,3) in(&EXCLUD_dx10_4) or
-		substr(icd_dgns_cd12,1,3) in(&EXCLUD_dx10_4) 		;
+	    substr(icd_dgns_cd1,1,4) in(&EXCLUD_dx10_4) or
+		substr(icd_dgns_cd2,1,4) in(&EXCLUD_dx10_4) or
+		substr(icd_dgns_cd3,1,4) in(&EXCLUD_dx10_4) or
+		substr(icd_dgns_cd4,1,4) in(&EXCLUD_dx10_4) or
+		substr(icd_dgns_cd5,1,4) in(&EXCLUD_dx10_4) or
+		substr(icd_dgns_cd6,1,4) in(&EXCLUD_dx10_4) or
+		substr(icd_dgns_cd7,1,4) in(&EXCLUD_dx10_4) or
+		substr(icd_dgns_cd8,1,4) in(&EXCLUD_dx10_4) or
+		substr(icd_dgns_cd9,1,4) in(&EXCLUD_dx10_4) or
+		substr(icd_dgns_cd10,1,4) in(&EXCLUD_dx10_4) or
+		substr(icd_dgns_cd11,1,4) in(&EXCLUD_dx10_4) or
+		substr(icd_dgns_cd12,1,4) in(&EXCLUD_dx10_4) 
+
+		substr(icd_dgns_cd1,1,3) in(&EXCLUD_dx10_3) or
+		substr(icd_dgns_cd2,1,3) in(&EXCLUD_dx10_3) or
+		substr(icd_dgns_cd3,1,3) in(&EXCLUD_dx10_3) or
+		substr(icd_dgns_cd4,1,3) in(&EXCLUD_dx10_3) or
+		substr(icd_dgns_cd5,1,3) in(&EXCLUD_dx10_3) or
+		substr(icd_dgns_cd6,1,3) in(&EXCLUD_dx10_3) or
+		substr(icd_dgns_cd7,1,3) in(&EXCLUD_dx10_3) or
+		substr(icd_dgns_cd8,1,3) in(&EXCLUD_dx10_3) or
+		substr(icd_dgns_cd9,1,3) in(&EXCLUD_dx10_3) or
+		substr(icd_dgns_cd10,1,3) in(&EXCLUD_dx10_3) or
+		substr(icd_dgns_cd11,1,3) in(&EXCLUD_dx10_3) or
+		substr(icd_dgns_cd12,1,3) in(&EXCLUD_dx10_3) 	;
 quit;
 proc sql;
 	create table exclude_cohort2 (compress=yes) as
@@ -987,14 +1055,15 @@ from
 	exclude_cohort1			 b
 where 
 		a.&bene_id=b.&bene_id 
-		and (	(a.&flag_popped_dt-180) <= b.&clm_from_dt <=a.&flag_popped_dt	)
+		and (	(a.&flag_popped_dt-60) <= b.&clm_from_dt <=a.&flag_popped_dt	)
 	; 
 quit;
 Data &exclude_cohort (keep=  bene_id &flag_popped_dt DELETE); 
 set exclude_cohort2;  
 array dx(12) icd_dgns_cd1 - icd_dgns_cd12;
 do j=1 to 12;
-	if substr(dx(j),1,3) in(&EXCLUD_dx10_4) then DELETE=1;	
+	if substr(dx(j),1,3) in(&EXCLUD_dx10_3) then DELETE=1
+	if substr(dx(j),1,4) in(&EXCLUD_dx10_4) then DELETE=1;	
 end;
 if DELETE ne 1 then delete;
 run; 
