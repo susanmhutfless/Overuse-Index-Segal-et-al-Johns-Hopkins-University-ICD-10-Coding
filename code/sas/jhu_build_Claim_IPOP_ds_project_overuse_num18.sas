@@ -740,7 +740,7 @@ Data &include_cohort (keep=  bene_id &flag_popped_dt KEEP);
 set include_cohort2;  
 array dx(12) icd_dgns_cd1 - icd_dgns_cd12;
 do j=1 to 12;
-	if substr(dx(j),1,3) in(&includ_dx10_3) then KEEP=1;	
+	if substr(dx(j),1,3) in(&includ_dx10) then KEEP=1;	
 end;
 if KEEP ne 1 then DELETE;
 run; 
