@@ -270,7 +270,7 @@ array dx(25) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
 		if substr(dx(j),1,&includ_dx10_n) in(&includ_dx10) then include=1; *will make the 60 day inclusion after merge inp, out, car;
 		if substr(dx(j),1,&exclud_dx10_n) in(&EXCLUD_dx10) then DELETE=1;			
 end;
-IF include ne 1 then delete;
+*IF include ne 1 then delete;
 IF DELETE  =  1 then delete; 
 *if clm_drg_cd notin(&includ_drg) then delete;
 if &flag_popped ne 1 then delete;
@@ -536,7 +536,7 @@ proc means data=&in mean median min max; var  &pop_age &pop_los; run;
 *compile Popped into 1 dataset
 		DO NOT INCLUDE CARRIER
 		Keep ONLY the first observation per person;
-data pop_&popN._in_out 
+data pop_&popN._in_out_b4lookback 
 	(keep = bene_id &flag_popped &pop_age &flag_popped_dt &pop_year &gndr_cd
 			prvdr_num prvdr_state_cd OP_PHYSN_SPCLTY_CD /*RFR_PHYSN_NPI*/
 			at_physn_npi op_physn_npi org_npi_num ot_physn_npi rndrng_physn_npi
@@ -544,15 +544,15 @@ data pop_&popN._in_out
 			inpatient outpatient);
 set pop_&popN._IN pop_&popN._OUT;
 run;
-proc sort data=pop_&popN._in_out nodupkey; by bene_id &flag_popped_dt; run;
-proc sort data=pop_&popN._in_out nodupkey; by bene_id; run;
-title 'Popped Inpatient or Outpatient (No Carrier) For Analysis';
-proc freq data=pop_&popN._in_out; 
+proc sort data=pop_&popN._in_out_b4lookback nodupkey; by bene_id &flag_popped_dt; run;
+proc sort data=pop_&popN._in_out_b4lookback nodupkey; by bene_id; run;
+title 'Popped Inpatient or Outpatient (No Carrier) For Analysis Before Lookback';
+proc freq data=pop_&popN._in_out_b4lookback; 
 table  	&pop_year; run;
-proc contents data=pop_&popN._in_out; run;
+proc contents data=pop_&popN._in_out_b4lookback; run;
 
 *save permanent dataset prior to lookback exclusions;
-data &permlib..pop_&popN._in_out; set pop_&popN._in_out; run;
+data &permlib..pop_&popN._in_out_b4lookback; set pop_&popN._in_out_b4lookback; run;
 
 /*start lookback;
 *merge inpatient/outpatient and lookback 60 days in inpatient/outpatient carrier 
@@ -595,7 +595,8 @@ proc sql;
 	create table include_cohort2 (compress=yes) as
 select  a.&flag_popped_dt, b.*
 from 
-	&permlib..pop_&popN._in_out	 a, 
+&permlib..pop_&popN._in_out_b4lookback
+	&permlib..pop_&popN._in_out_b4lookback	 a, 
 	include_cohort1			 b
 where 
 		a.&bene_id=b.&bene_id 
@@ -729,7 +730,7 @@ proc sql;
 	create table include_cohort2 (compress=yes) as
 select  a.&flag_popped_dt, b.*
 from 
-	&permlib..pop_&popN._in_out	 a, 
+	&permlib..pop_&popN._in_out_b4lookback	 a, 
 	include_cohort1			 b
 where 
 		a.&bene_id=b.&bene_id 
@@ -740,7 +741,7 @@ Data &include_cohort (keep=  bene_id &flag_popped_dt KEEP);
 set include_cohort2;  
 array dx(12) icd_dgns_cd1 - icd_dgns_cd12;
 do j=1 to 12;
-	if substr(dx(j),1,3) in(&includ_dx10) then KEEP=1;	
+	if substr(dx(j),1,&includ_dx10_n) in(&includ_dx10) then KEEP=1;	
 end;
 if KEEP ne 1 then DELETE;
 run; 
@@ -815,10 +816,10 @@ run;
 proc sort data=pop_&popN._include NODUPKEY; by &bene_id &flag_popped_dt; run;
 
 *merge INcludes with perm dataset and KEEP;
-proc sort data=&permlib..pop_&popN._in_out; by &bene_id &flag_popped_dt; run;
+proc sort data=&permlib..pop_&popN._in_out_b4lookback; by &bene_id &flag_popped_dt; run;
 
 data &permlib..pop_&popN._in_out (drop = KEEP);
-merge &permlib..pop_&popN._in_out pop_&popN._include;
+merge &permlib..pop_&popN._in_out_b4lookback pop_&popN._include;
 by &bene_id &flag_popped_dt;
 if KEEP ne 1 then delete;
 run;
