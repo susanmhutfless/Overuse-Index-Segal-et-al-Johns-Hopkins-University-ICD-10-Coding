@@ -216,10 +216,10 @@ proc print data=pops_denom3 (obs=20); run; *this has death and chronic condition
 proc freq data=pops_cc_2016; table ami; run;*check freq;
 
 *copy model run previously--does not account for time that i can tell and does not account for repeated measures
-	if sorted 1 row per person/msa/year/qtr unless Taylor series identifies replicates not specified in model?;
+	if sorted 1 row per person/msa/year/qtr unless Taylor series identifies replicates/covariance not specified in model?;
 proc surveyreg Data=pops_denom3;
-class pop_num msa gndr_cd age_group;
-model pop = msa gndr_cd age_group pop_num/ noint solution;
+class pop_num health_sys_id2016 gndr_cd age_group;
+model pop = health_sys_id2016 gndr_cd age_group pop_num/ noint solution;
 ods output ParameterEstimates=jhoi;
 run;
 
