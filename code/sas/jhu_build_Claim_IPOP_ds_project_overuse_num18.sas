@@ -595,7 +595,6 @@ proc sql;
 	create table include_cohort2 (compress=yes) as
 select  a.&flag_popped_dt, b.*
 from 
-&permlib..pop_&popN._in_out_b4lookback
 	&permlib..pop_&popN._in_out_b4lookback	 a, 
 	include_cohort1			 b
 where 
