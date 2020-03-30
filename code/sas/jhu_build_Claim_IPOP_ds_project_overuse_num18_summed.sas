@@ -210,7 +210,7 @@ from
 where 
 	a.&bene_id = b.&bene_id 
 	and 
-	a.&clm_id = b.*clm_id;
+	a.&clm_id = b.&clm_id;
 quit;
 *make inclusion/exclusion criteria and set variables for eligible population;
 Data &include_cohort ; 
