@@ -155,7 +155,7 @@ Actor		Orthopedists
 *start identification of eligibility;
 *First identify all who are eligible;
 /*** this macro is for inpatient and outpatient claims--must have DX code of interest***/
-%macro claims_rev(date=,	source=,  include_cohort=);
+%macro claims_rev(date=,	source=,  rev_cohort=, include_cohort=, ccn=);
 *identify dx codes of interest;
 proc sql;
 	create table include_cohort1 (compress=yes) as
