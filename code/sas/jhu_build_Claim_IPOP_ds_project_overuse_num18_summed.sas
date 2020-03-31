@@ -228,13 +228,13 @@ pop_num=&popN;
 run; 
 %mend;
 /*** this section is related to IP - inpatient claims--for eligible cohort***/
-%claims_rev(date=&clm_beg_dt_in, source=rif2015.INpatient_claims_07,  
+*%claims_rev(date=&clm_beg_dt_in, source=rif2015.INpatient_claims_07,  
 	rev_cohort=rif2015.inpatient_revenue_07, include_cohort=pop_&popN._INinclude_2015_7, ccn=ccn2016);
-%claims_rev(date=&clm_beg_dt_in, source=rif2015.INpatient_claims_08,  
+*%claims_rev(date=&clm_beg_dt_in, source=rif2015.INpatient_claims_08,  
 	rev_cohort=rif2015.INpatient_revenue_08, include_cohort=pop_&popN._INinclude_2015_8, ccn=ccn2016);
-%claims_rev(date=&clm_beg_dt_in, source=rif2015.INpatient_claims_09,  
+*%claims_rev(date=&clm_beg_dt_in, source=rif2015.INpatient_claims_09,  
 	rev_cohort=rif2015.INpatient_revenue_09, include_cohort=pop_&popN._INinclude_2015_9, ccn=ccn2016);
-%claims_rev(date=&clm_beg_dt_in, source=rif2015.INpatient_claims_10,  
+*%claims_rev(date=&clm_beg_dt_in, source=rif2015.INpatient_claims_10,  
 	rev_cohort=rif2015.INpatient_revenue_10, include_cohort=pop_&popN._INinclude_2015_10, ccn=ccn2016);
 %claims_rev(date=&clm_beg_dt_in, source=rif2015.INpatient_claims_11,  
 	rev_cohort=rif2015.INpatient_revenue_11, include_cohort=pop_&popN._INinclude_2015_11, ccn=ccn2016);
@@ -332,13 +332,13 @@ proc sort data=pop_&popN._INinclude NODUPKEY; by compendium_hospital_id year qtr
 proc sort data=pop_&popN._INinclude NODUPKEY; by compendium_hospital_id year qtr &bene_id ; run;
 
 /*** this section is related to OP - outpatient claims--for eligibility***/
-%claims_rev(date=&clm_from_dt, source=rif2015.OUTpatient_claims_07,  
+*%claims_rev(date=&clm_from_dt, source=rif2015.OUTpatient_claims_07,  
 	rev_cohort=rif2015.inpatient_revenue_07, include_cohort=pop_&popN._OUTinclude_2015_7, ccn=ccn2016);
-%claims_rev(date=&clm_from_dt, source=rif2015.OUTpatient_claims_08,  
+*%claims_rev(date=&clm_from_dt, source=rif2015.OUTpatient_claims_08,  
 	rev_cohort=rif2015.outpatient_revenue_08, include_cohort=pop_&popN._OUTinclude_2015_8, ccn=ccn2016);
-%claims_rev(date=&clm_from_dt, source=rif2015.OUTpatient_claims_09,  
+*%claims_rev(date=&clm_from_dt, source=rif2015.OUTpatient_claims_09,  
 	rev_cohort=rif2015.outpatient_revenue_09, include_cohort=pop_&popN._OUTinclude_2015_9, ccn=ccn2016);
-%claims_rev(date=&clm_from_dt, source=rif2015.OUTpatient_claims_10,  
+*%claims_rev(date=&clm_from_dt, source=rif2015.OUTpatient_claims_10,  
 	rev_cohort=rif2015.outpatient_revenue_10, include_cohort=pop_&popN._OUTinclude_2015_10, ccn=ccn2016);
 %claims_rev(date=&clm_from_dt, source=rif2015.OUTpatient_claims_11,  
 	rev_cohort=rif2015.outpatient_revenue_11, include_cohort=pop_&popN._OUTinclude_2015_11, ccn=ccn2016);
