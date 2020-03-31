@@ -226,6 +226,11 @@ elig_dt=&date;
 elig=1;
 pop_num=&popN;
 run; 
+*delete the temp datasets;
+proc datasets lib=work nolist;
+ delete include: ;
+quit;
+run;
 %mend;
 /*** this section is related to IP - inpatient claims--for eligible cohort***/
 *%claims_rev(date=&clm_beg_dt_in, source=rif2015.INpatient_claims_07,  
