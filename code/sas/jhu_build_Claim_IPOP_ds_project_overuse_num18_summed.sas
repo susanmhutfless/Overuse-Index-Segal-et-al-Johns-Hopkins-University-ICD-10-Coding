@@ -447,7 +447,7 @@ if year<2016 then delete;
 if year>2018 then delete;
 run;
 *person can contribute only once even if seen in inpatient and outpatient in same hosp/year/qtr;
-proc sort data=pop_&popN._elig NODUPKEY; by compendium_hospital_id year qtr &bene_id ;run;
+proc sort data=&permlib..pop_&popN._elig NODUPKEY; by compendium_hospital_id year qtr &bene_id ;run;
 
 *end identification of eligibility;
 
@@ -542,6 +542,9 @@ quit;
 Data &include_cohort.1; 
 set include_cohort1c include_cohort1f;  
 if &rev_cntr in(&ED_rev_cntr) then ed=1; label ed='revenue center indicated emergency department';
+&flag_popped_dt=&clm_beg_dt_in; 
+	format &flag_popped_dt date9.; 						label &flag_popped_dt			=	&flag_popped_dt_label;
+				 										label &flag_popped				=	&flag_popped_label;
 array pr(&proc_cd_max) &proc_pfx.&proc_cd_min - &proc_pfx.&proc_cd_max;
 	do i=1 to &proc_cd_max;
 		if pr(i) in(&includ_pr10) then &flag_popped=1;
@@ -563,7 +566,7 @@ from
 	&include_cohort.1 b	
 where 
 		a.&bene_id=b.&bene_id 
-		and (	(b.elig_dt-60) <= a.&flag_popped_dt <=b.elig_dt-60); *had the eligible dx within 60 days of pop date; 
+		and (	(a.elig_dt-60) <= b.&flag_popped_dt <=a.elig_dt-60); *had the eligible dx within 60 days of pop date; 
 quit;
 %mend;
 %claims_rev(source=rif2016.inpatient_claims_01, rev_cohort=rif2016.inpatient_revenue_01, include_cohort=pop_&popN._IN_2016_1, ccn=ccn2016);
@@ -605,9 +608,6 @@ quit;
 
 data pop_&popN._IN (keep=  &vars_to_keep_ip inpatient ed setting_pop);
 set pop_&popN._IN:;
-&flag_popped_dt=&clm_beg_dt_in; 
-	format &flag_popped_dt date9.; 						label &flag_popped_dt			=	&flag_popped_dt_label;
-				 										label &flag_popped				=	&flag_popped_label;
 &pop_age=(&clm_beg_dt_in-&clm_dob)/365.25; 				label &pop_age					=	&pop_age_label;
 &pop_age=round(&pop_age);
 &pop_los=&clm_end_dt_in-&clm_beg_dt_in;					label &pop_los					=	&pop_los_label;
