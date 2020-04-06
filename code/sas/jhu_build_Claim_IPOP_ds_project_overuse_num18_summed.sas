@@ -566,7 +566,7 @@ from
 	include_cohort1g		  b	
 where 
 		a.&bene_id=b.&bene_id 
-		and (	(a.elig_dt-60) <= b.&flag_popped_dt <=a.elig_dt-60); *had the eligible dx within 60 days of pop date; 
+		and (	(a.elig_dt-60) <= b.&flag_popped_dt <=a.elig_dt); *had the eligible dx within 60 days of pop date; 
 quit;
 %mend;
 %claims_rev(date=&clm_beg_dt_in, source=rif2016.inpatient_claims_01, rev_cohort=rif2016.inpatient_revenue_01, include_cohort=pop_&popN._IN_2016_1, ccn=ccn2016);
