@@ -223,6 +223,7 @@ if KEEP ne 1 then DELETE;
 year=year(&date);
 qtr=qtr(&date);
 elig_dt=&date;
+age=(&date-&clm_dob)/365.25; 
 elig=1;
 pop_num=&popN;
 run; 
@@ -318,7 +319,7 @@ run;
 %claims_rev(date=&clm_beg_dt_in, source=rifq2018.INpatient_claims_12,  
 	rev_cohort=rifq2018.INpatient_revenue_12, include_cohort=pop_&popN._INinclude_2018_12, ccn=ccn2016);
 
-data pop_&popN._INinclude (keep= &bene_id &clm_id elig_dt elig setting_elig
+data pop_&popN._INinclude (keep= &bene_id &clm_id elig_dt elig setting_elig ed age
 							pop_num compendium_hospital_id year qtr  &gndr_cd &clm_dob bene_race_cd
 							&clm_beg_dt_in &clm_end_dt_in  &ptnt_dschrg_stus_cd
 							&nch_clm_type_cd &CLM_IP_ADMSN_TYPE_CD &clm_fac_type_cd &clm_src_ip_admsn_cd 
@@ -422,7 +423,7 @@ proc sort data=pop_&popN._INinclude NODUPKEY; by compendium_hospital_id year qtr
 %claims_rev(date=&clm_from_dt, source=rifq2018.OUTpatient_claims_12,  
 	rev_cohort=rifq2018.outpatient_revenue_12, include_cohort=pop_&popN._OUTinclude_2018_12, ccn=ccn2016);
 
-data pop_&popN._OUTinclude (keep= &bene_id &clm_id elig_dt elig setting_elig
+data pop_&popN._OUTinclude (keep= &bene_id &clm_id elig_dt elig setting_elig ed age
 							pop_num compendium_hospital_id year qtr  &gndr_cd &clm_dob bene_race_cd
 							&clm_from_dt &clm_thru_dt   &ptnt_dschrg_stus_cd
 							&nch_clm_type_cd &clm_fac_type_cd  
@@ -606,7 +607,7 @@ quit;
 %claims_rev(date=&clm_beg_dt_in, source=rifq2018.inpatient_claims_11, rev_cohort=rifq2018.inpatient_revenue_11, include_cohort=pop_&popN._IN_2018_11, ccn=ccn2016);
 %claims_rev(date=&clm_beg_dt_in, source=rifq2018.inpatient_claims_12, rev_cohort=rifq2018.inpatient_revenue_12, include_cohort=pop_&popN._IN_2018_12, ccn=ccn2016);
 
-data pop_&popN._IN (keep=  pop: &flag_popped_dt elig_dt
+data pop_&popN._IN (keep=  pop: &flag_popped_dt elig: setting: ed
 							&bene_id &clm_id &gndr_cd 
 							&clm_beg_dt_in &clm_end_dt_in &clm_dob  &ptnt_dschrg_stus_cd
 							&nch_clm_type_cd &CLM_IP_ADMSN_TYPE_CD &clm_fac_type_cd &clm_src_ip_admsn_cd 
@@ -636,11 +637,12 @@ set pop_&popN._IN_:;
 &pop_OP_PHYSN_SPCLTY_CD=&OP_PHYSN_SPCLTY_CD;
 pop_compendium_hospital_id=compendium_hospital_id;
 setting_pop='IP'; label setting_pop='setting where patient popped';
+&pop_year=year(&flag_popped_dt);
 pop_year=year(&flag_popped_dt);
 pop_qtr=qtr(&flag_popped_dt);
 if elig_dt = . then delete;
-if pop_year<2016 then delete;
-if pop_year>2018 then delete;
+if &pop_year<2016 then delete;
+if &pop_year>2018 then delete;
 format bene_state_cd prvdr_state_cd $state. &pop_OP_PHYSN_SPCLTY_CD $speccd. &pop_clm_src_ip_admsn_cd $src1adm.
 		&pop_ptnt_dschrg_stus_cd $stuscd.
 		&pop_icd_dgns_cd1 $dgns. &pop_icd_prcdr_cd1 $prcdr. &pop_hcpcs_cd $hcpcs.;
@@ -687,7 +689,7 @@ proc sort data=pop_&popN._IN NODUPKEY; by pop_compendium_hospital_id pop_year po
 %claims_rev(date=&clm_from_dt, source=rifq2018.OUTpatient_claims_11, rev_cohort=rifq2018.OUTpatient_revenue_11, include_cohort=pop_&popN._out_2018_11, ccn=ccn2016);
 %claims_rev(date=&clm_from_dt, source=rifq2018.OUTpatient_claims_12, rev_cohort=rifq2018.OUTpatient_revenue_12, include_cohort=pop_&popN._out_2018_12, ccn=ccn2016);
 
-data pop_&popN._out (keep=  pop: &flag_popped_dt elig_dt
+data pop_&popN._out (keep=  pop: &flag_popped_dt elig: setting: ed
 							&bene_id &clm_id &gndr_cd 
 							&clm_from_dt &clm_thru_dt &clm_dob  &ptnt_dschrg_stus_cd
 							&nch_clm_type_cd &clm_fac_type_cd  
@@ -713,11 +715,12 @@ set pop_&popN._out_:;
 &pop_OP_PHYSN_SPCLTY_CD=&OP_PHYSN_SPCLTY_CD; format &pop_OP_PHYSN_SPCLTY_CD speccd.;
 pop_compendium_hospital_id=compendium_hospital_id;
 setting_pop='OP';
+&pop_year=year(&flag_popped_dt);
+pop_year=year(&flag_popped_dt);
+pop_qtr=qtr(&flag_popped_dt);
 if elig_dt = . then delete;
 if &pop_year<2016 then delete;
 if &pop_year>2018 then delete;
-pop_year=year(&flag_popped_dt);
-pop_qtr=qtr(&flag_popped_dt);
 format &pop_OP_PHYSN_SPCLTY_CD $speccd. &pop_icd_dgns_cd1 $dgns. &pop_icd_prcdr_cd1 $prcdr. &pop_hcpcs_cd $hcpcs.;
 run;
 /* get rid of duplicate rows so that each bene contributes 1x per hospital/year/qtr */
@@ -725,7 +728,7 @@ proc sort data=pop_&popN._OUT NODUPKEY; by pop_compendium_hospital_id pop_year p
 proc sort data=pop_&popN._OUT NODUPKEY; by pop_compendium_hospital_id pop_year pop_qtr &bene_id ; run; 
 
 data pop_&popN._in_out_popped
-	(keep = bene_id elig_dt pop:
+	(keep = bene_id elig: pop: setting: ed
 			/*&gndr_cd bene_race_cd	bene_cnty_cd bene_state_cd 	bene_mlg_cntct_zip_cd*/
 			);
 set pop_&popN._IN pop_&popN._OUT;
@@ -762,7 +765,7 @@ proc sort data=&permlib..pop_&popN._in_out NODUPKEY; by pop_compendium_hospital_
 
 title 'Popped Inpatient or Outpatient (No Carrier) For Analysis';
 proc freq data=&permlib..pop_&popN._in_out; 
-table  	&pop_year elig_year setting_pop setting_elig; run;
+table  	&pop_year pop_year setting_pop setting_elig; run;
 proc contents data=&permlib..pop_&popN._in_out; run;
 *End link eligible and popped;
 
@@ -842,17 +845,77 @@ proc print data=setting_pop noobs; run;
 
 proc means data=&in mean median min max; var  &pop_age &pop_los; run;
 %mend;
+
+
+*start;
+%macro eliglook(in=);
+proc freq data=&in order=freq noprint; 
+table  	setting_elig /nocum out=setting_elig; run;
+proc print data=setting_elig noobs; where count>=11; run;
+
+proc freq data=&in order=freq noprint; 
+table  	year /nocum out=year (drop = count); run;
+proc print data=year noobs; run;
+
+proc freq data=&in order=freq noprint; 
+table  	hcpcs_cd /nocum out=hcpcs_cd (drop = count); run;
+proc print data=hcpcs_cd noobs; where percent>1; run;
+
+proc freq data=&in order=freq noprint; 
+table  	icd_prcdr_cd1 /nocum out=icd_prcdr_cd1 (drop = count); run;
+proc print data=icd_prcdr_cd1 noobs; where percent>1; run;
+
+proc freq data=&in order=freq noprint; 
+table  	&rev_cntr /nocum out=&rev_cntr (drop = count); run;
+proc print data=&rev_cntr noobs; where percent>1; run;
+
+proc freq data=&in order=freq noprint; 
+table  	ed /nocum out=ed (drop = count); run;
+proc print data=ed noobs; where percent>1; run;
+
+proc freq data=&in order=freq noprint; 
+table  	icd_dgns_cd1 /nocum out=icd_dgns_cd1 (drop = count); run;
+proc print data=icd_dgns_cd1 noobs; where percent>1; run;
+
+proc freq data=&in order=freq noprint; 
+table  	OP_PHYSN_SPCLTY_CD /nocum out=OP_PHYSN_SPCLTY_CD (drop = count); run;
+proc print data=OP_PHYSN_SPCLTY_CD noobs; run;
+
+proc freq data=&in order=freq noprint; 
+table  	nch_clm_type_cd /nocum out=nch_clm_type_cd (drop = count); run;
+proc print data=nch_clm_type_cd noobs; run;
+
+proc freq data=&in order=freq noprint; 
+table  	&gndr_cd /nocum out=&gndr_cd (drop = count); run;
+proc print data=&gndr_cd noobs; run;
+
+proc freq data=&in order=freq noprint; 
+table  	setting_elig /nocum out=setting_elig (drop = count); run;
+proc print data=setting_elig noobs; run;
+
+proc means data=&in mean median min max; var  age los; run;
+%mend;
+
+*stop;
+
 title 'Inpatient Popped';
 %poppedlook(in=pop_&popN._IN);
+*delete the temp datasets;
+proc datasets lib=work nolist;
+ delete setting_pop setting_elig &gndr_cd  &pop_nch_clm_type_cd
+		&pop_OP_PHYSN_SPCLTY_CD &pop_icd_dgns_cd1 &pop_admtg_dgns_cd
+		&pop_clm_drg_cd ed &rev_cntr &pop_hcpcs_cd &pop_year &flag_popped;
+quit;
+run;
 title 'Elgible from inpatient encounter';
-%poppedlook(in=pop_&popN._INinclude);
+%eliglook(in=pop_&popN._INinclude);
 		/*bene_state_cd prvdr_state_cd 
 		&pop_OP_PHYSN_SPCLTY_CD &pop_clm_fac_type_cd &pop_ptnt_dschrg_stus_cd
 		&pop_nch_clm_type_cd &pop_CLM_IP_ADMSN_TYPE_CD &pop_clm_src_ip_admsn_cd*/ 
 title 'Outpatient Popped';
 %poppedlook(in=pop_&popN._OUT);
 title 'Elgible from outpatient encounter';
-%poppedlook(in=pop_&popN._OUTinclude);
+%eliglook(in=pop_&popN._OUTinclude);
 
 *End summary checks;
 
