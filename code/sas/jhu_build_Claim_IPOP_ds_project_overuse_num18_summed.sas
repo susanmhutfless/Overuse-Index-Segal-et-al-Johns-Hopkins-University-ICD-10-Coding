@@ -319,7 +319,7 @@ run;
 %claims_rev(date=&clm_beg_dt_in, source=rifq2018.INpatient_claims_12,  
 	rev_cohort=rifq2018.INpatient_revenue_12, include_cohort=pop_&popN._INinclude_2018_12, ccn=ccn2016);
 
-data pop_&popN._INinclude (keep= &bene_id &clm_id elig_dt elig setting_elig ed age
+data pop_&popN._INinclude (keep= &bene_id &clm_id elig_dt elig setting_elig age
 							pop_num compendium_hospital_id year qtr  &gndr_cd &clm_dob bene_race_cd
 							&clm_beg_dt_in &clm_end_dt_in  &ptnt_dschrg_stus_cd
 							&nch_clm_type_cd &CLM_IP_ADMSN_TYPE_CD &clm_fac_type_cd &clm_src_ip_admsn_cd 
@@ -423,7 +423,7 @@ proc sort data=pop_&popN._INinclude NODUPKEY; by compendium_hospital_id year qtr
 %claims_rev(date=&clm_from_dt, source=rifq2018.OUTpatient_claims_12,  
 	rev_cohort=rifq2018.outpatient_revenue_12, include_cohort=pop_&popN._OUTinclude_2018_12, ccn=ccn2016);
 
-data pop_&popN._OUTinclude (keep= &bene_id &clm_id elig_dt elig setting_elig ed age
+data pop_&popN._OUTinclude (keep= &bene_id &clm_id elig_dt elig setting_elig age
 							pop_num compendium_hospital_id year qtr  &gndr_cd &clm_dob bene_race_cd
 							&clm_from_dt &clm_thru_dt   &ptnt_dschrg_stus_cd
 							&nch_clm_type_cd &clm_fac_type_cd  
@@ -755,8 +755,8 @@ proc sort data=&permlib..pop_&popN._elig	NODUPKEY; by  &bene_id elig_dt;run;
 data &permlib..pop_&popN._in_out (drop=compendium_hospital_id);
 merge pop_&popN._in_out_popped &permlib..pop_&popN._elig;
 by &bene_id elig_dt;
-if compendium_hospital_id and pop_compendium_hospital_id=. then delete;
-if pop_compendium_hospital_id=. then pop_compendium_hospital_id=compendium_hospital_id;
+if compendium_hospital_id=' ' and pop_compendium_hospital_id=' ' then delete;
+if pop_compendium_hospital_id=' ' then pop_compendium_hospital_id=compendium_hospital_id;
 label pop_compendium_hospital_id='Hospital where patient popped, if patient did not pop, the hospital where patient
 	was first eligible during the quarter';
 run;
