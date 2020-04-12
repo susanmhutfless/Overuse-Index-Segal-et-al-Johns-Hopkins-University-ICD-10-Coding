@@ -840,8 +840,8 @@ table  	&pop_nch_clm_type_cd /nocum out=&pop_nch_clm_type_cd (drop = count); run
 proc print data=&pop_nch_clm_type_cd noobs; run;
 
 proc freq data=&in order=freq noprint; 
-table  	&gndr_cd /nocum out=&gndr_cd (drop = count); run;
-proc print data=&gndr_cd noobs; run;
+table  	pop_gndr_cd /nocum out=pop_gndr_cd (drop = count); run;
+proc print data=pop_gndr_cd noobs; run;
 
 proc means data=&in mean median min max; var  &pop_age &pop_los; run;
 %mend;
@@ -907,15 +907,34 @@ proc datasets lib=work nolist;
 		&pop_clm_drg_cd ed &rev_cntr &pop_hcpcs_cd &pop_year &flag_popped;
 quit;
 run;
+
 title 'Elgible from inpatient encounter';
 %eliglook(in=pop_&popN._INinclude);
 		/*bene_state_cd prvdr_state_cd 
 		&pop_OP_PHYSN_SPCLTY_CD &pop_clm_fac_type_cd &pop_ptnt_dschrg_stus_cd
 		&pop_nch_clm_type_cd &pop_CLM_IP_ADMSN_TYPE_CD &pop_clm_src_ip_admsn_cd*/ 
+proc datasets lib=work nolist;
+ delete setting_pop setting_elig &gndr_cd  &pop_nch_clm_type_cd
+		&pop_OP_PHYSN_SPCLTY_CD &pop_icd_dgns_cd1 &pop_admtg_dgns_cd
+		&pop_clm_drg_cd ed &rev_cntr &pop_hcpcs_cd &pop_year &flag_popped;
+quit;
+run;
 title 'Outpatient Popped';
 %poppedlook(in=pop_&popN._OUT);
+proc datasets lib=work nolist;
+ delete setting_pop setting_elig &gndr_cd  &pop_nch_clm_type_cd
+		&pop_OP_PHYSN_SPCLTY_CD &pop_icd_dgns_cd1 &pop_admtg_dgns_cd
+		&pop_clm_drg_cd ed &rev_cntr &pop_hcpcs_cd &pop_year &flag_popped;
+quit;
+run;
 title 'Elgible from outpatient encounter';
 %eliglook(in=pop_&popN._OUTinclude);
+proc datasets lib=work nolist;
+ delete setting_pop setting_elig &gndr_cd  &pop_nch_clm_type_cd
+		&pop_OP_PHYSN_SPCLTY_CD &pop_icd_dgns_cd1 &pop_admtg_dgns_cd
+		&pop_clm_drg_cd ed &rev_cntr &pop_hcpcs_cd &pop_year &flag_popped;
+quit;
+run;
 
 *End summary checks;
 
