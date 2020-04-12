@@ -660,7 +660,7 @@ run;
 proc sort data=pop_&popN._IN NODUPKEY; by pop_compendium_hospital_id pop_year pop_qtr &bene_id elig_dt; run;
 proc sort data=pop_&popN._IN NODUPKEY; by pop_compendium_hospital_id pop_year pop_qtr &bene_id ; run; 
 
-/*** this section is related to OP - OUTpatient claims ***/
+/*** this section is related to OP Popped- OUTpatient claims ***/
 %claims_rev(date=&clm_from_dt, source=rif2016.OUTpatient_claims_01, rev_cohort=rif2016.OUTpatient_revenue_01, include_cohort=pop_&popN._out_2016_1, ccn=ccn2016);
 %claims_rev(date=&clm_from_dt, source=rif2016.OUTpatient_claims_02, rev_cohort=rif2016.OUTpatient_revenue_02, include_cohort=pop_&popN._out_2016_2, ccn=ccn2016);
 %claims_rev(date=&clm_from_dt, source=rif2016.OUTpatient_claims_03, rev_cohort=rif2016.OUTpatient_revenue_03, include_cohort=pop_&popN._out_2016_3, ccn=ccn2016);
@@ -783,7 +783,7 @@ proc contents data=&permlib..pop_&popN._in_out; run;
 
 *Start summary checks;
 /**This section makes summaries for inpatient, outpatient POPPED & eligible **/
-*look at inpatient info;
+*look at popped;
 %macro poppedlook(in=);
 proc freq data=&in order=freq noprint; 
 table  	&flag_popped /nocum out=&flag_popped; run;
@@ -798,6 +798,10 @@ proc print data=&flag_popped noobs; where count>=11; run;
 proc freq data=&in order=freq noprint; 
 table  	setting_pop /nocum out=setting_pop; run;
 proc print data=setting_pop noobs; where count>=11; run;
+
+proc freq data=&in order=freq noprint; 
+table  	setting_pop_: /nocum out=setting_pop_; run;
+proc print data=setting_pop_ noobs; where count>=11; run;
 
 proc freq data=&in order=freq noprint; 
 table  	&pop_year /nocum out=&pop_year (drop = count); run;
@@ -821,11 +825,11 @@ proc print data=pop_ed noobs; where percent>1; run;
 
 proc freq data=&in order=freq noprint; 
 table  	&pop_clm_drg_cd /nocum out=&pop_clm_drg_cd (drop = count); run;
-proc print data=&pop_clm_drg_cd noobs; run;
+proc print data=&pop_clm_drg_cd noobs; run; *inpatient only;
 
 proc freq data=&in order=freq noprint; 
 table  	&pop_admtg_dgns_cd /nocum out=&pop_admtg_dgns_cd (drop = count); run;
-proc print data=&pop_admtg_dgns_cd noobs; where percent>1; run;
+proc print data=&pop_admtg_dgns_cd noobs; where percent>1; run;*inpatient only;
 
 proc freq data=&in order=freq noprint; 
 table  	&pop_icd_dgns_cd1 /nocum out=&pop_icd_dgns_cd1 (drop = count); run;
@@ -840,8 +844,8 @@ table  	&pop_nch_clm_type_cd /nocum out=&pop_nch_clm_type_cd (drop = count); run
 proc print data=&pop_nch_clm_type_cd noobs; run;
 
 proc freq data=&in order=freq noprint; 
-table  	pop_gndr_cd /nocum out=pop_gndr_cd (drop = count); run;
-proc print data=pop_gndr_cd noobs; run;
+table  	&gndr_cd /nocum out=&gndr_cd (drop = count); run;
+proc print data=&gndr_cd noobs; run;
 
 proc means data=&in mean median min max; var  &pop_age &pop_los; run;
 %mend;
