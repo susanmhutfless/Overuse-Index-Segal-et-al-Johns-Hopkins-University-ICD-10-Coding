@@ -49,14 +49,21 @@ Actor		Orthopedists
 					'29868' '29880' '29881' '29882'
 					'29883'			;
 
+
+
 %let includ_pr10 =
-					'OSBC4ZZ' 'OSBD4ZZ'			;
+					'0SBC4ZZ' '0SBD4ZZ'			;
 
 %let includ_dx10   = 'M17';
 %let includ_dx10_n = 3;		*this number should match number that needs to be substringed;
 %let includ_drg = ;
 
 /** Exclusion criteria **/
+%let exclud_hcpcs= '27447';
+
+%let EXclud_pr10 =	'0SRC' '0SRD'				;
+%let EXclud_pr10_n = 4;	
+
 %let EXCLUD_dx10   = 'V' 'W'; 
 %let exclud_dx10_n = 1; 
 
@@ -212,17 +219,44 @@ where
 	and 
 	a.&clm_id = b.&clm_id;
 quit;
+*transpose the revenue/hcpcs to 1 row per bene/clm;
+proc sort data=include_cohort3 nodupkey out=hcpcs_transposed; by &bene_id &clm_id &hcpcs_cd; run;
+proc transpose data=hcpcs_transposed out=hcpcs_transposed (drop = _name_ _label_) prefix=hcpcs_cd;
+    by &bene_id &clm_id ;
+    var &hcpcs_cd;
+run;
+
+proc sort data=include_cohort3 nodupkey out=rev_transposed; by &bene_id &clm_id &rev_cntr; run;
+proc transpose data=rev_transposed out=rev_transposed (drop = _name_ _label_) prefix=rev_cntr;
+    by &bene_id &clm_id ;
+    var &rev_cntr;
+run;
 *make inclusion/exclusion criteria and set variables for eligible population;
-Data &include_cohort ; 
-set include_cohort3; 
-if &rev_cntr in(&ED_rev_cntr) then elig_ed=1; label elig_ed='eligible visit: revenue center indicated emergency department'; 
+data &include_cohort ; 
+merge 	include_cohort2 
+		hcpcs_transposed
+		rev_transposed; 
+by &bene_id &clm_id ;
+array rev{*} rev_cntr:;
+do r=1 to dim(rev);
+	if rev(r) in(&ED_rev_cntr) then elig_ed=1;	
+end;
+label elig_ed='eligible visit: revenue center indicated emergency department'; 
+array hcpcs{*} hcpcs_cd:;
+do h=1 to dim(hcpcs);
+	if hcpcs(h) in(&exclud_hcpcs) then DELETE=1;	
+end;
+label elig_ed='eligible visit: revenue center indicated emergency department'; 
+array pr(&proc_cd_max) &proc_pfx.&proc_cd_min - &proc_pfx.&proc_cd_max;
+do i=1 to &proc_cd_max;
+	if substr(pr(i),1,&exclud_pr10_n) in(&EXclud_pr10) then DELETE=1;	
+end;
 array dx(&diag_cd_max) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
 do j=1 to &diag_cd_max;
 	if substr(dx(j),1,&includ_dx10_n) in(&includ_dx10) then KEEP=1;	
 end;
 if KEEP ne 1 then DELETE;
-year=year(&date);
-qtr=qtr(&date);
+if DELETE = 1 then delete;
 elig_dt=&date;
 elig_age=(&date-&clm_dob)/365.25; label elig_age='age at eligibility';
 if &clm_end_dt_in ne . then do;
@@ -327,7 +361,7 @@ run;
 	rev_cohort=rifq2018.INpatient_revenue_12, include_cohort=pop_&popN._INinclude_2018_12, ccn=ccn2016);
 
 data pop_&popN._INinclude (keep= &bene_id &clm_id elig_dt elig: setting_elig:
-							pop_num compendium_hospital_id year qtr  &gndr_cd &clm_dob bene_race_cd
+							pop_num elig_compendium_hospital_id  &gndr_cd &clm_dob bene_race_cd
 							&clm_beg_dt_in &clm_end_dt_in  &ptnt_dschrg_stus_cd
 							&nch_clm_type_cd &CLM_IP_ADMSN_TYPE_CD &clm_fac_type_cd &clm_src_ip_admsn_cd 
 							&admtg_dgns_cd &clm_drg_cd  &hcpcs_cd
@@ -340,10 +374,30 @@ data pop_&popN._INinclude (keep= &bene_id &clm_id elig_dt elig: setting_elig:
 set pop_&popN._INinclude: 	;
 setting_elig='IP';
 setting_elig_ip=1;
+elig_compendium_hospital_id=compendium_hospital_id;
+elig_year=year(elig_dt);
+elig_qtr=qtr(elig_dt);
+elig_prvdr_num=prvdr_num;
+elig_OP_PHYSN_SPCLTY_CD=OP_PHYSN_SPCLTY_CD;
+elig_prvdr_state_cd=prvdr_state_cd;
+elig_at_physn_npi=at_physn_npi;
+elig_op_physn_npi =op_physn_npi ;
+elig_org_npi_num=org_npi_num;
+elig_ot_physn_npi=ot_physn_npi;
+elig_rndrng_physn_npi=rndrng_physn_npi;
+elig_gndr_cd=&gndr_cd;
+elig_bene_race_cd=bene_race_cd;
+elig_bene_cnty_cd=bene_cnty_cd;
+elig_bene_state_cd=bene_state_cd; 	
+elig_bene_mlg_cntct_zip_cd=bene_mlg_cntct_zip_cd;
+format bene_state_cd prvdr_state_cd $state. OP_PHYSN_SPCLTY_CD $speccd. &rev_cntr $rev_cntr.
+		&clm_src_ip_admsn_cd $src1adm. &nch_clm_type_cd $clm_typ. &CLM_IP_ADMSN_TYPE_CD $typeadm.
+		&ptnt_dschrg_stus_cd $stuscd. &gndr_cd gender. bene_race_cd race. &clm_drg_cd drg.
+		&icd_dgns_cd1 &admtg_dgns_cd $dgns. &icd_prcdr_cd1 $prcdr. &hcpcs_cd $hcpcs. ;
 run;
 /* get rid of duplicate rows so that each bene contributes 1x per hospital/year/qtr */
-proc sort data=pop_&popN._INinclude NODUPKEY; by compendium_hospital_id year qtr &bene_id elig_dt; run;
-proc sort data=pop_&popN._INinclude NODUPKEY; by compendium_hospital_id year qtr &bene_id ; run;
+proc sort data=pop_&popN._INinclude NODUPKEY; by elig_compendium_hospital_id elig_year elig_qtr &bene_id elig_dt; run;
+proc sort data=pop_&popN._INinclude NODUPKEY; by elig_compendium_hospital_id elig_year elig_qtr &bene_id ; run;
 
 /*** this section is related to OP - outpatient claims--for eligibility***/
 *%claims_rev(date=&clm_from_dt, source=rif2015.OUTpatient_claims_07,  
@@ -432,7 +486,7 @@ proc sort data=pop_&popN._INinclude NODUPKEY; by compendium_hospital_id year qtr
 	rev_cohort=rifq2018.outpatient_revenue_12, include_cohort=pop_&popN._OUTinclude_2018_12, ccn=ccn2016);
 
 data pop_&popN._OUTinclude (keep= &bene_id &clm_id elig_dt elig: setting_elig:
-							pop_num compendium_hospital_id year qtr  &gndr_cd &clm_dob bene_race_cd
+							pop_num elig_compendium_hospital_id   &gndr_cd &clm_dob bene_race_cd
 							&clm_from_dt &clm_thru_dt   &ptnt_dschrg_stus_cd
 							&nch_clm_type_cd &clm_fac_type_cd  
 							&hcpcs_cd
@@ -445,20 +499,38 @@ data pop_&popN._OUTinclude (keep= &bene_id &clm_id elig_dt elig: setting_elig:
 set pop_&popN._OUTinclude: 	;
 setting_elig='OP';
 setting_elig_op=1;
+elig_compendium_hospital_id=compendium_hospital_id;
+elig_year=year(elig_dt);
+elig_qtr=qtr(elig_dt);
+elig_prvdr_num=prvdr_num;
+elig_OP_PHYSN_SPCLTY_CD=OP_PHYSN_SPCLTY_CD;
+elig_prvdr_state_cd=prvdr_state_cd;
+elig_at_physn_npi=at_physn_npi;
+elig_op_physn_npi =op_physn_npi ;
+elig_org_npi_num=org_npi_num;
+elig_ot_physn_npi=ot_physn_npi;
+elig_rndrng_physn_npi=rndrng_physn_npi;
+elig_gndr_cd=&gndr_cd;
+elig_bene_race_cd=bene_race_cd;
+elig_bene_cnty_cd=bene_cnty_cd;
+elig_bene_state_cd=bene_state_cd; 	
+elig_bene_mlg_cntct_zip_cd=bene_mlg_cntct_zip_cd;
+format bene_state_cd prvdr_state_cd $state. OP_PHYSN_SPCLTY_CD $speccd. &rev_cntr $rev_cntr.
+		&clm_src_ip_admsn_cd $src1adm. &nch_clm_type_cd $clm_typ. &CLM_IP_ADMSN_TYPE_CD $typeadm.
+		&ptnt_dschrg_stus_cd $stuscd. &gndr_cd gender. bene_race_cd race. &clm_drg_cd drg.
+		&icd_dgns_cd1 &admtg_dgns_cd $dgns. &icd_prcdr_cd1 $prcdr. &hcpcs_cd $hcpcs. ;
+run;
 run;
 /* get rid of duplicate rows so that each bene contributes 1x per hospital/year/qtr */
-proc sort data=pop_&popN._OUTinclude NODUPKEY; by compendium_hospital_id year qtr &bene_id elig_dt; run;
-proc sort data=pop_&popN._OUTinclude NODUPKEY; by compendium_hospital_id year qtr &bene_id ; run; 
+proc sort data=pop_&popN._OUTinclude NODUPKEY; by elig_compendium_hospital_id elig_year elig_qtr &bene_id elig_dt; run;
+proc sort data=pop_&popN._OUTinclude NODUPKEY; by elig_compendium_hospital_id elig_year elig_qtr &bene_id ; run; 
 
 data &permlib..pop_&popN._elig;
 set 	pop_&popN._OUTinclude 
 		pop_&popN._INinclude ;
-if year<2016 then delete;
-if year>2018 then delete;
-elig_compendium_hospital_id=compendium_hospital_id;
 run;
 *person can contribute only once even if seen in inpatient and outpatient in same hosp/year/qtr;
-proc sort data=&permlib..pop_&popN._elig NODUPKEY; by compendium_hospital_id year qtr &bene_id ;run;
+proc sort data=&permlib..pop_&popN._elig NODUPKEY; by elig_compendium_hospital_id elig_year elig_qtr &bene_id ;run;
 
 *end identification of eligibility;
 
@@ -652,9 +724,10 @@ pop_qtr=qtr(&flag_popped_dt);
 if elig_dt = . then delete;
 if &pop_year<2016 then delete;
 if &pop_year>2018 then delete;
-format bene_state_cd prvdr_state_cd $state. &pop_OP_PHYSN_SPCLTY_CD $speccd. &pop_clm_src_ip_admsn_cd $src1adm.
+format bene_state_cd prvdr_state_cd $state. &pop_OP_PHYSN_SPCLTY_CD $speccd. &rev_cntr $rev_cntr.
+		&pop_clm_src_ip_admsn_cd $src1adm.
 		&pop_ptnt_dschrg_stus_cd $stuscd.
-		&pop_icd_dgns_cd1 $dgns. &pop_icd_prcdr_cd1 $prcdr. &pop_hcpcs_cd $hcpcs.;
+		&pop_icd_dgns_cd1 $dgns. &pop_icd_prcdr_cd1 $prcdr. &pop_hcpcs_cd $hcpcs. ;
 run;
 /* get rid of duplicate rows so that each bene contributes 1x per hospital/year/qtr */
 proc sort data=pop_&popN._IN NODUPKEY; by pop_compendium_hospital_id pop_year pop_qtr &bene_id elig_dt; run;
@@ -728,7 +801,8 @@ pop_qtr=qtr(&flag_popped_dt);
 if elig_dt = . then delete;
 if &pop_year<2016 then delete;
 if &pop_year>2018 then delete;
-format &pop_OP_PHYSN_SPCLTY_CD $speccd. &pop_icd_dgns_cd1 $dgns. &pop_icd_prcdr_cd1 $prcdr. &pop_hcpcs_cd $hcpcs.;
+format &pop_OP_PHYSN_SPCLTY_CD $speccd. &rev_cntr $rev_cntr.
+&pop_icd_dgns_cd1 $dgns. &pop_icd_prcdr_cd1 $prcdr. &pop_hcpcs_cd $hcpcs.;
 run;
 /* get rid of duplicate rows so that each bene contributes 1x per hospital/year/qtr */
 proc sort data=pop_&popN._OUT NODUPKEY; by pop_compendium_hospital_id pop_year pop_qtr &bene_id elig_dt; run;
@@ -854,12 +928,24 @@ proc means data=&in mean median min max; var  &pop_age &pop_los; run;
 *start;
 %macro eliglook(in=);
 proc freq data=&in order=freq noprint; 
+table  	pop_num /nocum out=pop_num; run;
+proc print data=pop_num noobs; where count>=11; run;
+
+proc freq data=&in order=freq noprint; 
 table  	setting_elig /nocum out=setting_elig; run;
 proc print data=setting_elig noobs; where count>=11; run;
 
 proc freq data=&in order=freq noprint; 
-table  	year /nocum out=year (drop = count); run;
-proc print data=year noobs; run;
+table  	setting_elig_: /nocum out=setting_elig_; run;
+proc print data=setting_elig_ noobs; where count>=11; run;
+
+proc freq data=&in order=freq noprint; 
+table  	elig_year /nocum out=elig_year (drop = count); run;
+proc print data=elig_year noobs; run;
+
+proc freq data=&in order=freq noprint; 
+table  	elig_qtr /nocum out=elig_qtr (drop = count); run;
+proc print data=elig_qtr noobs; run;
 
 proc freq data=&in order=freq noprint; 
 table  	hcpcs_cd /nocum out=hcpcs_cd (drop = count); run;
@@ -878,8 +964,16 @@ table  	elig_ed /nocum out=elig_ed (drop = count); run;
 proc print data=elig_ed noobs; where percent>1; run;
 
 proc freq data=&in order=freq noprint; 
+table  	&clm_drg_cd /nocum out=&clm_drg_cd (drop = count); run;
+proc print data=&clm_drg_cd noobs; where percent>1; run; *inpatient only;
+
+proc freq data=&in order=freq noprint; 
 table  	icd_dgns_cd1 /nocum out=icd_dgns_cd1 (drop = count); run;
 proc print data=icd_dgns_cd1 noobs; where percent>1; run;
+
+proc freq data=&in order=freq noprint; 
+table  	&admtg_dgns_cd /nocum out=&admtg_dgns_cd (drop = count); run;
+proc print data=&admtg_dgns_cd noobs; where percent>1; run;
 
 proc freq data=&in order=freq noprint; 
 table  	OP_PHYSN_SPCLTY_CD /nocum out=OP_PHYSN_SPCLTY_CD (drop = count); run;
@@ -890,12 +984,24 @@ table  	nch_clm_type_cd /nocum out=nch_clm_type_cd (drop = count); run;
 proc print data=nch_clm_type_cd noobs; run;
 
 proc freq data=&in order=freq noprint; 
+table  	&ptnt_dschrg_stus_cd /nocum out=&ptnt_dschrg_stus_cd (drop = count); run;
+proc print data=&ptnt_dschrg_stus_cd noobs; run;
+
+proc freq data=&in order=freq noprint; 
+table  	&CLM_IP_ADMSN_TYPE_CD /nocum out=&CLM_IP_ADMSN_TYPE_CD (drop = count); run;
+proc print data=&CLM_IP_ADMSN_TYPE_CD noobs; run;
+
+proc freq data=&in order=freq noprint; 
+table  	&clm_src_ip_admsn_cd /nocum out=&clm_src_ip_admsn_cd (drop = count); run;
+proc print data=&clm_src_ip_admsn_cd noobs; run;
+
+proc freq data=&in order=freq noprint; 
 table  	&gndr_cd /nocum out=&gndr_cd (drop = count); run;
 proc print data=&gndr_cd noobs; run;
 
 proc freq data=&in order=freq noprint; 
-table  	setting_elig /nocum out=setting_elig (drop = count); run;
-proc print data=setting_elig noobs; run;
+table  	bene_race_cd /nocum out=bene_race_cd (drop = count); run;
+proc print data=bene_race_cd noobs; run;
 
 proc means data=&in mean median min max; var  elig_age elig_los; run;
 %mend;
@@ -906,37 +1012,45 @@ title 'Inpatient Popped';
 %poppedlook(in=pop_&popN._IN);
 *delete the temp datasets;
 proc datasets lib=work nolist;
- delete setting_pop setting_elig &gndr_cd  &pop_nch_clm_type_cd
-		&pop_OP_PHYSN_SPCLTY_CD &pop_icd_dgns_cd1 &pop_admtg_dgns_cd
-		&pop_clm_drg_cd ed &rev_cntr &pop_hcpcs_cd &pop_year &flag_popped;
+ delete setting: elig: pop: icd: clm:
+		year qtr &gndr_cd  bene_race_cd 
+		&hcpcs_cd &clm_drg_cd &rev_cntr
+		&admtg_dgns_cd &OP_PHYSN_SPCLTY_CD nch_clm_type_cd
+		&ptnt_dschrg_stus_cd ;
 quit;
 run;
 
-title 'Elgible from inpatient encounter';
+title 'Eligible from inpatient encounter';
 %eliglook(in=pop_&popN._INinclude);
 		/*bene_state_cd prvdr_state_cd 
 		&pop_OP_PHYSN_SPCLTY_CD &pop_clm_fac_type_cd &pop_ptnt_dschrg_stus_cd
 		&pop_nch_clm_type_cd &pop_CLM_IP_ADMSN_TYPE_CD &pop_clm_src_ip_admsn_cd*/ 
 proc datasets lib=work nolist;
- delete setting_pop setting_elig &gndr_cd  &pop_nch_clm_type_cd
-		&pop_OP_PHYSN_SPCLTY_CD &pop_icd_dgns_cd1 &pop_admtg_dgns_cd
-		&pop_clm_drg_cd ed &rev_cntr &pop_hcpcs_cd &pop_year &flag_popped;
+ delete setting: elig: pop: icd: clm:
+		year qtr &gndr_cd  bene_race_cd 
+		&hcpcs_cd &clm_drg_cd &rev_cntr
+		&admtg_dgns_cd &OP_PHYSN_SPCLTY_CD nch_clm_type_cd
+		&ptnt_dschrg_stus_cd ;
 quit;
 run;
 title 'Outpatient Popped';
 %poppedlook(in=pop_&popN._OUT);
 proc datasets lib=work nolist;
- delete setting_pop setting_elig &gndr_cd  &pop_nch_clm_type_cd
-		&pop_OP_PHYSN_SPCLTY_CD &pop_icd_dgns_cd1 &pop_admtg_dgns_cd
-		&pop_clm_drg_cd ed &rev_cntr &pop_hcpcs_cd &pop_year &flag_popped;
+ delete setting: elig: pop: icd: clm:
+		year qtr &gndr_cd  bene_race_cd 
+		&hcpcs_cd &clm_drg_cd &rev_cntr
+		&admtg_dgns_cd &OP_PHYSN_SPCLTY_CD nch_clm_type_cd
+		&ptnt_dschrg_stus_cd ;
 quit;
 run;
 title 'Elgible from outpatient encounter';
 %eliglook(in=pop_&popN._OUTinclude);
 proc datasets lib=work nolist;
- delete setting_pop setting_elig &gndr_cd  &pop_nch_clm_type_cd
-		&pop_OP_PHYSN_SPCLTY_CD &pop_icd_dgns_cd1 &pop_admtg_dgns_cd
-		&pop_clm_drg_cd ed &rev_cntr &pop_hcpcs_cd &pop_year &flag_popped;
+ delete setting: elig: pop: icd: clm:
+		year qtr &gndr_cd  bene_race_cd 
+		&hcpcs_cd &clm_drg_cd &rev_cntr
+		&admtg_dgns_cd &OP_PHYSN_SPCLTY_CD nch_clm_type_cd
+		&ptnt_dschrg_stus_cd ;
 quit;
 run;
 
