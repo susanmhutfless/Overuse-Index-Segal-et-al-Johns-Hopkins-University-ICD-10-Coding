@@ -5,7 +5,7 @@
 ********************************************************************/
 
 /*** Indicator description ***/
-/* Description and codes from .xlsx file  "ICD-10 conversions_12_17-19" */
+/* Description and codes from .xlsx file  "ICD-10 conversions_3_30_2020" */
 
 ***************Major modifications made per 27mar2020 phone call to 
 include at risk population only and sum counts**************************************
@@ -14,27 +14,6 @@ by hospital qtr year
 then evaluate N of the eligible that popped;
 
 /* Indicator 18 */
-
-
-/*Description from Excel file
-(New) Number 		18	
-Indicator 		Meniscectomy in patients with DJD of the knee
-Indicator
-			Motivator: partial meniscectomy or meniscus repair or placement of an artificial meniscus have little value in patients with DJD of the knee 
-
-			Indicator: use of meniscectomy in a population of patients with DJD. 
-
-			[this can be reported among all patients with menisectomy]
-
-Timing		Procedure code with inclusionary diagnosis code in preceding 60 days 
-			and with NO exclusionary code associated with the procedure (same claim). 		
-
-Setting		Inpatient or outpatient (including ED). 	
-
-System		Ortho	
-
-Actor		Orthopedists
-*/
 
 /*** start of indicator specific variables ***/
 
@@ -364,7 +343,7 @@ data pop_&popN._INinclude (keep= &bene_id &clm_id elig_dt elig: setting_elig:
 							pop_num elig_compendium_hospital_id  &gndr_cd &clm_dob bene_race_cd
 							&clm_beg_dt_in &clm_end_dt_in  &ptnt_dschrg_stus_cd
 							&nch_clm_type_cd &CLM_IP_ADMSN_TYPE_CD &clm_fac_type_cd &clm_src_ip_admsn_cd 
-							&admtg_dgns_cd &clm_drg_cd  &hcpcs_cd1
+							&admtg_dgns_cd &clm_drg_cd  hcpcs_cd1
 							&diag_pfx.&diag_cd_min   &proc_pfx.&proc_cd_min
 							prvdr_num prvdr_state_cd OP_PHYSN_SPCLTY_CD rev_cntr1
 							at_physn_npi op_physn_npi org_npi_num ot_physn_npi rndrng_physn_npi
@@ -515,10 +494,10 @@ elig_bene_race_cd=bene_race_cd;
 elig_bene_cnty_cd=bene_cnty_cd;
 elig_bene_state_cd=bene_state_cd; 	
 elig_bene_mlg_cntct_zip_cd=bene_mlg_cntct_zip_cd;
-format bene_state_cd prvdr_state_cd $state. OP_PHYSN_SPCLTY_CD $speccd. &rev_cntr $rev_cntr.
+format bene_state_cd prvdr_state_cd $state. OP_PHYSN_SPCLTY_CD $speccd. rev_cntr1 $rev_cntr.
 		&clm_src_ip_admsn_cd $src1adm. &nch_clm_type_cd $clm_typ. &CLM_IP_ADMSN_TYPE_CD $typeadm.
 		&ptnt_dschrg_stus_cd $stuscd. &gndr_cd gender. bene_race_cd race. &clm_drg_cd drg.
-		&icd_dgns_cd1 &admtg_dgns_cd $dgns. &icd_prcdr_cd1 $prcdr. &hcpcs_cd $hcpcs. ;
+		&icd_dgns_cd1 &admtg_dgns_cd $dgns. &icd_prcdr_cd1 $prcdr. hcpcs_cd1 $hcpcs. ;
 run;
 run;
 /* get rid of duplicate rows so that each bene contributes 1x per hospital/year/qtr */
@@ -948,16 +927,16 @@ table  	elig_qtr /nocum out=elig_qtr (drop = count); run;
 proc print data=elig_qtr noobs; run;
 
 proc freq data=&in order=freq noprint; 
-table  	hcpcs_cd /nocum out=hcpcs_cd (drop = count); run;
-proc print data=hcpcs_cd noobs; where percent>1; run;
+table  	hcpcs_cd1 /nocum out=hcpcs_cd1 (drop = count); run;
+proc print data=hcpcs_cd1 noobs; where percent>1; run;
 
 proc freq data=&in order=freq noprint; 
 table  	icd_prcdr_cd1 /nocum out=icd_prcdr_cd1 (drop = count); run;
 proc print data=icd_prcdr_cd1 noobs; where percent>1; run;
 
 proc freq data=&in order=freq noprint; 
-table  	&rev_cntr /nocum out=&rev_cntr (drop = count); run;
-proc print data=&rev_cntr noobs; where percent>1; format &rev_cntr $rev_cntr.;run;
+table  	rev_cntr1 /nocum out=rev_cntr1 (drop = count); run;
+proc print data=rev_cntr1 noobs; where percent>1; run;
 
 proc freq data=&in order=freq noprint; 
 table  	elig_ed /nocum out=elig_ed (drop = count); run;
@@ -1028,7 +1007,7 @@ title 'Eligible from inpatient encounter';
 proc datasets lib=work nolist;
  delete setting: elig: pop: icd: clm:
 		year qtr &gndr_cd  bene_race_cd 
-		&hcpcs_cd &clm_drg_cd &rev_cntr
+		hcpcs_cd1 &clm_drg_cd rev_cntr1
 		&admtg_dgns_cd &OP_PHYSN_SPCLTY_CD nch_clm_type_cd
 		&ptnt_dschrg_stus_cd ;
 quit;
