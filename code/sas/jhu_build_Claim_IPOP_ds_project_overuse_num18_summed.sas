@@ -598,7 +598,7 @@ run;
 *bring transposed rev center in with claim;
 data include_cohort1e2 ; 
 merge 	include_cohort1d  
-		rev_transposed; *have separate criteria for hcpcs above so don't need to grab hcpcs here;
+		rev_transposed; *have separate criteria for hcpcs above so no need to grab hcpcs here;
 by &bene_id &clm_id ;
 run;
 
@@ -646,6 +646,8 @@ from
 	include_cohort1g		  b	
 where 
 		a.&bene_id=b.&bene_id 
+		and 
+		a.elig_dt=b.&flag_popped_dt;*
 		and (	(a.elig_dt-60) <= b.&flag_popped_dt <=a.elig_dt); *had the eligible dx within 60 days of pop date; 
 quit;
 %mend;
@@ -690,8 +692,8 @@ data pop_&popN._IN (keep=  pop: &flag_popped_dt elig: setting:
 							&bene_id &clm_id 
 							&clm_beg_dt_in &clm_end_dt_in &clm_dob  &ptnt_dschrg_stus_cd
 							&nch_clm_type_cd &CLM_IP_ADMSN_TYPE_CD &clm_fac_type_cd &clm_src_ip_admsn_cd 
-							&admtg_dgns_cd &clm_drg_cd  
-							prvdr_num prvdr_state_cd OP_PHYSN_SPCLTY_CD rev_cntr
+							&admtg_dgns_cd &clm_drg_cd  rev_cntr1
+							prvdr_num prvdr_state_cd OP_PHYSN_SPCLTY_CD 
 							at_physn_npi op_physn_npi org_npi_num ot_physn_npi rndrng_physn_npi
 							/*RFR_PHYSN_NPI*/
 							&gndr_cd bene_race_cd	bene_cnty_cd
@@ -721,10 +723,12 @@ pop_qtr=qtr(&flag_popped_dt);
 if elig_dt = . then delete;
 if &pop_year<2016 then delete;
 if &pop_year>2018 then delete;
-format bene_state_cd prvdr_state_cd $state. &pop_OP_PHYSN_SPCLTY_CD $speccd. &rev_cntr $rev_cntr.
-		&pop_clm_src_ip_admsn_cd $src1adm.
+format bene_state_cd prvdr_state_cd $state. &pop_OP_PHYSN_SPCLTY_CD $speccd. rev_cntr1 $rev_cntr.
+		&pop_clm_src_ip_admsn_cd $src1adm. &pop_nch_clm_type_cd $clm_typ.
+		&pop_CLM_IP_ADMSN_TYPE_CD $typeadm.
 		&pop_ptnt_dschrg_stus_cd $stuscd.
-		&pop_icd_dgns_cd1 $dgns. &pop_icd_prcdr_cd1 $prcdr. &pop_hcpcs_cd $hcpcs. ;
+		&pop_icd_dgns_cd1 &pop_admtg_dgns_cd $dgns. &pop_icd_prcdr_cd1 $prcdr. &pop_hcpcs_cd $hcpcs. 
+		&gndr_cd gender. bene_race_cd race. &pop_clm_drg_cd drg. ;
 run;
 /* get rid of duplicate rows so that each bene contributes 1x per hospital/year/qtr */
 proc sort data=pop_&popN._IN NODUPKEY; by pop_compendium_hospital_id pop_year pop_qtr &bene_id elig_dt; run;
@@ -798,8 +802,10 @@ pop_qtr=qtr(&flag_popped_dt);
 if elig_dt = . then delete;
 if &pop_year<2016 then delete;
 if &pop_year>2018 then delete;
-format &pop_OP_PHYSN_SPCLTY_CD $speccd. &rev_cntr $rev_cntr.
-&pop_icd_dgns_cd1 $dgns. &pop_icd_prcdr_cd1 $prcdr. &pop_hcpcs_cd $hcpcs.;
+format &pop_OP_PHYSN_SPCLTY_CD $speccd. rev_cntr1 $rev_cntr.
+		 &pop_nch_clm_type_cd $clm_typ. 
+		&ptnt_dschrg_stus_cd $stuscd. &gndr_cd gender. bene_race_cd race. 
+		&pop_icd_dgns_cd1  $dgns. &pop_icd_prcdr_cd1 $prcdr. &pop_hcpcs_cd $hcpcs. ;
 run;
 /* get rid of duplicate rows so that each bene contributes 1x per hospital/year/qtr */
 proc sort data=pop_&popN._OUT NODUPKEY; by pop_compendium_hospital_id pop_year pop_qtr &bene_id elig_dt; run;
@@ -827,6 +833,7 @@ pop_bene_state_cd=bene_state_cd;
 pop_bene_mlg_cntct_zip_cd=bene_mlg_cntct_zip_cd;
 run;
 *person can contribute only once even if seen in inpatient and outpatient in same hosp/year/qtr;
+proc sort data=pop_&popN._in_out_popped NODUPKEY; by pop_compendium_hospital_id pop_year pop_qtr &bene_id elig_dt; run;
 proc sort data=pop_&popN._in_out_popped NODUPKEY; by pop_compendium_hospital_id pop_year pop_qtr &bene_id; run;
 
 *End: Identify who popped;
@@ -835,20 +842,39 @@ proc sort data=pop_&popN._in_out_popped NODUPKEY; by pop_compendium_hospital_id 
 proc sort data=pop_&popN._in_out_popped		NODUPKEY; by  &bene_id elig_dt;run;
 proc sort data=&permlib..pop_&popN._elig	NODUPKEY; by  &bene_id elig_dt;run;
 
-data &permlib..pop_&popN._in_out (drop=compendium_hospital_id);
+*choose POP hospital, year quarter if patient poppped, otherwise choose ELIG;
+data &permlib..pop_&popN._in_out 
+	(	drop=elig_compendium_hospital_id elig_year elig_qtr 
+		keep= bene_id elig: pop: setting:);
 merge pop_&popN._in_out_popped &permlib..pop_&popN._elig;
 by &bene_id elig_dt;
 if elig_compendium_hospital_id=' ' and pop_compendium_hospital_id=' ' then delete;
 if pop_compendium_hospital_id=' ' then pop_compendium_hospital_id=elig_compendium_hospital_id;
 label pop_compendium_hospital_id='Hospital where patient popped, if patient did not pop, the hospital where patient
 	was first eligible during the quarter';
+if elig_year=. and pop_year=. then delete;
+if pop_year=. then pop_year=elig_year;
+label pop_year='Year patient popped/was eligible';
+if elig_qtr=. and pop_qtr=. then delete;
+if pop_qtr=. then pop_qtr=elig_qtr;
+label pop_qtr='Quarter patient popped/was eligible';
+if elig_age=. and pop_age=. then delete;
+if pop_age=. then pop_age=elig_age;
+label pop_age='Age patient popped/was eligible';
+if elig_gndr_cd=' ' and pop_gndr_cd=' ' then delete;
+if pop_gndr_cd=' ' then pop_gndr_cd=elig_gndr_cd;
+label pop_gndr_cd='Gender patient popped/was eligible';
+format elig_dt date9.;
+if pop_year<2016 then delete;
+if pop_year>2018 then delete;
+if &flag_popped=. then &flag_popped=0;
 run;
 /*allow to pop only once per qtr*/
-proc sort data=&permlib..pop_&popN._in_out NODUPKEY; by pop_compendium_hospital_id year qtr &bene_id;run;
+proc sort data=&permlib..pop_&popN._in_out NODUPKEY; by pop_compendium_hospital_id pop_year pop_qtr &bene_id;run;
 
 title 'Popped Inpatient or Outpatient (No Carrier) For Analysis';
 proc freq data=&permlib..pop_&popN._in_out; 
-table  	&pop_year pop_year setting_pop setting_elig; run;
+table  	&pop_year pop_year pop_qtr setting_pop setting_elig; run;
 proc contents data=&permlib..pop_&popN._in_out; run;
 *End link eligible and popped;
 
@@ -887,8 +913,8 @@ table  	&pop_icd_prcdr_cd1 /nocum out=&pop_icd_prcdr_cd1 (drop = count); run;
 proc print data=&pop_icd_prcdr_cd1 noobs; where percent>1; run;
 
 proc freq data=&in order=freq noprint; 
-table  	&rev_cntr /nocum out=&rev_cntr (drop = count); run;
-proc print data=&rev_cntr noobs; where percent>1; format &rev_cntr $rev_cntr.;run;
+table  	rev_cntr1 /nocum out=rev_cntr1 (drop = count); run;
+proc print data=rev_cntr1 noobs; where percent>1; run;
 
 proc freq data=&in order=freq noprint; 
 table  	pop_ed /nocum out=pop_ed (drop = count); run;
