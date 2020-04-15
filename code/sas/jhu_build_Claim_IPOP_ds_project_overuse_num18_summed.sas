@@ -890,7 +890,7 @@ from
 &abcd a,
 &permlib..pop_&popN._in_out b
 where 
-a.bene_id=b.bene_id;
+a.bene_id=b.bene_id and a.BENE_ENROLLMT_REF_YR = b.pop_year;
 quit;
 proc sort data=&include_cohort; by bene_id;
 %mend;
@@ -909,11 +909,11 @@ proc sort data=pop_&popN._vital; by bene_id; run;
 proc sql;
 create table &include_cohort (compress=yes) as
 select  
-a.bene_id, b.*
+a.bene_id, a.elig_dt, b.*
 from 
 pop_&popN._vital a,
 &abcd b
-where a.bene_id=b.bene_id;
+where a.bene_id = b.bene_id and a.pop_year = b.BENE_ENROLLMT_REF_YR;
 quit;
 %mend;
 %line(abcd=mbsf.mbsf_cc_2018, include_cohort=cc_2018); 
@@ -934,25 +934,25 @@ quit;
 %line(abcd=mbsf.mbsf_otcc_2012, include_cohort=otcc_2012); 
 %line(abcd=mbsf.mbsf_otcc_2011, include_cohort=otcc_2011); 
 %line(abcd=mbsf.mbsf_otcc_2010, include_cohort=otcc_2010); 
-proc sort data=cc_2010; by bene_id;
-proc sort data=cc_2011; by bene_id;
-proc sort data=cc_2012; by bene_id;
-proc sort data=cc_2013; by bene_id;
-proc sort data=cc_2014; by bene_id;
-proc sort data=cc_2015; by bene_id;
-proc sort data=cc_2016; by bene_id;
-proc sort data=cc_2017; by bene_id;
-proc sort data=cc_2018; by bene_id;
-proc sort data=otcc_2010; by bene_id;
-proc sort data=otcc_2011; by bene_id;
-proc sort data=otcc_2012; by bene_id;
-proc sort data=otcc_2013; by bene_id;
-proc sort data=otcc_2014; by bene_id;
-proc sort data=otcc_2015; by bene_id;
-proc sort data=otcc_2016; by bene_id;
-proc sort data=otcc_2017; by bene_id;
-proc sort data=otcc_2018; by bene_id;
-proc sort data=pop_&popN._vital; by bene_id;
+proc sort data=cc_2010; by bene_id elig_dt;
+proc sort data=cc_2011; by bene_id elig_dt;
+proc sort data=cc_2012; by bene_id elig_dt;
+proc sort data=cc_2013; by bene_id elig_dt;
+proc sort data=cc_2014; by bene_id elig_dt;
+proc sort data=cc_2015; by bene_id elig_dt;
+proc sort data=cc_2016; by bene_id elig_dt;
+proc sort data=cc_2017; by bene_id elig_dt;
+proc sort data=cc_2018; by bene_id elig_dt;
+proc sort data=otcc_2010; by bene_id elig_dt;
+proc sort data=otcc_2011; by bene_id elig_dt;
+proc sort data=otcc_2012; by bene_id elig_dt;
+proc sort data=otcc_2013; by bene_id elig_dt;
+proc sort data=otcc_2014; by bene_id elig_dt;
+proc sort data=otcc_2015; by bene_id elig_dt;
+proc sort data=otcc_2016; by bene_id elig_dt;
+proc sort data=otcc_2017; by bene_id elig_dt;
+proc sort data=otcc_2018; by bene_id elig_dt;
+proc sort data=pop_&popN._vital; by bene_id elig_dt;
 run;
 data cc (keep=bene: elig_dt enrl_src ami ami_ever alzh_ever alzh_demen_ever atrial_fib_ever
 cataract_ever chronickidney_ever copd_ever chf_ever diabetes_ever glaucoma_ever  hip_fracture_ever 
@@ -968,7 +968,7 @@ schiot_MEDICARE_EVER spibif_MEDICARE_EVER spiinj_MEDICARE_EVER toba_MEDICARE_EVE
 visual_MEDICARE_EVER cc_sum cc_other_sum cc_DHHS_sum);
 ;
 merge otcc: cc:	;
-by bene_id;
+by bene_id elig_dt;
 *make chronic conitions indicators;
 if ami_ever ne . and ami_ever<=elig_dt then cc_ami=1; else cc_ami=0;
 if alzh_ever ne . and alzh_ever <=elig_dt then cc_alzh=1; else cc_alzh=0;
