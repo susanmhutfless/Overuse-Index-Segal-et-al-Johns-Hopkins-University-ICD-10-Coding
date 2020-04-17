@@ -260,7 +260,7 @@ run;
 	rev_cohort=rif2015.INpatient_revenue_08, include_cohort=pop_&popN._INinclude_2015_8, ccn=ccn2016);
 *%claims_rev(date=&clm_beg_dt_in, source=rif2015.INpatient_claims_09,  
 	rev_cohort=rif2015.INpatient_revenue_09, include_cohort=pop_&popN._INinclude_2015_9, ccn=ccn2016);
-*%claims_rev(date=&clm_beg_dt_in, source=rif2015.INpatient_claims_10,  
+%claims_rev(date=&clm_beg_dt_in, source=rif2015.INpatient_claims_10,  
 	rev_cohort=rif2015.INpatient_revenue_10, include_cohort=pop_&popN._INinclude_2015_10, ccn=ccn2016);
 %claims_rev(date=&clm_beg_dt_in, source=rif2015.INpatient_claims_11,  
 	rev_cohort=rif2015.INpatient_revenue_11, include_cohort=pop_&popN._INinclude_2015_11, ccn=ccn2016);
@@ -385,7 +385,7 @@ proc sort data=pop_&popN._INinclude NODUPKEY; by elig_compendium_hospital_id eli
 	rev_cohort=rif2015.outpatient_revenue_08, include_cohort=pop_&popN._OUTinclude_2015_8, ccn=ccn2016);
 *%claims_rev(date=&clm_from_dt, source=rif2015.OUTpatient_claims_09,  
 	rev_cohort=rif2015.outpatient_revenue_09, include_cohort=pop_&popN._OUTinclude_2015_9, ccn=ccn2016);
-*%claims_rev(date=&clm_from_dt, source=rif2015.OUTpatient_claims_10,  
+%claims_rev(date=&clm_from_dt, source=rif2015.OUTpatient_claims_10,  
 	rev_cohort=rif2015.outpatient_revenue_10, include_cohort=pop_&popN._OUTinclude_2015_10, ccn=ccn2016);
 %claims_rev(date=&clm_from_dt, source=rif2015.OUTpatient_claims_11,  
 	rev_cohort=rif2015.outpatient_revenue_11, include_cohort=pop_&popN._OUTinclude_2015_11, ccn=ccn2016);
@@ -895,37 +895,16 @@ quit;
 %mend;
 %line(abcd=mbsf.mbsf_cc_2018, include_cohort=cc_2018); 
 %line(abcd=mbsf.mbsf_cc_2017, include_cohort=cc_2017); 
-%line(abcd=mbsf.mbsf_cc_2016, include_cohort=cc_2016); 
-%line(abcd=mbsf.mbsf_cc_2015, include_cohort=cc_2015);
-%line(abcd=mbsf.mbsf_cc_2014, include_cohort=cc_2014); 
-%line(abcd=mbsf.mbsf_cc_2013, include_cohort=cc_2013); 
-%line(abcd=mbsf.mbsf_cc_2012, include_cohort=cc_2012); 
-%line(abcd=mbsf.mbsf_cc_2011, include_cohort=cc_2011); 
-%line(abcd=mbsf.mbsf_cc_2010, include_cohort=cc_2010); 
+%line(abcd=mbsf.mbsf_cc_2016, include_cohort=cc_2016);  
 %line(abcd=mbsf.mbsf_otcc_2018, include_cohort=otcc_2018); 
 %line(abcd=mbsf.mbsf_otcc_2017, include_cohort=otcc_2017); 
 %line(abcd=mbsf.mbsf_otcc_2016, include_cohort=otcc_2016); 
-%line(abcd=mbsf.mbsf_otcc_2015, include_cohort=otcc_2015); 
-%line(abcd=mbsf.mbsf_otcc_2014, include_cohort=otcc_2014); 
-%line(abcd=mbsf.mbsf_otcc_2013, include_cohort=otcc_2013); 
-%line(abcd=mbsf.mbsf_otcc_2012, include_cohort=otcc_2012); 
-%line(abcd=mbsf.mbsf_otcc_2011, include_cohort=otcc_2011); 
-%line(abcd=mbsf.mbsf_otcc_2010, include_cohort=otcc_2010); 
-proc sort data=cc_2010; by bene_id elig_dt;
-proc sort data=cc_2011; by bene_id elig_dt;
-proc sort data=cc_2012; by bene_id elig_dt;
-proc sort data=cc_2013; by bene_id elig_dt;
-proc sort data=cc_2014; by bene_id elig_dt;
-proc sort data=cc_2015; by bene_id elig_dt;
+
+
 proc sort data=cc_2016; by bene_id elig_dt;
 proc sort data=cc_2017; by bene_id elig_dt;
 proc sort data=cc_2018; by bene_id elig_dt;
-proc sort data=otcc_2010; by bene_id elig_dt;
-proc sort data=otcc_2011; by bene_id elig_dt;
-proc sort data=otcc_2012; by bene_id elig_dt;
-proc sort data=otcc_2013; by bene_id elig_dt;
-proc sort data=otcc_2014; by bene_id elig_dt;
-proc sort data=otcc_2015; by bene_id elig_dt;
+
 proc sort data=otcc_2016; by bene_id elig_dt;
 proc sort data=otcc_2017; by bene_id elig_dt;
 proc sort data=otcc_2018; by bene_id elig_dt;
