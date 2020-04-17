@@ -908,7 +908,7 @@ proc sort data=cc_2018; by bene_id elig_dt;
 proc sort data=otcc_2016; by bene_id elig_dt;
 proc sort data=otcc_2017; by bene_id elig_dt;
 proc sort data=otcc_2018; by bene_id elig_dt;
-proc sort data=pop_&popN._vital; by bene_id elig_dt;
+proc sort data=&permlib..pop_&popN._in_out; by bene_id elig_dt;
 run;
 data cc (keep=bene: elig_dt enrl_src ami ami_ever alzh_ever alzh_demen_ever atrial_fib_ever
 cataract_ever chronickidney_ever copd_ever chf_ever diabetes_ever glaucoma_ever  hip_fracture_ever 
@@ -1002,16 +1002,34 @@ run;
 
 data &permlib..pop_&popN._in_out;
 merge 
-cc (in=a) pop_&popN._vital (in=b);
-by bene_id;
+cc (in=a) &permlib..pop_&popN._in_out (in=b);
+by bene_id elig_dt;
 if a and b;
 run; 
 
 title 'Popped Inpatient or Outpatient (No Carrier) For Analysis';
 proc freq data=&permlib..pop_&popN._in_out; 
 table  	popped &flag_popped &pop_year pop_year pop_qtr setting_pop setting_elig; run;
-proc means data=&permlib..pop_&popN._in_out; var elig_age elig_los &pop_age &pop_los pop_age cc_sum; run;
+proc means data=&permlib..pop_&popN._in_out n mean median min max; var elig_age elig_los &pop_age &pop_los pop_age cc_sum; run;
 proc contents data=&permlib..pop_&popN._in_out; run;
+
+*merge to health system;
+proc sql;
+create table &permlib..pop_&popN._in_out (compress=yes) as
+select  
+a.*, b.
+from 
+&permlib..pop_&popN._in_out a,
+&permlib..ahrq_ccn b
+where a.pop_compendium_hospital_id = b.;
+quit;
+
+
+*look at 1 record per person logistic regression;
+proc logistic data= &permlib..pop_&popN._in_out ; 
+class elig_gndr_cd pop_compendium_hospital_id;
+ model popped (event='1')= elig_age elig_gndr_cd pop_year pop_qtr cc_sum pop_compendium_hospital_id;
+run;
 
 *Start summary checks;
 /**This section makes summaries for inpatient, outpatient POPPED & eligible **/
