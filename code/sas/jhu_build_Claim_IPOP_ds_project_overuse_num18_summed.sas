@@ -879,8 +879,8 @@ table  	popped &flag_popped &pop_year pop_year pop_qtr setting_pop setting_elig;
 proc contents data=&permlib..pop_&popN._in_out; run;
 *End link eligible and popped;
 
-*start linkage to MBSF for vital status, comorbidities;
-*need to link ot mbsf to get comorbidity;
+*start linkage to MBSF for comorbidities;
+/*vital status and enrollmetn info;
 %macro line(abcd=, include_cohort=);
 proc sql;
 create table &include_cohort (compress=yes) as
@@ -902,7 +902,7 @@ data pop_&popN._vital;
 merge vital:;
 by bene_id;
 run; 
-proc sort data=pop_&popN._vital; by bene_id; run;
+proc sort data=pop_&popN._vital; by bene_id; run;*/
 
 *bring in chronic conditions;
 %macro line(abcd=, include_cohort=);
@@ -911,7 +911,7 @@ create table &include_cohort (compress=yes) as
 select  
 a.bene_id, a.elig_dt, b.*
 from 
-pop_&popN._vital a,
+&permlib..pop_&popN._in_out a,
 &abcd b
 where a.bene_id = b.bene_id and a.pop_year = b.BENE_ENROLLMT_REF_YR;
 quit;
