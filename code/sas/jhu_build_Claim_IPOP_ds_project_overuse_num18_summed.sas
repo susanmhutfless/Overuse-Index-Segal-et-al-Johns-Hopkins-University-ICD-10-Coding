@@ -880,29 +880,6 @@ proc contents data=&permlib..pop_&popN._in_out; run;
 *End link eligible and popped;
 
 *start linkage to MBSF for comorbidities;
-/*vital status and enrollmetn info;
-%macro line(abcd=, include_cohort=);
-proc sql;
-create table &include_cohort (compress=yes) as
-select  
-	*
-from 
-&abcd a,
-&permlib..pop_&popN._in_out b
-where 
-a.bene_id=b.bene_id and a.BENE_ENROLLMT_REF_YR = b.pop_year;
-quit;
-proc sort data=&include_cohort; by bene_id;
-%mend;
-%line(abcd=mbsf.mbsf_abcd_2016, include_cohort=vital_2016); 
-%line(abcd=mbsf.mbsf_abcd_2017, include_cohort=vital_2017); 
-%line(abcd=mbsf.mbsf_abcd_2018, include_cohort=vital_2018); 
-
-data pop_&popN._vital;
-merge vital:;
-by bene_id;
-run; 
-proc sort data=pop_&popN._vital; by bene_id; run;*/
 
 *bring in chronic conditions;
 %macro line(abcd=, include_cohort=);
