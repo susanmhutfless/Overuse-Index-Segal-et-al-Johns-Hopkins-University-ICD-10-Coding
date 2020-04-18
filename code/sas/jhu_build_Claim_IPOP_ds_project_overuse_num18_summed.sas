@@ -1024,13 +1024,91 @@ from
 where a.pop_compendium_hospital_id = b.compendium_hospital_id;
 quit;
 
+data pop_&popN._in_out_anal; set pop_&popN._in_out;
+    if elig_age   =.   then delete; 
+    if elig_age   <0   then delete;
+    if elig_age   >105 then delete;
+    /** turn continuous age into category **/
+    if 0  <= elig_age <= 5   then elig_age_cat = 05   ;
+    if 5  <  elig_age <= 10  then elig_age_cat = 0510  ;
+    if 10 <  elig_age <= 20  then elig_age_cat = 1020 ;
+    if 20 <  elig_age <= 30  then elig_age_cat = 2030 ;
+    if 30 <  elig_age <= 40  then elig_age_cat = 3040 ;
+    if 40 <  elig_age <= 50  then elig_age_cat = 4050 ;
+    if 50 <  elig_age <= 60  then elig_age_cat = 5060 ;
+    if 60 <  elig_age <= 70  then elig_age_cat = 6070 ;
+    if 70 <  elig_age <= 80  then elig_age_cat = 7080 ;
+    if 80 <  elig_age <= 105 then elig_age_cat = 80105;
+if cc_sum=0 	then cc_sum_cat	='0';
+if cc_sum=1 	then cc_sum_cat	='1';
+if cc_sum=2 	then cc_sum_cat	='2';
+if 3<=cc_sum<=5 then cc_sum_cat	='3-5';
+if 6<=cc_sum<=10 then cc_sum_cat='6-10';
+if 11<=cc_sum<=15 then cc_sum_cat='11-15';
+if 16<=cc_sum 	then cc_sum_cat	='16+';
+run;
 
 *look at 1 record per person logistic regression;
-proc logistic data= pop_&popN._in_out ; 
-class elig_gndr_cd health_sys_id2016 pop_compendium_hospital_id;
- model popped (event='1')= elig_age elig_gndr_cd pop_year pop_qtr cc_sum health_sys_id2016;
+proc logistic data= pop_&popN._in_out_anal (obs=100000); 
+class elig_gndr_cd(ref='2') elig_age_cat(ref='6070') cc_sum_cat(ref='0') pop_year(ref='2016') pop_qtr(ref='1')
+health_sys_id2016 pop_compendium_hospital_id/param=ref;
+ model popped (event='1')= elig_age_cat elig_gndr_cd cc_sum_cat pop_year pop_qtr  health_sys_id2016;
 strata pop_compendium_hospital_id;
 run;
+
+
+
+*get % for aggregate analysis;
+
+*try;
+proc summary data= pop_&popN._in_out_anal;
+by pop_compendium_hospital_id pop_year pop_qtr;
+var elig_age cc_sum;
+output out=sum2 mean= median=/autoname;
+run;
+data pop_&popN._means (drop = _type_ _freq_); 
+set sum2;
+n=_freq_; label n='number eligible for pop';
+run;
+
+proc sort data=pop_&popN._in_out_anal; by pop_compendium_hospital_id pop_year pop_qtr;
+proc freq data=pop_&popN._in_out_anal ; by pop_compendium_hospital_id pop_year pop_qtr;
+where popped=1;
+table  	popped /nocum out=pop_&popN._popped; run;
+data pop_&popN._popped (keep = pop_compendium_hospital_id pop_year pop_qtr popped); set popped (drop = popped);
+popped=count;
+run;
+proc print data=pop_&popN._popped (obs=30); run;
+
+%macro make1recperhosp(var= );
+proc sort data=pop_&popN._in_out_anal; by pop_compendium_hospital_id pop_year pop_qtr;
+proc freq data=pop_&popN._in_out_anal ; by pop_compendium_hospital_id pop_year pop_qtr;
+table  	&var /nocum out=&var; run;
+data pop_&popN._&var (keep = pop_compendium_hospital_id pop_year pop_qtr &var); set &var (drop = &var);
+&var=count;
+run;
+proc print data=pop_&popN._&var (obs=30); run;
+%mend;
+%make1recperhosp(var=elig_gndr_cd);
+
+popped elig_gndr_cd elig_age_cat cc_sum_cat pop_year pop_qtr
+
+data pop_&popN._in_out_anal2;
+merge pop_&popN._means pop_&popN._popped;
+if n<11 then delete;
+run;
+
+
+*try for hospital;
+ods graphics on;
+proc bglimm data=pop_&popN._in_out_anal2 nmc=10000 thin=2 seed=976352
+   plots=all;
+   class health_sys_id2016 pop_compendium_hospital_id;
+   model popped/N = health_sys_id2016 pop_year pop_qtr/ noint;
+   random int / subject = pop_compendium_hospital_id;
+run;
+
+
 
 *Start summary checks;
 /**This section makes summaries for inpatient, outpatient POPPED & eligible **/
