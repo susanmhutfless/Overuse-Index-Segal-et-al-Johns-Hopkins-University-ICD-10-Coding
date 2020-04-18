@@ -1015,20 +1015,21 @@ proc contents data=&permlib..pop_&popN._in_out; run;
 
 *merge to health system;
 proc sql;
-create table &permlib..pop_&popN._in_out (compress=yes) as
+create table pop_&popN._in_out (compress=yes) as
 select  
-a.*, b.
+*
 from 
 &permlib..pop_&popN._in_out a,
 &permlib..ahrq_ccn b
-where a.pop_compendium_hospital_id = b.;
+where a.pop_compendium_hospital_id = b.compendium_hospital_id;
 quit;
 
 
 *look at 1 record per person logistic regression;
-proc logistic data= &permlib..pop_&popN._in_out ; 
-class elig_gndr_cd pop_compendium_hospital_id;
- model popped (event='1')= elig_age elig_gndr_cd pop_year pop_qtr cc_sum pop_compendium_hospital_id;
+proc logistic data= pop_&popN._in_out ; 
+class elig_gndr_cd health_sys_id2016 pop_compendium_hospital_id;
+ model popped (event='1')= elig_age elig_gndr_cd pop_year pop_qtr cc_sum health_sys_id2016;
+strata pop_compendium_hospital_id;
 run;
 
 *Start summary checks;
