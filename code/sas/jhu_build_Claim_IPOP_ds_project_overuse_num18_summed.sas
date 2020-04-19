@@ -54,7 +54,7 @@ then evaluate N of the eligible that popped;
 %let	flag_popped_dt					= popped18_dt							;
 %let 	flag_popped_dt_label			= 'indicator 18 date patient popped (IP=clm_admsn_dt OP=clm_from_dt)'	;
 %let 	pop_age							= pop_18_age							;				
-%let	pop_age_label					= 'age eligible for pop 18'				;
+%let	pop_age_label					= 'age popped for pop 18'				;
 %let	pop_los							= pop_18_los							;
 %let	pop_los_label					= 'length of stay when patient popped'	;
 %let	pop_year						= pop_18_year							;
@@ -873,10 +873,10 @@ run;
 /*allow to pop only once per qtr*/
 proc sort data=&permlib..pop_&popN._in_out NODUPKEY; by pop_compendium_hospital_id pop_year pop_qtr &bene_id;run;
 
-title 'Popped Inpatient or Outpatient (No Carrier) For Analysis';
+/*title 'Popped Inpatient or Outpatient (No Carrier) For Analysis';
 proc freq data=&permlib..pop_&popN._in_out; 
 table  	popped &flag_popped &pop_year pop_year pop_qtr setting_pop setting_elig; run;
-proc contents data=&permlib..pop_&popN._in_out; run;
+proc contents data=&permlib..pop_&popN._in_out; run;*/
 *End link eligible and popped;
 
 *start linkage to MBSF for comorbidities;
@@ -1007,10 +1007,13 @@ by bene_id elig_dt;
 if a and b;
 run; 
 
+*Start summary checks;
+/**Look at freq, means, contents of final 1 record per person dataset **/
 title 'Popped Inpatient or Outpatient (No Carrier) For Analysis';
 proc freq data=&permlib..pop_&popN._in_out; 
 table  	popped &flag_popped &pop_year pop_year pop_qtr setting_pop setting_elig; run;
-proc means data=&permlib..pop_&popN._in_out n mean median min max; var elig_age elig_los &pop_age &pop_los pop_age cc_sum; run;
+proc means data=&permlib..pop_&popN._in_out n mean median min max; 
+var elig_age elig_los &pop_age &pop_los pop_age cc_sum; run;
 proc contents data=&permlib..pop_&popN._in_out; run;
 
 *Start summary checks;
@@ -1021,7 +1024,7 @@ proc freq data=&in order=freq noprint;
 table  	&flag_popped /nocum out=&flag_popped; run;
 proc print data=&flag_popped noobs; where count>=11; run;
 
-title 'Linked to AHRQ compendium hospital';
+*title 'Linked to AHRQ compendium hospital';
 proc freq data=&in order=freq noprint; 
 where pop_compendium_hospital_id ne ' ';
 table  	&flag_popped /nocum out=&flag_popped; run;
@@ -1308,37 +1311,64 @@ select
 from 
 pop_&popN._in_out_anal2 a,
 &permlib..ahrq_ccn b
-where a.pop_compendium_hospital_id = b.compendium_hospital_id ;
+where a.pop_compendium_hospital_id = b.compendium_hospital_id 
+and b.health_sys_id2016 ne ' ';
 quit;
 
 *proc bglimm not available;
 *https://documentation.sas.com/?docsetId=statug&docsetTarget=statug_bglimm_gettingstarted01.htm&docsetVersion=15.1&locale=en;
 *used glimmix;
 *https://www.lexjansen.com/nesug/nesug05/an/an4.pdf;
+*https://support.sas.com/documentation/cdl/en/statug/63347/HTML/default/viewer.htm#statug_glimmix_a0000001419.htm;
+title 'Model without pop size restriction';
+proc glimmix data=pop_&popN._in_out_anal3;
+	class health_sys_id2016 pop_compendium_hospital_id;
+*x = employment / 10;
+*logn = log(expCount);
+*SMR_pred = 100*exp(_zgamma_ + _xbeta_);
+model popped = health_sys_id2016 pop_year pop_qtr elig_age_mean cc_sum_mean / dist=poisson offset=n s ddfm=none;
+random pop_compendium_hospital_id;
+id health_sys_id2016 pop_compendium_hospital_id pop_year pop_qtr;
+output out=glimmixout;
+run;
+
+proc glimmix data=pop_&popN._in_out_anal3;
+class health_sys_id2016 pop_compendium_hospital_id;
+model popped = health_sys_id2016 pop_year pop_qtr elig_age_mean cc_sum_mean / ddfm=kr dist=Poisson;
+random _residual_ / group=health_sys_id2016 sub=pop_compendium_hospital_id;
+*lsmeans A / diff;
+run;
+
 proc glimmix data=pop_&popN._in_out_anal3;
    class health_sys_id2016 pop_compendium_hospital_id;
-   model popped/N = health_sys_id2016 pop_year pop_qtr elig_age_mean cc_sum_mean/ noint;
+   model popped/N = health_sys_id2016 pop_year pop_qtr elig_age_mean cc_sum_mean/ link=log s dist=poisson;
    random int / subject = pop_compendium_hospital_id;
 run;
 *limit to at least 11 events (=popped) in a quarter;
+title 'Model with pop size restriction (only those with n>=11 popped in quarter contribute)';
 proc glimmix data=pop_&popN._in_out_anal3;
 where popped>=11;
-   class health_sys_id2016 pop_compendium_hospital_id;
-   model popped/N = health_sys_id2016 pop_year pop_qtr elig_age_mean cc_sum_mean/ noint;
-   random int / subject = pop_compendium_hospital_id;
+class health_sys_id2016 pop_compendium_hospital_id;
+model popped = health_sys_id2016 pop_year pop_qtr elig_age_mean cc_sum_mean / ddfm=kr dist=Poisson;
+random _residual_ / group=health_sys_id2016 sub=pop_compendium_hospital_id;
+*lsmeans A / diff;
 run;
 
-*look at 1 record per person logistic regression;
+
+/*look at 1 record per person logistic regression--would need to merge back to health system to run;
 proc logistic data= pop_&popN._in_out_anal; 
 class elig_gndr_cd(ref='2') elig_age_cat(ref='6070') cc_sum_cat(ref='0') pop_year(ref='2016') pop_qtr(ref='1')
 health_sys_id2016 pop_compendium_hospital_id/param=ref;
  model popped (event='1')= elig_age_cat elig_gndr_cd cc_sum_cat pop_year pop_qtr  health_sys_id2016;
 strata pop_compendium_hospital_id;
-run;
+run;*/
 
 *checks for missingness in case no convergence or log says missing data;
 proc means nmiss data=pop_&popN._in_out_anal3; run;
-proc freq data=pop_&popN._in_out_anal3; table popped pop_year pop_qtr; run;
-proc print data=pop_&popN._in_out_anal3; where pop_compendium_hospital_id=' '; run;
-proc print data=pop_&popN._in_out_anal3; where health_sys_id2016=' '; run;
+proc freq data=pop_&popN._in_out_anal3; where popped<=12; table popped; run;
+proc freq data=pop_&popN._in_out_anal3; table pop_year pop_qtr; run;
+proc print data=pop_&popN._in_out_anal3; where pop_compendium_hospital_id=' ';
+	var pop_compendium_hospital_id health_sys_id2016; run;
+proc print data=pop_&popN._in_out_anal3; where health_sys_id2016=' '; 
+	var pop_compendium_hospital_id health_sys_id2016;run;
 
