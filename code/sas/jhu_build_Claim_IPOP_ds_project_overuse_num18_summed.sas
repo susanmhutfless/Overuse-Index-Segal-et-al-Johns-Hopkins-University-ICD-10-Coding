@@ -1013,106 +1013,6 @@ table  	popped &flag_popped &pop_year pop_year pop_qtr setting_pop setting_elig;
 proc means data=&permlib..pop_&popN._in_out n mean median min max; var elig_age elig_los &pop_age &pop_los pop_age cc_sum; run;
 proc contents data=&permlib..pop_&popN._in_out; run;
 
-
-
-data pop_&popN._in_out_anal; set &permlib..pop_&popN._in_out;
-if elig_age   =.   then delete; 
-if elig_age   <0   then delete;
-if elig_age   >105 then delete;
-if cc_sum=. then delete;
-if elig_gndr_cd notin('1','2') then delete;
-    /** turn continuous age into category **/
-    if 0  <= elig_age <= 5   then elig_age_cat = 05   ;
-    if 5  <  elig_age <= 10  then elig_age_cat = 0510  ;
-    if 10 <  elig_age <= 20  then elig_age_cat = 1020 ;
-    if 20 <  elig_age <= 30  then elig_age_cat = 2030 ;
-    if 30 <  elig_age <= 40  then elig_age_cat = 3040 ;
-    if 40 <  elig_age <= 50  then elig_age_cat = 4050 ;
-    if 50 <  elig_age <= 60  then elig_age_cat = 5060 ;
-    if 60 <  elig_age <= 70  then elig_age_cat = 6070 ;
-    if 70 <  elig_age <= 80  then elig_age_cat = 7080 ;
-    if 80 <  elig_age <= 105 then elig_age_cat = 80105;
-if cc_sum=0 	then cc_sum_cat	='0';
-if cc_sum=1 	then cc_sum_cat	='1';
-if cc_sum=2 	then cc_sum_cat	='2';
-if 3<=cc_sum<=5 then cc_sum_cat	='3-5';
-if 6<=cc_sum<=10 then cc_sum_cat='6-10';
-if 11<=cc_sum<=15 then cc_sum_cat='11-15';
-if 16<=cc_sum 	then cc_sum_cat	='16+';
-run;
-
-/*look at 1 record per person logistic regression;
-proc logistic data= pop_&popN._in_out_anal (obs=100000); 
-class elig_gndr_cd(ref='2') elig_age_cat(ref='6070') cc_sum_cat(ref='0') pop_year(ref='2016') pop_qtr(ref='1')
-health_sys_id2016 pop_compendium_hospital_id/param=ref;
- model popped (event='1')= elig_age_cat elig_gndr_cd cc_sum_cat pop_year pop_qtr  health_sys_id2016;
-strata pop_compendium_hospital_id;
-run;*/
-
-
-
-*get % for aggregate analysis;
-
-*try;
-proc sort data=pop_&popN._in_out_anal; by pop_compendium_hospital_id pop_year pop_qtr; 
-proc summary data= pop_&popN._in_out_anal;
-by pop_compendium_hospital_id pop_year pop_qtr;
-var elig_age cc_sum;
-output out=sum2 mean= median=/autoname;
-run;
-data pop_&popN._means (drop = _type_ _freq_); 
-set sum2;
-n=_freq_; label n='number eligible for pop';
-run;
-
-proc sort data=pop_&popN._in_out_anal; by pop_compendium_hospital_id pop_year pop_qtr;
-proc freq data=pop_&popN._in_out_anal noprint; by pop_compendium_hospital_id pop_year pop_qtr;
-where popped=1;
-table  	popped /nocum out=popped; run;
-data pop_&popN._popped (keep = pop_compendium_hospital_id pop_year pop_qtr popped); set popped (drop = popped);
-popped=count;
-run;
-
-
-proc sort data=pop_&popN._in_out_anal; by pop_compendium_hospital_id pop_year pop_qtr;
-proc freq data=pop_&popN._in_out_anal noprint; by pop_compendium_hospital_id pop_year pop_qtr;
-table  	elig_gndr_cd /nocum out=elig_gndr_cd; run;
-data pop_&popN._elig_gndr_cd (keep = pop_compendium_hospital_id pop_year pop_qtr female_percent); 
-set elig_gndr_cd;
-where elig_gndr_cd='2';
-female_percent=percent;
-run;
-
-data pop_&popN._in_out_anal2;
-merge pop_&popN._means pop_&popN._popped pop_&popN._elig_gndr_cd;
-by pop_compendium_hospital_id pop_year pop_qtr;
-if n<11 then delete;
-if popped=. then popped=0;
-run;
-
-*merge to health system;
-proc sql;
-create table pop_&popN._in_out_anal3 (compress=yes) as
-select  
-*
-from 
-pop_&popN._in_out_anal2 a,
-&permlib..ahrq_ccn b
-where a.pop_compendium_hospital_id = b.compendium_hospital_id ;
-quit;
-
-*try for hospital;
-*proc bglimm not available;
-*https://documentation.sas.com/?docsetId=statug&docsetTarget=statug_bglimm_gettingstarted01.htm&docsetVersion=15.1&locale=en;
-*used glimmix;
-proc glimmix data=pop_&popN._in_out_anal3;
-   class health_sys_id2016 pop_compendium_hospital_id;
-   model popped/N = health_sys_id2016 pop_year pop_qtr elig_age_mean cc_sum_mean/ noint;
-   random int / subject = pop_compendium_hospital_id;
-run;
-
-
-
 *Start summary checks;
 /**This section makes summaries for inpatient, outpatient POPPED & eligible **/
 *look at popped;
@@ -1335,16 +1235,110 @@ run;
 
 *End summary checks;
 
+*create models;
+*make categories of age and cc for analysis;
+data pop_&popN._in_out_anal; set &permlib..pop_&popN._in_out;
+if elig_age   =.   then delete; 
+if elig_age   <0   then delete;
+if elig_age   >105 then delete;
+if cc_sum=. then delete;
+if elig_gndr_cd notin('1','2') then delete;
+    /** turn continuous age into category **/
+    if 0  <= elig_age <= 5   then elig_age_cat = 05   ;
+    if 5  <  elig_age <= 10  then elig_age_cat = 0510  ;
+    if 10 <  elig_age <= 20  then elig_age_cat = 1020 ;
+    if 20 <  elig_age <= 30  then elig_age_cat = 2030 ;
+    if 30 <  elig_age <= 40  then elig_age_cat = 3040 ;
+    if 40 <  elig_age <= 50  then elig_age_cat = 4050 ;
+    if 50 <  elig_age <= 60  then elig_age_cat = 5060 ;
+    if 60 <  elig_age <= 70  then elig_age_cat = 6070 ;
+    if 70 <  elig_age <= 80  then elig_age_cat = 7080 ;
+    if 80 <  elig_age <= 105 then elig_age_cat = 80105;
+if cc_sum=0 	then cc_sum_cat	='0';
+if cc_sum=1 	then cc_sum_cat	='1';
+if cc_sum=2 	then cc_sum_cat	='2';
+if 3<=cc_sum<=5 then cc_sum_cat	='3-5';
+if 6<=cc_sum<=10 then cc_sum_cat='6-10';
+if 11<=cc_sum<=15 then cc_sum_cat='11-15';
+if 16<=cc_sum 	then cc_sum_cat	='16+';
+run;
+
+*get % for aggregate (1 record per hospital) analysis;
+proc sort data=pop_&popN._in_out_anal; by pop_compendium_hospital_id pop_year pop_qtr; 
+proc summary data= pop_&popN._in_out_anal;
+by pop_compendium_hospital_id pop_year pop_qtr;
+var elig_age cc_sum;
+output out=sum2 mean= median=/autoname;
+run;
+data pop_&popN._means (drop = _type_ _freq_); 
+set sum2;
+n=_freq_; label n='number eligible for pop';
+run;
+
+proc sort data=pop_&popN._in_out_anal; by pop_compendium_hospital_id pop_year pop_qtr;
+proc freq data=pop_&popN._in_out_anal noprint; by pop_compendium_hospital_id pop_year pop_qtr;
+where popped=1;
+table  	popped /nocum out=popped; run;
+data pop_&popN._popped (keep = pop_compendium_hospital_id pop_year pop_qtr popped); set popped (drop = popped);
+popped=count;
+run;
 
 
+proc sort data=pop_&popN._in_out_anal; by pop_compendium_hospital_id pop_year pop_qtr;
+proc freq data=pop_&popN._in_out_anal noprint; by pop_compendium_hospital_id pop_year pop_qtr;
+table  	elig_gndr_cd /nocum out=elig_gndr_cd; run;
+data pop_&popN._elig_gndr_cd (keep = pop_compendium_hospital_id pop_year pop_qtr female_percent); 
+set elig_gndr_cd;
+where elig_gndr_cd='2';
+female_percent=percent;
+run;
 
-*need to average comorbidity, age sex by hospital;
+data pop_&popN._in_out_anal2;
+merge pop_&popN._means pop_&popN._popped pop_&popN._elig_gndr_cd;
+by pop_compendium_hospital_id pop_year pop_qtr;
+if n<11 then delete;
+if popped=. then popped=0;
+run;
 
-*Start sum for analysis;
-do proc summary of eigible then proc summary of popped
-merge num and denom
+*merge hospital aggregated data to health system;
+proc sql;
+create table pop_&popN._in_out_anal3 (compress=yes) as
+select  
+*
+from 
+pop_&popN._in_out_anal2 a,
+&permlib..ahrq_ccn b
+where a.pop_compendium_hospital_id = b.compendium_hospital_id ;
+quit;
 
-*need to relink ot compendium to make sure using the correct health system.....popped, if not popped then eligible;
-*poisson regression;
+*proc bglimm not available;
+*https://documentation.sas.com/?docsetId=statug&docsetTarget=statug_bglimm_gettingstarted01.htm&docsetVersion=15.1&locale=en;
+*used glimmix;
+*https://www.lexjansen.com/nesug/nesug05/an/an4.pdf;
+proc glimmix data=pop_&popN._in_out_anal3;
+   class health_sys_id2016 pop_compendium_hospital_id;
+   model popped/N = health_sys_id2016 pop_year pop_qtr elig_age_mean cc_sum_mean/ noint;
+   random int / subject = pop_compendium_hospital_id;
+run;
+*limit to at least 11 events (=popped) in a quarter;
+proc glimmix data=pop_&popN._in_out_anal3;
+where popped>=11;
+   class health_sys_id2016 pop_compendium_hospital_id;
+   model popped/N = health_sys_id2016 pop_year pop_qtr elig_age_mean cc_sum_mean/ noint;
+   random int / subject = pop_compendium_hospital_id;
+run;
 
+*look at 1 record per person logistic regression;
+proc logistic data= pop_&popN._in_out_anal; 
+class elig_gndr_cd(ref='2') elig_age_cat(ref='6070') cc_sum_cat(ref='0') pop_year(ref='2016') pop_qtr(ref='1')
+health_sys_id2016 pop_compendium_hospital_id/param=ref;
+ model popped (event='1')= elig_age_cat elig_gndr_cd cc_sum_cat pop_year pop_qtr  health_sys_id2016;
+strata pop_compendium_hospital_id;
+run;
+
+*checks for missingness in case no convergence or log says missing data;
+proc means nmiss data=pop_&popN._in_out_anal3; run;
+proc freq data=pop_&popN._in_out_anal3; table popped pop_year pop_qtr; run;
+proc print data=pop_&popN._in_out_anal3; where pop_compendium_hospital_id=' '; run;
+proc print data=pop_&popN._in_out_anal3; where health_sys_id2016=' '; run;
 
