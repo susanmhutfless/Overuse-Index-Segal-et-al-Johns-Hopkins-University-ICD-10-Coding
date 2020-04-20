@@ -648,7 +648,7 @@ where
 		a.&bene_id=b.&bene_id 
 		and 
 		a.elig_dt=b.&flag_popped_dt
-		and (	(a.elig_dt-180) <= b.&flag_popped_dt <=a.elig_dt	);  
+		and (	(a.elig_dt-180) <= b.&flag_popped_dt <=a.elig_dt	);  *Eliana: enter the lookback here;
 quit;
 %mend;
 %claims_rev(date=&clm_beg_dt_in, source=rif2016.inpatient_claims_01, rev_cohort=rif2016.inpatient_revenue_01, include_cohort=pop_&popN._IN_2016_1, ccn=ccn2016);
@@ -1364,9 +1364,12 @@ strata pop_compendium_hospital_id;
 run;*/
 
 *checks for missingness in case no convergence or log says missing data;
+title 'checks for missingness in case no convergence or log says missing data';
 proc means nmiss data=pop_&popN._in_out_anal3; run;
-proc freq data=pop_&popN._in_out_anal3; where popped<=12; table popped; run;
 proc freq data=pop_&popN._in_out_anal3; table pop_year pop_qtr; run;
+title 'how many had pops <=12 for the hosp/year/qtr';
+proc freq data=pop_&popN._in_out_anal3; where popped<=12; table popped; run;
+title 'none should print for missing hospital id or hosp system id--if they do there is a problem';
 proc print data=pop_&popN._in_out_anal3; where pop_compendium_hospital_id=' ';
 	var pop_compendium_hospital_id health_sys_id2016; run;
 proc print data=pop_&popN._in_out_anal3; where health_sys_id2016=' '; 
