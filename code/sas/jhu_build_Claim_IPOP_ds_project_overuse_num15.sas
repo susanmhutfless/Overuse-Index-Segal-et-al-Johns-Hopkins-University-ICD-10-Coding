@@ -1,5 +1,5 @@
 /********************************************************************
-* Job Name: jhu_build_Claim_IPOP_ds_project_overuse_num18_summed.sas
+* Job Name: jhu_build_Claim_IPOP_ds_project_overuse_num15_summed.sas
 * Job Desc: Input for Inpatient & Outpatient (Including Carrier) Claims 
 * Copyright: Johns Hopkins University - SegalLab & HutflessLab 2019
 ********************************************************************/
@@ -32,9 +32,18 @@ then evaluate N of the eligible that popped;
 %let includ_pr10 =
 					'00NY0ZZ' '0QQ0'			;
 
+%let includ_dx10   = '0';
+%let includ_dx10_n = ;		*this number should match number that needs to be substringed;
+%let includ_drg = ;
 
 /** Exclusion criteria **/
-NONE
+%let exclud_hcpcs= '0';
+
+%let EXclud_pr10 =	'0'				;
+%let EXclud_pr10_n = ;	
+
+%let EXCLUD_dx10   = 'M543' 'M544'	; 
+%let exclud_dx10_4 = ; 
 
 /** Label pop specific variables  **/
 %global popN;
