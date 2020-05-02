@@ -33,17 +33,18 @@ then evaluate N of the eligible that popped;
 					'00NY0ZZ' '0QQ0'			;
 
 %let includ_dx10   = '0';
-%let includ_dx10_n = ;		*this number should match number that needs to be substringed;
-%let includ_drg = ;
+%let includ_dx10_n =  0  ;		*this number should match number that needs to be substringed--if missing enter '0';
+%let includ_drg    = '0';
 
 /** Exclusion criteria **/
-%let exclud_hcpcs= '0';
+%let exclud_hcpcs=  '0'				;
 
 %let EXclud_pr10 =	'0'				;
-%let EXclud_pr10_n = ;	
+%let EXclud_pr10_n = 0				;	
 
-%let EXCLUD_dx10   = 'M543' 'M544'	; 
-%let exclud_dx10_4 = ; 
+%let EXCLUD_dx10   = 'M543' 'M544'	; *this will only include codes that look like this exactly
+										if you need to substring then need to use the _n as above and confirm code set up to do so;
+%let exclud_dx10_4 = ; 					*as above, this can't be missing and needs the substring count _n variable;
 
 /** Label pop specific variables  **/
 %global popN;
