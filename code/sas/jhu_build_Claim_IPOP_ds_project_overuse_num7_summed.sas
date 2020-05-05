@@ -36,13 +36,13 @@ then evaluate N of the eligible that popped;
 %let includ_dx10   = 'J0100' 'J080' 'J0120' 
 					 'J0130' 'J0140' 'J0190' ;
 %let includ_dx10_n = 5;		*this number should match number that needs to be substringed;
-%let includ_drg = ;
+%let includ_drg = '0' ;
 
 /** Exclusion criteria **/
 %let exclud_hcpcs= '0';
 
-%let EXclud_pr10 =	'0' '0'				;
-%let EXclud_pr10_n = ;	
+%let EXclud_pr10 =	'0'				;
+%let EXclud_pr10_n = 0	;	
 
 %let EXCLUD_dx10   = 'J320' 'J321' 'J322' 'J323'
 					 'J324' 'J328' 'J329'	; 
