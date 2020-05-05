@@ -32,14 +32,14 @@ then evaluate N of the eligible that popped;
 							;
 
 %let includ_dx10   = '0';
-%let includ_dx10_n = ;		*this number should match number that needs to be substringed;
-%let includ_drg = ;
+%let includ_dx10_n = 0 ;		*this number should match number that needs to be substringed;
+%let includ_drg =  '0'	;
 
 /** Exclusion criteria **/
 %let exclud_hcpcs= '0';
 
 %let EXclud_pr10 =	'0' 				;
-%let EXclud_pr10_n = ;	
+%let EXclud_pr10_n = 0;	
 
 %let EXCLUD_dx10   = 'I63' 'I64' 'I65' 'I66'
 					 'I67' 'I68' 'I69' 'R55'; 
