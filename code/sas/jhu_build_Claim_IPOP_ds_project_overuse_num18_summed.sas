@@ -35,7 +35,7 @@ then evaluate N of the eligible that popped;
 
 %let includ_dx10   = 'M17';
 %let includ_dx10_n = 3;		*this number should match number that needs to be substringed;
-%let includ_drg = ;
+%let includ_drg = 0	;
 
 /** Exclusion criteria **/
 %let exclud_hcpcs= '27447';
