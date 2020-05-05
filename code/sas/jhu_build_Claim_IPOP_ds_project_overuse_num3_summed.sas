@@ -31,14 +31,14 @@ then evaluate N of the eligible that popped;
 					'BW03ZZZ' 			;
 
 %let includ_dx10   = '0';
-%let includ_dx10_n = ;		*this number should match number that needs to be substringed;
-%let includ_drg = ;
+%let includ_dx10_n = 0	;		*this number should match number that needs to be substringed;
+%let includ_drg = '0'	;
 
 /** Exclusion criteria **/
 %let exclud_hcpcs= '0';
 
 %let EXclud_pr10 =	'0'				;
-%let EXclud_pr10_n = ;	
+%let EXclud_pr10_n = 0	;	
 
 %let EXCLUD_dx10   = 'J00' 'J01' 'J02' 'J03' 'J04' 'J05' 'J06' 
 					'J09' 'J10' 'J11' 'J12' 'J13' 'J14' 'J15' 
