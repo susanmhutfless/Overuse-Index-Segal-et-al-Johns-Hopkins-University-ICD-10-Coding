@@ -31,8 +31,8 @@ then evaluate N of the eligible that popped;
 					'0HPT' '0HPU'		;
 
 %let includ_dx10   = '0';
-%let includ_dx10_n = ;		*this number should match number that needs to be substringed;
-%let includ_drg = ;
+%let includ_dx10_n = 0	;		*this number should match number that needs to be substringed;
+%let includ_drg = '0'	;
 
 /** Exclusion criteria **/
 %let exclud_hcpcs=  '19160'	'19161'	'19162' '19180'	
@@ -44,10 +44,10 @@ then evaluate N of the eligible that popped;
 					'19367'	'19368'	'19369' ;
 
 %let EXclud_pr10 =	'0' 				;
-%let EXclud_pr10_n = ;	
+%let EXclud_pr10_n = 0	;	
 
 %let EXCLUD_dx10   = '0'; 
-%let exclud_dx10_n = ; 
+%let exclud_dx10_n = 0	; 
 
 /** Label pop specific variables  **/
 %global popN;
