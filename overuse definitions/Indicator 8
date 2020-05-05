@@ -1,0 +1,73 @@
+/*Description from Excel file
+(New) Number 		8	
+Indicator 		Don’t order sinus computed tomography (CT) for uncomplicated acute rhinosinusitis.
+Indicator
+			Motivator: sinus CT adds little information that will change management of acute sinusitis (we will not do the antibiotics part of this)
+
+			Indicator: Sinus CT in patients with acute sinusitis without a history of chronic sinusitis
+			that could be managed more conservatively
+
+			[this can be reported among all patients with sinus CT]
+
+Timing		Procedure code is associated with an inclusionary diagnosis code (same claim)  AND  no exclusionary diagnosis code in preceding 180 days
+
+Setting		Inpatient or outpatient (including ED)	
+
+System		ENT	
+
+Actor		primary care, ENT, allergists
+
+*/Updated with information from 12.17.19 Excel Sheet/*
+
+
+/*** start of indicator specific variables ***/
+
+/*inclusion criteria*/
+%global includ_hcpcs;
+%global includ_pr10;
+
+%let includ_hcpcs =
+					'70486'	'70487'	'70488'	;
+
+%let includ_pr10 =
+					'BN250ZZ' 'BN251ZZ' 'BN25YZZ' 'BN25ZZZ'			;
+
+%let includ_dx10 =			'J0100' 'J080' 'J0120' 
+					'J0130' 'J0140' 'J0190' 	;
+
+%let includ_drg = ;
+
+/** Exclusion criteria **/
+%let EXCLUD_dx10=			'J320' 'J321' 'J322' 'J323'
+					'J324' 'J328' 'J329'		;  
+
+/** label pop specific variables  instructions: ctrl-H 8 for this pop # **/
+%global flag_popped																;
+%let 	flag_popped             		= popped8 								;
+%let 	flag_popped_label				= 'indicator 8 popped'					;	
+%let	flag_popped_dt					= popped8_dt							;
+%let 	flag_popped_dt_label			= 'indicator 8 date patient popped'	;
+%let 	pop_age							= pop_8_age							;				
+%let	pop_age_label					= 'age eligible for pop 8'				;
+%let	pop_los							= pop_8_los							;
+%let	pop_los_label					= 'length of stay when patient popped'	;
+%let	pop_year						= pop_8_year							;
+%let	pop_nch_clm_type_cd				= pop_8_nch_clm_type_cd				;
+%let  	pop_CLM_IP_ADMSN_TYPE_CD		= pop_8_CLM_IP_ADMSN_TYPE_CD			;
+%let	pop_clm_fac_type_cd				= pop_8_clm_fac_type_cd				;
+%let	pop_clm_src_ip_admsn_cd			= pop_8_clm_src_ip_admsn_cd					;
+%let	pop_ptnt_dschrg_stus_cd  		= pop_8_ptnt_dschrg_stus_cd			;
+%let	pop_admtg_dgns_cd				= pop_8_admtg_dgns_cd					;
+%let	pop_icd_dgns_cd1				= pop_8_icd_dgns_cd1					;
+%let	pop_clm_drg_cd					= pop_8_clm_drg_cd						;
+%let	pop_hcpcs_cd					= pop_8_hcpcs_cd						;
+%let	pop_OP_PHYSN_SPCLTY_CD			= pop_8_OP_PHYSN_SPCLTY_CD				;
+
+%let	pop_nch_clm_type_cd_label		= 'claim/facility type for pop 8' 		;
+%let	pop_CLM_IP_ADMSN_TYPE_CD_label	= 'inpatient admission type code for pop 8'	;
+%let  	pop_clm_fac_type_cd_label		= 'inpatient clm_fac_type_cd for pop 8';
+%let	pop_clm_src_ip_admsn_cd_label	= 'clm_src_ip_admsn_cd for pop 8'		;
+%let	pop_ptnt_dschrg_stus_cd_label	= 'discharge status code for pop 8'	;	
+
+
+/*** end of indicator specific variables ***/

@@ -44,6 +44,7 @@ Actor		Allergists, primary care
 %let exclud_dx10_1 =	'C'														;
 %let exclud_dx10_3 =	'D80'	'D81'	'D82'	'D83'	'D84'	'D85'
 						'D86'	'D87'	'D88'	'D89'							;
+%let exclud_dx10_4 = 	'D472'													;
 
 /** Label pop specific variables  instructions **/
 %let 	flag_popped             		= popped02 								;
@@ -103,7 +104,7 @@ Actor		Allergists, primary care
 %let  diag_cd_min        = 1                 	;
 %let  diag_cd_max        = 25                 	;
 
-%let  proc_pfx           = icd_prcdr          	;
+%let  proc_pfx           = icd_prcdr_cd          ;
 %let  proc_cd_min        = 1                 	;
 %let  proc_cd_max        = 25                 	;
 
@@ -130,7 +131,7 @@ Actor		Allergists, primary care
 %let vrdc_code = &vpath./jhu_vrdc_code          ;
 %include "&vrdc_code./macro_tool_box.sas";
 %include "&vrdc_code./medicare_formats.sas";
-%include "&vrdc_code./jhu_build_Health_Systems.sas";
+*%include "&vrdc_code./jhu_build_Health_Systems.sas";
 
 /** vars to keep or delete from the different data sources **/
 
@@ -202,7 +203,7 @@ proc sql;
 select *
 from 
 	&source a,
-	ahrq_ccn b
+	&permlib..ahrq_ccn b
 where 
 	a.prvdr_num = b.&ccn
 ;
@@ -244,7 +245,9 @@ set include_cohort3;
 array dx(25) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
 do j=1 to &diag_cd_max;
 	if substr(dx(j),1,3) in(&includ_dx10_3) or substr(dx(j),1,4) in(&includ_dx10_4) then ALLERGY=1;
-	if substr(dx(j),1,3) in(&exclud_dx10_3) or substr(dx(j),1,1) in(&exclud_dx10_1) then DELETE=1;
+	if substr(dx(j),1,4) in(&exclud_dx10_4) or
+	substr(dx(j),1,3) in(&exclud_dx10_3) or 
+	substr(dx(j),1,1) in(&exclud_dx10_1) then DELETE=1;
 end;
 IF ALLERGY ne 1 then delete;
 IF DELETE  =  1 then delete;
@@ -275,18 +278,18 @@ run;
 %claims_rev(source=rif2017.inpatient_claims_10, rev_cohort=rif2017.inpatient_revenue_10, include_cohort=pop_02_IN_2017_10, ccn=ccn2016);
 %claims_rev(source=rif2017.inpatient_claims_11, rev_cohort=rif2017.inpatient_revenue_11, include_cohort=pop_02_IN_2017_11, ccn=ccn2016);
 %claims_rev(source=rif2017.inpatient_claims_12, rev_cohort=rif2017.inpatient_revenue_12, include_cohort=pop_02_IN_2017_12, ccn=ccn2016);
-%claims_rev(source=rifq2018.inpatient_claims_01, rev_cohort=rifq2018.inpatient_revenue_01, include_cohort=pop_02_IN_2018_1, ccn=ccn2018);
-%claims_rev(source=rifq2018.inpatient_claims_02, rev_cohort=rifq2018.inpatient_revenue_02, include_cohort=pop_02_IN_2018_2, ccn=ccn2018);
-%claims_rev(source=rifq2018.inpatient_claims_03, rev_cohort=rifq2018.inpatient_revenue_03, include_cohort=pop_02_IN_2018_3, ccn=ccn2018);
-%claims_rev(source=rifq2018.inpatient_claims_04, rev_cohort=rifq2018.inpatient_revenue_04, include_cohort=pop_02_IN_2018_4, ccn=ccn2018);
-%claims_rev(source=rifq2018.inpatient_claims_05, rev_cohort=rifq2018.inpatient_revenue_05, include_cohort=pop_02_IN_2018_5, ccn=ccn2018);
-%claims_rev(source=rifq2018.inpatient_claims_06, rev_cohort=rifq2018.inpatient_revenue_06, include_cohort=pop_02_IN_2018_6, ccn=ccn2018);
-%claims_rev(source=rifq2018.inpatient_claims_07, rev_cohort=rifq2018.inpatient_revenue_07, include_cohort=pop_02_IN_2018_7, ccn=ccn2018);
-%claims_rev(source=rifq2018.inpatient_claims_08, rev_cohort=rifq2018.inpatient_revenue_08, include_cohort=pop_02_IN_2018_8, ccn=ccn2018);
-%claims_rev(source=rifq2018.inpatient_claims_09, rev_cohort=rifq2018.inpatient_revenue_09, include_cohort=pop_02_IN_2018_9, ccn=ccn2018);
-%claims_rev(source=rifq2018.inpatient_claims_10, rev_cohort=rifq2018.inpatient_revenue_10, include_cohort=pop_02_IN_2018_10, ccn=ccn2018);
-%claims_rev(source=rifq2018.inpatient_claims_11, rev_cohort=rifq2018.inpatient_revenue_11, include_cohort=pop_02_IN_2018_11, ccn=ccn2018);
-%claims_rev(source=rifq2018.inpatient_claims_12, rev_cohort=rifq2018.inpatient_revenue_12, include_cohort=pop_02_IN_2018_12, ccn=ccn2018);
+%claims_rev(source=rifq2018.inpatient_claims_01, rev_cohort=rifq2018.inpatient_revenue_01, include_cohort=pop_02_IN_2018_1, ccn=ccn2016);
+%claims_rev(source=rifq2018.inpatient_claims_02, rev_cohort=rifq2018.inpatient_revenue_02, include_cohort=pop_02_IN_2018_2, ccn=ccn2016);
+%claims_rev(source=rifq2018.inpatient_claims_03, rev_cohort=rifq2018.inpatient_revenue_03, include_cohort=pop_02_IN_2018_3, ccn=ccn2016);
+%claims_rev(source=rifq2018.inpatient_claims_04, rev_cohort=rifq2018.inpatient_revenue_04, include_cohort=pop_02_IN_2018_4, ccn=ccn2016);
+%claims_rev(source=rifq2018.inpatient_claims_05, rev_cohort=rifq2018.inpatient_revenue_05, include_cohort=pop_02_IN_2018_5, ccn=ccn2016);
+%claims_rev(source=rifq2018.inpatient_claims_06, rev_cohort=rifq2018.inpatient_revenue_06, include_cohort=pop_02_IN_2018_6, ccn=ccn2016);
+%claims_rev(source=rifq2018.inpatient_claims_07, rev_cohort=rifq2018.inpatient_revenue_07, include_cohort=pop_02_IN_2018_7, ccn=ccn2016);
+%claims_rev(source=rifq2018.inpatient_claims_08, rev_cohort=rifq2018.inpatient_revenue_08, include_cohort=pop_02_IN_2018_8, ccn=ccn2016);
+%claims_rev(source=rifq2018.inpatient_claims_09, rev_cohort=rifq2018.inpatient_revenue_09, include_cohort=pop_02_IN_2018_9, ccn=ccn2016);
+%claims_rev(source=rifq2018.inpatient_claims_10, rev_cohort=rifq2018.inpatient_revenue_10, include_cohort=pop_02_IN_2018_10, ccn=ccn2016);
+%claims_rev(source=rifq2018.inpatient_claims_11, rev_cohort=rifq2018.inpatient_revenue_11, include_cohort=pop_02_IN_2018_11, ccn=ccn2016);
+%claims_rev(source=rifq2018.inpatient_claims_12, rev_cohort=rifq2018.inpatient_revenue_12, include_cohort=pop_02_IN_2018_12, ccn=ccn2016);
 
 data pop_02_IN;
 set pop_02_IN_2016_1 pop_02_IN_2016_2 pop_02_IN_2016_3 pop_02_IN_2016_4 pop_02_IN_2016_5 pop_02_IN_2016_6
@@ -303,7 +306,6 @@ format bene_state_cd prvdr_state_cd $state. &pop_OP_PHYSN_SPCLTY_CD $speccd. &po
 run;
 /* get rid of duplicate rows--keep first occurence so sort by date first */
 proc sort data=pop_02_IN; by &bene_id &flag_popped_dt; run;
-proc sort data=pop_02_IN nodupkey; by &bene_id; run;
 
 /*** this section is related to OP - outpatient claims ***/
 %macro claims_rev(source=, rev_cohort=, include_cohort=, ccn=);
@@ -321,7 +323,7 @@ select *
 from 
 include_cohort1 a, 
 &source b,
-ahrq_ccn c
+&permlib..ahrq_ccn c
 where 
 	a.&bene_id=b.&bene_id and a.&clm_id=b.&clm_id and  
 	b.prvdr_num = c.&ccn
@@ -343,7 +345,9 @@ set include_cohort2;
 array dx(25) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
 do j=1 to &diag_cd_max;
 	if substr(dx(j),1,3) in(&includ_dx10_3) or substr(dx(j),1,4) in(&includ_dx10_4) then ALLERGY=1;
-	if substr(dx(j),1,3) in(&exclud_dx10_3) or substr(dx(j),1,1) in(&exclud_dx10_1) then DELETE=1;
+	if substr(dx(j),1,4) in(&exclud_dx10_4) or
+	substr(dx(j),1,3) in(&exclud_dx10_3) or 
+	substr(dx(j),1,1) in(&exclud_dx10_1) then DELETE=1;
 end;
 IF ALLERGY ne 1 then delete;
 IF DELETE  =  1 then delete;
@@ -373,18 +377,18 @@ run;
 %claims_rev(source=rif2017.OUTpatient_claims_10, rev_cohort=rif2017.OUTpatient_revenue_10, include_cohort=pop_02_OUT_2017_10, ccn=ccn2016);
 %claims_rev(source=rif2017.OUTpatient_claims_11, rev_cohort=rif2017.OUTpatient_revenue_11, include_cohort=pop_02_OUT_2017_11, ccn=ccn2016);
 %claims_rev(source=rif2017.OUTpatient_claims_12, rev_cohort=rif2017.OUTpatient_revenue_12, include_cohort=pop_02_OUT_2017_12, ccn=ccn2016);
-%claims_rev(source=rifq2018.OUTpatient_claims_01, rev_cohort=rifq2018.OUTpatient_revenue_01, include_cohort=pop_02_OUT_2018_1, ccn=ccn2018);
-%claims_rev(source=rifq2018.OUTpatient_claims_02, rev_cohort=rifq2018.OUTpatient_revenue_02, include_cohort=pop_02_OUT_2018_2, ccn=ccn2018);
-%claims_rev(source=rifq2018.OUTpatient_claims_03, rev_cohort=rifq2018.OUTpatient_revenue_03, include_cohort=pop_02_OUT_2018_3, ccn=ccn2018);
-%claims_rev(source=rifq2018.OUTpatient_claims_04, rev_cohort=rifq2018.OUTpatient_revenue_04, include_cohort=pop_02_OUT_2018_4, ccn=ccn2018);
-%claims_rev(source=rifq2018.OUTpatient_claims_05, rev_cohort=rifq2018.OUTpatient_revenue_05, include_cohort=pop_02_OUT_2018_5, ccn=ccn2018);
-%claims_rev(source=rifq2018.OUTpatient_claims_06, rev_cohort=rifq2018.OUTpatient_revenue_06, include_cohort=pop_02_OUT_2018_6, ccn=ccn2018);
-%claims_rev(source=rifq2018.OUTpatient_claims_07, rev_cohort=rifq2018.OUTpatient_revenue_07, include_cohort=pop_02_OUT_2018_7, ccn=ccn2018);
-%claims_rev(source=rifq2018.OUTpatient_claims_08, rev_cohort=rifq2018.OUTpatient_revenue_08, include_cohort=pop_02_OUT_2018_8, ccn=ccn2018);
-%claims_rev(source=rifq2018.OUTpatient_claims_09, rev_cohort=rifq2018.OUTpatient_revenue_09, include_cohort=pop_02_OUT_2018_9, ccn=ccn2018);
-%claims_rev(source=rifq2018.OUTpatient_claims_10, rev_cohort=rifq2018.OUTpatient_revenue_10, include_cohort=pop_02_OUT_2018_10, ccn=ccn2018);
-%claims_rev(source=rifq2018.OUTpatient_claims_11, rev_cohort=rifq2018.OUTpatient_revenue_11, include_cohort=pop_02_OUT_2018_11, ccn=ccn2018);
-%claims_rev(source=rifq2018.OUTpatient_claims_12, rev_cohort=rifq2018.OUTpatient_revenue_12, include_cohort=pop_02_OUT_2018_12, ccn=ccn2018);
+%claims_rev(source=rifq2018.OUTpatient_claims_01, rev_cohort=rifq2018.OUTpatient_revenue_01, include_cohort=pop_02_OUT_2018_1, ccn=ccn2016);
+%claims_rev(source=rifq2018.OUTpatient_claims_02, rev_cohort=rifq2018.OUTpatient_revenue_02, include_cohort=pop_02_OUT_2018_2, ccn=ccn2016);
+%claims_rev(source=rifq2018.OUTpatient_claims_03, rev_cohort=rifq2018.OUTpatient_revenue_03, include_cohort=pop_02_OUT_2018_3, ccn=ccn2016);
+%claims_rev(source=rifq2018.OUTpatient_claims_04, rev_cohort=rifq2018.OUTpatient_revenue_04, include_cohort=pop_02_OUT_2018_4, ccn=ccn2016);
+%claims_rev(source=rifq2018.OUTpatient_claims_05, rev_cohort=rifq2018.OUTpatient_revenue_05, include_cohort=pop_02_OUT_2018_5, ccn=ccn2016);
+%claims_rev(source=rifq2018.OUTpatient_claims_06, rev_cohort=rifq2018.OUTpatient_revenue_06, include_cohort=pop_02_OUT_2018_6, ccn=ccn2016);
+%claims_rev(source=rifq2018.OUTpatient_claims_07, rev_cohort=rifq2018.OUTpatient_revenue_07, include_cohort=pop_02_OUT_2018_7, ccn=ccn2016);
+%claims_rev(source=rifq2018.OUTpatient_claims_08, rev_cohort=rifq2018.OUTpatient_revenue_08, include_cohort=pop_02_OUT_2018_8, ccn=ccn2016);
+%claims_rev(source=rifq2018.OUTpatient_claims_09, rev_cohort=rifq2018.OUTpatient_revenue_09, include_cohort=pop_02_OUT_2018_9, ccn=ccn2016);
+%claims_rev(source=rifq2018.OUTpatient_claims_10, rev_cohort=rifq2018.OUTpatient_revenue_10, include_cohort=pop_02_OUT_2018_10, ccn=ccn2016);
+%claims_rev(source=rifq2018.OUTpatient_claims_11, rev_cohort=rifq2018.OUTpatient_revenue_11, include_cohort=pop_02_OUT_2018_11, ccn=ccn2016);
+%claims_rev(source=rifq2018.OUTpatient_claims_12, rev_cohort=rifq2018.OUTpatient_revenue_12, include_cohort=pop_02_OUT_2018_12, ccn=ccn2016);
 
 data pop_02_OUT;
 set pop_02_OUT_2016_1 pop_02_OUT_2016_2 pop_02_OUT_2016_3 pop_02_OUT_2016_4 pop_02_OUT_2016_5 pop_02_OUT_2016_6
@@ -403,7 +407,7 @@ run;
 	with the measure during data checks;
 proc sort data=pop_02_OUT nodupkey; by bene_id &flag_popped_dt; run;
 
-/**Do same for Carrier file that we did for Outpatient**/
+/**Do same for Carrier file that we did for Outpatient except Carrier does not have ICD procedure**/
 %macro claims_rev(source=, rev_cohort=, include_cohort=);
 proc sql;
 create table include_cohort1 (compress=yes) as
@@ -438,7 +442,9 @@ set include_cohort2;
 array dx(25) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
 do j=1 to &diag_cd_max;
 	if substr(dx(j),1,3) in(&includ_dx10_3) or substr(dx(j),1,4) in(&includ_dx10_4) then ALLERGY=1;
-	if substr(dx(j),1,3) in(&exclud_dx10_3) or substr(dx(j),1,1) in(&exclud_dx10_1) then DELETE=1;
+	if substr(dx(j),1,4) in(&exclud_dx10_4) or
+	substr(dx(j),1,3) in(&exclud_dx10_3) or 
+	substr(dx(j),1,1) in(&exclud_dx10_1) then DELETE=1;
 end;
 IF ALLERGY ne 1 then delete;
 IF DELETE  =  1 then delete;
@@ -625,7 +631,8 @@ proc means data=&in mean median min max; var  &pop_age &pop_los; run;
 %mend;
 %poppedlook(in=pop_02_car);
 
-*compile all Inpatient and Outpatient Popped into 1 dataset
+*compile Outpatient Popped into 1 dataset
+		DO NOT INCLUDE INPATIENT 
 		DO NOT INCLUDE CARRIER
 		Keep ONLY the first observation per person;
 data pop_02_in_out 
@@ -633,11 +640,11 @@ data pop_02_in_out
 			prvdr_num prvdr_state_cd OP_PHYSN_SPCLTY_CD /*RFR_PHYSN_NPI*/
 			at_physn_npi op_physn_npi org_npi_num ot_physn_npi rndrng_physn_npi
 			bene_race_cd	bene_cnty_cd bene_state_cd 	bene_mlg_cntct_zip_cd);
-set pop_02_IN pop_02_OUT;
+set /*pop_02_IN*/ pop_02_OUT;
 run;
 proc sort data=pop_02_in_out nodupkey; by bene_id &flag_popped_dt; run;
 proc sort data=pop_02_in_out nodupkey; by bene_id; run;
-title 'Popped (Inpatient and Outpatient (No Carrier) For Analysis';
+title 'Popped: Outpatient (No Inpatient, No Carrier) For Analysis';
 proc freq data=pop_02_in_out; 
 table  	&pop_year; run;
 proc contents data=pop_02_in_out; run;
