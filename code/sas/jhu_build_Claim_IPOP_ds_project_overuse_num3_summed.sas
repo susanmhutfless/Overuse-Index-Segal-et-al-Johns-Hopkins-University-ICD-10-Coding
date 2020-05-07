@@ -15,6 +15,7 @@ then evaluate N of the eligible that popped;
 
 /* Indicator 3 */
 
+
 /*** start of indicator specific variables ***/
 
 /*global variables for inclusion and exclusion*/
@@ -30,15 +31,15 @@ then evaluate N of the eligible that popped;
 %let includ_pr10 =
 					'BW03ZZZ' 			;
 
-%let includ_dx10   = '0';
-%let includ_dx10_n = 0	;		*this number should match number that needs to be substringed;
-%let includ_drg = '0'	;
+%let includ_dx10   = 'Z0181';
+%let includ_dx10_n = 5	;		*this number should match number that needs to be substringed;
+%let includ_drg    = '0'	;
 
 /** Exclusion criteria **/
 %let exclud_hcpcs= '0';
 
 %let EXclud_pr10 =	'0'				;
-%let EXclud_pr10_n = 0	;	
+%let EXclud_pr10_n = 7	;	
 
 %let EXCLUD_dx10   = 'J00' 'J01' 'J02' 'J03' 'J04' 'J05' 'J06' 
 					'J09' 'J10' 'J11' 'J12' 'J13' 'J14' 'J15' 
@@ -237,7 +238,8 @@ do i=1 to &proc_cd_max;
 end;
 array dx(&diag_cd_max) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
 do j=1 to &diag_cd_max;
-	if substr(dx(j),1,&includ_dx10_n) in(&includ_dx10) then KEEP=1;	
+	if substr(dx(j),1,&includ_dx10_n) in(&includ_dx10) then KEEP=1;
+	***need exclusionary diagnosis here;****susie eliana;
 end;
 if KEEP ne 1 then DELETE;
 if DELETE = 1 then delete;
@@ -635,7 +637,8 @@ do i=1 to &proc_cd_max;
 end;
 array dx(&diag_cd_max) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
 do j=1 to &diag_cd_max;
-	if substr(dx(j),1,&includ_dx10_n) in(&includ_dx10) then KEEP=1;	
+	if substr(dx(j),1,&includ_dx10_n) in(&includ_dx10) then KEEP=1;	*NOOOOOOOO!!!!!!!!!! SUSIE ELIANA;
+	****need exclusionary dx		susie;
 end;
 if KEEP ne 1 then DELETE;
 if DELETE = 1 then delete;
@@ -1011,6 +1014,7 @@ cc (in=a) &permlib..pop_&popN._in_out (in=b);
 by bene_id elig_dt;
 if a and b;
 run; 
+
 
 *Start summary checks;
 /**Look at freq, means, contents of final 1 record per person dataset **/
