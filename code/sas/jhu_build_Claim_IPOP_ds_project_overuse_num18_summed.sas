@@ -23,27 +23,31 @@ then evaluate N of the eligible that popped;
 		EXCLUD_dx10  exclud_dx10_n;
 
 /*inclusion criteria*/
+		*people with DIAGNOSES of DJD of knee 
+		and no DIAGNOSIS of knee trauma 
+		and without a concurrent knee replacement;
+
 %let includ_hcpcs =
 					'29881' '27332' '27333' '27403'
 					'29868' '29880' '29881' '29882'
-					'29883'			;
+					'29883'			;		*use for popped visit;
 
 
 
 %let includ_pr10 =
-					'0SBC4ZZ' '0SBD4ZZ'			;
+					'0SBC4ZZ' '0SBD4ZZ'			; *use for popped visit;
 
-%let includ_dx10   = 'M17';
+%let includ_dx10   = 'M17';	*use for inclusion visit;
 %let includ_dx10_n = 3;		*this number should match number that needs to be substringed;
 %let includ_drg = ;
 
 /** Exclusion criteria **/
-%let exclud_hcpcs= '27447';
+%let exclud_hcpcs= '27447'; *use for inclusion visit & popped visit;
 
-%let EXclud_pr10 =	'0SRC' '0SRD'				;
+%let EXclud_pr10 =	'0SRC' '0SRD'				; *use for inclusion visit & popped visit;
 %let EXclud_pr10_n = 4;	
 
-%let EXCLUD_dx10   = 'V' 'W'; 
+%let EXCLUD_dx10   = 'V' 'W'; 						* use for inclusion visit & popped visit;
 %let exclud_dx10_n = 1; 
 
 /** Label pop specific variables  **/
@@ -140,6 +144,7 @@ then evaluate N of the eligible that popped;
 
 *start identification of eligibility;
 *First identify all who are eligible;
+
 /*** this macro is for inpatient and outpatient claims--must have DX code of interest***/
 %macro claims_rev(date=,	source=,  rev_cohort=, include_cohort=, ccn=);
 *identify dx codes of interest;
@@ -232,7 +237,8 @@ do i=1 to &proc_cd_max;
 end;
 array dx(&diag_cd_max) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
 do j=1 to &diag_cd_max;
-	if substr(dx(j),1,&includ_dx10_n) in(&includ_dx10) then KEEP=1;	
+	if substr(dx(j),1,&includ_dx10_n) in(&includ_dx10) then KEEP=1;
+	if substr(dx(j),1,&exclud_dx10_n) in(&exclud_dx10) then DELETE=1;		
 end;
 if KEEP ne 1 then DELETE;
 if DELETE = 1 then delete;
@@ -254,11 +260,11 @@ quit;
 run;
 %mend;
 /*** this section is related to IP - inpatient claims--for eligible cohort***/
-*%claims_rev(date=&clm_beg_dt_in, source=rif2015.INpatient_claims_07,  
+%claims_rev(date=&clm_beg_dt_in, source=rif2015.INpatient_claims_07,  
 	rev_cohort=rif2015.inpatient_revenue_07, include_cohort=pop_&popN._INinclude_2015_7, ccn=ccn2016);
-*%claims_rev(date=&clm_beg_dt_in, source=rif2015.INpatient_claims_08,  
+%claims_rev(date=&clm_beg_dt_in, source=rif2015.INpatient_claims_08,  
 	rev_cohort=rif2015.INpatient_revenue_08, include_cohort=pop_&popN._INinclude_2015_8, ccn=ccn2016);
-*%claims_rev(date=&clm_beg_dt_in, source=rif2015.INpatient_claims_09,  
+%claims_rev(date=&clm_beg_dt_in, source=rif2015.INpatient_claims_09,  
 	rev_cohort=rif2015.INpatient_revenue_09, include_cohort=pop_&popN._INinclude_2015_9, ccn=ccn2016);
 %claims_rev(date=&clm_beg_dt_in, source=rif2015.INpatient_claims_10,  
 	rev_cohort=rif2015.INpatient_revenue_10, include_cohort=pop_&popN._INinclude_2015_10, ccn=ccn2016);
@@ -379,11 +385,11 @@ proc sort data=pop_&popN._INinclude NODUPKEY; by elig_compendium_hospital_id eli
 proc sort data=pop_&popN._INinclude NODUPKEY; by elig_compendium_hospital_id elig_year elig_qtr &bene_id ; run;
 
 /*** this section is related to OP - outpatient claims--for eligibility***/
-*%claims_rev(date=&clm_from_dt, source=rif2015.OUTpatient_claims_07,  
+%claims_rev(date=&clm_from_dt, source=rif2015.OUTpatient_claims_07,  
 	rev_cohort=rif2015.inpatient_revenue_07, include_cohort=pop_&popN._OUTinclude_2015_7, ccn=ccn2016);
-*%claims_rev(date=&clm_from_dt, source=rif2015.OUTpatient_claims_08,  
+%claims_rev(date=&clm_from_dt, source=rif2015.OUTpatient_claims_08,  
 	rev_cohort=rif2015.outpatient_revenue_08, include_cohort=pop_&popN._OUTinclude_2015_8, ccn=ccn2016);
-*%claims_rev(date=&clm_from_dt, source=rif2015.OUTpatient_claims_09,  
+%claims_rev(date=&clm_from_dt, source=rif2015.OUTpatient_claims_09,  
 	rev_cohort=rif2015.outpatient_revenue_09, include_cohort=pop_&popN._OUTinclude_2015_9, ccn=ccn2016);
 %claims_rev(date=&clm_from_dt, source=rif2015.OUTpatient_claims_10,  
 	rev_cohort=rif2015.outpatient_revenue_10, include_cohort=pop_&popN._OUTinclude_2015_10, ccn=ccn2016);
@@ -507,6 +513,8 @@ proc sort data=pop_&popN._OUTinclude NODUPKEY; by elig_compendium_hospital_id el
 data &permlib..pop_&popN._elig;
 set 	pop_&popN._OUTinclude 
 		pop_&popN._INinclude ;
+if elig_year<2016 then delete;
+if elig_year>2018 then delete;
 run;
 *person can contribute only once even if seen in inpatient and outpatient in same hosp/year/qtr;
 proc sort data=&permlib..pop_&popN._elig NODUPKEY; by elig_compendium_hospital_id elig_year elig_qtr &bene_id ;run;
