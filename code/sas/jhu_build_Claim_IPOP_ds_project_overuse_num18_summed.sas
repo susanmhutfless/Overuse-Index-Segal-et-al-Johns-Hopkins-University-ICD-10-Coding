@@ -18,7 +18,8 @@ then evaluate N of the eligible that popped;
 /*** start of indicator specific variables ***/
 
 /*global variables for inclusion and exclusion*/
-%global includ_hcpcs includ_pr10 
+%global includ_hcpcs 
+		includ_pr10  includ_pr10_n
 		includ_dx10  includ_dx10_n 
 		EXCLUD_dx10  exclud_dx10_n;
 
@@ -36,10 +37,11 @@ then evaluate N of the eligible that popped;
 
 %let includ_pr10 =
 					'0SBC4ZZ' '0SBD4ZZ'			; *use for popped visit;
+%let includ_pr10_n = 7;
 
 %let includ_dx10   = 'M17';	*use for inclusion visit;
 %let includ_dx10_n = 3;		*this number should match number that needs to be substringed;
-%let includ_drg = ;
+%let includ_drg = '0';
 
 /** Exclusion criteria **/
 %let exclud_hcpcs= '27447'; *use for inclusion visit & popped visit;
@@ -513,8 +515,6 @@ proc sort data=pop_&popN._OUTinclude NODUPKEY; by elig_compendium_hospital_id el
 data &permlib..pop_&popN._elig;
 set 	pop_&popN._OUTinclude 
 		pop_&popN._INinclude ;
-if elig_year<2016 then delete;
-if elig_year>2018 then delete;
 run;
 *person can contribute only once even if seen in inpatient and outpatient in same hosp/year/qtr;
 proc sort data=&permlib..pop_&popN._elig NODUPKEY; by elig_compendium_hospital_id elig_year elig_qtr &bene_id ;run;
@@ -635,11 +635,14 @@ label pop_ed='popped: revenue center indicated emergency department';
 array pr(&proc_cd_max) &proc_pfx.&proc_cd_min - &proc_pfx.&proc_cd_max;
 do i=1 to &proc_cd_max;
 	if substr(pr(i),1,&exclud_pr10_n) in(&EXclud_pr10) then DELETE=1;	
+	if substr(pr(i),1,&includ_pr10_n) in(&includ_pr10) then KEEP=1;
 end;
 array dx(&diag_cd_max) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
 do j=1 to &diag_cd_max;
-	if substr(dx(j),1,&includ_dx10_n) in(&includ_dx10) then KEEP=1;	
+	if substr(dx(j),1,&exclud_dx10_n) in(&exclud_dx10) then DELETE=1;	
 end;
+if hcpcs_cd in(&includ_hcpcs) then KEEP;
+if hcpcs_cd in(&exclud_hcpcs) then DELETE;
 if KEEP ne 1 then DELETE;
 if DELETE = 1 then delete;
 *if clm_drg_cd notin(&includ_drg) then delete;
@@ -656,7 +659,7 @@ where
 		a.&bene_id=b.&bene_id 
 		and 
 		a.elig_dt=b.&flag_popped_dt
-		and (	(a.elig_dt-180) <= b.&flag_popped_dt <=a.elig_dt	);  *Eliana: enter the lookback here;
+		and (	(a.elig_dt-180) <= b.&flag_popped_dt <=a.elig_dt	);  *Eliana: enter the time element here;
 quit;
 %mend;
 %claims_rev(date=&clm_beg_dt_in, source=rif2016.inpatient_claims_01, rev_cohort=rif2016.inpatient_revenue_01, include_cohort=pop_&popN._IN_2016_1, ccn=ccn2016);
@@ -875,6 +878,9 @@ label pop_gndr_cd='Gender patient popped/was eligible';
 format elig_dt date9.;
 if pop_year<2016 then delete;
 if pop_year>2018 then delete;
+*delete those who were in eligibility outside range that did not pop;
+if &flag_popped ne 1 and elig_year<2016 then delete;
+if &flag_popped ne 1 and elig_year>2018 then delete;
 if &flag_popped=. then &flag_popped=0;
 popped=&flag_popped;
 run;
@@ -1323,7 +1329,7 @@ where a.pop_compendium_hospital_id = b.compendium_hospital_id
 and b.health_sys_id2016 ne ' ';
 quit;
 
-*proc bglimm not available;
+/*proc bglimm not available;
 *https://documentation.sas.com/?docsetId=statug&docsetTarget=statug_bglimm_gettingstarted01.htm&docsetVersion=15.1&locale=en;
 *used glimmix;
 *https://www.lexjansen.com/nesug/nesug05/an/an4.pdf;
