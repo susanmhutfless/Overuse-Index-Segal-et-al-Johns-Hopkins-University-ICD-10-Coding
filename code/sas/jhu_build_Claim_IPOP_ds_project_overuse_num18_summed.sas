@@ -13,6 +13,8 @@ We need to identify the at-risk population, calculate their agecat/comorbid/fema
 by hospital qtr year
 then evaluate N of the eligible that popped;
 
+*NOTE: Defining an array with 0 elements in log is acceptable if N identified is 0;
+
 /* Indicator 18 */
 
 /*** start of indicator specific variables ***/
