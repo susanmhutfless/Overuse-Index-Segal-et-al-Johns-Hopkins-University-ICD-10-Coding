@@ -1251,7 +1251,6 @@ proc datasets lib=work nolist;
 		&ptnt_dschrg_stus_cd ;
 quit;
 run;
-
 *End summary checks;
 
 *create models;
@@ -1319,7 +1318,7 @@ if n<11 then delete;
 if popped=. then popped=0;
 run;
 
-*merge hospital aggregated data to health system;
+*merge hospital aggregated data to health system--request export of this dataset;
 proc sql;
 create table pop_&popN._in_out_anal3 (compress=yes) as
 select  
@@ -1379,7 +1378,7 @@ health_sys_id2016 pop_compendium_hospital_id/param=ref;
 strata pop_compendium_hospital_id;
 run;*/
 
-*checks for missingness in case no convergence or log says missing data;
+/*checks for missingness in case no convergence or log says missing data;
 title 'checks for missingness in case no convergence or log says missing data';
 proc means nmiss data=pop_&popN._in_out_anal3; run;
 proc freq data=pop_&popN._in_out_anal3; table pop_year pop_qtr; run;
@@ -1390,4 +1389,9 @@ proc print data=pop_&popN._in_out_anal3; where pop_compendium_hospital_id=' ';
 	var pop_compendium_hospital_id health_sys_id2016; run;
 proc print data=pop_&popN._in_out_anal3; where health_sys_id2016=' '; 
 	var pop_compendium_hospital_id health_sys_id2016;run;
+*/
 
+*2 things required when program finishes running:
+(1) Export pop_&popN._in_out_anal3--this is the analytic dataset
+(2) Re-run the summary checks and request export of the PDF to review
+		-these are the summaries of inpatient/outpatient prior to n<11 exclusions made for analytic dataset;
