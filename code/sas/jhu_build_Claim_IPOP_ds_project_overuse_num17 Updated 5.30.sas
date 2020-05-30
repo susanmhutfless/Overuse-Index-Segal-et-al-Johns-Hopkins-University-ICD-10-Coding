@@ -5,7 +5,7 @@
 ********************************************************************/
 
 /*** Indicator description ***/
-/* Description and codes from .xlsx file  "ICD-10 conversions_3_30_2020" */
+/* Description and codes from .xlsx file  "ICD-10 conversions_5_28_2020" */
 
 ***************Major modifications made per 27mar2020 phone call to 
 include at risk population only and sum counts**************************************
@@ -13,33 +13,39 @@ We need to identify the at-risk population, calculate their agecat/comorbid/fema
 by hospital qtr year
 then evaluate N of the eligible that popped;
 
+*NOTE: Defining an array with 0 elements in log is acceptable if N identified is 0;
+
 /* Indicator 17 */
 
 /*** start of indicator specific variables ***/
 
 /*global variables for inclusion and exclusion*/
-%global includ_hcpcs includ_pr10 
+%global includ_hcpcs 
+		includ_pr10  includ_pr10_n
 		includ_dx10  includ_dx10_n 
 		EXCLUD_dx10  exclud_dx10_n;
 
 /*inclusion criteria*/
+		*people without diagnosis of neuropathy or weakness and with diagnosis of low back pain;
+
 %let includ_hcpcs =
-					'72148' '72149' '72158' 	;
+					'72148' '72149' '72158'		;		*use for popped visit;
 
 
 
 %let includ_pr10 =
-					'BR39Y0Z' 'BR39YZZ'	'BR39ZZZ'		;
+					'BR39Y0Z' 'BR39YZZ'	'BR39ZZZ'		; *use for popped visit;
+%let includ_pr10_n = 7;
 
-%let includ_dx10   = 'M545';
+%let includ_dx10   = 'M545';	*use for inclusion visit;
 %let includ_dx10_n = 4;		*this number should match number that needs to be substringed;
-%let includ_drg = '0'	;
+%let includ_drg = '0';
 
 /** Exclusion criteria **/
-%let exclud_hcpcs= '0';
+%let exclud_hcpcs= '0'; *use for inclusion visit & popped visit;
 
-%let EXclud_pr10 =	'0' 			;
-%let EXclud_pr10_n = 0	;	
+%let EXclud_pr10 =	'0'			; *use for inclusion visit & popped visit;
+%let EXclud_pr10_n = 0;	
 
 %let EXCLUD_dx10   = 'S34' 'C00' 'C01'
 					'C02' 'C03' 'C04' 'C05' 'C06'
@@ -60,9 +66,12 @@ then evaluate N of the eligible that popped;
 					'C78' 'C79' 'C80' 'C81' 'C82' 
 					'C83' 'C84' 'C85' 'C86' 'C87'
 					'C88' 'C89' 'C90' 'C91' 'C92' 
-					'C93' 'C94' 'C95' 'C96' 'M462'
-					'M463' 'M464' 'M465'	;
+					'C93' 'C94' 'C95' 'C96' 	;				* use for inclusion visit & popped visit;
 %let exclud_dx10_n = 3; 
+
+%let EXCLUD_dx10   = 'M462' 'M463' 'M464' 'M465'; * use for inclusion visit & popped visit;
+
+%let exclud_dx10_n = 4;
 
 /** Label pop specific variables  **/
 %global popN;
@@ -158,6 +167,7 @@ then evaluate N of the eligible that popped;
 
 *start identification of eligibility;
 *First identify all who are eligible;
+
 /*** this macro is for inpatient and outpatient claims--must have DX code of interest***/
 %macro claims_rev(date=,	source=,  rev_cohort=, include_cohort=, ccn=);
 *identify dx codes of interest;
@@ -250,7 +260,8 @@ do i=1 to &proc_cd_max;
 end;
 array dx(&diag_cd_max) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
 do j=1 to &diag_cd_max;
-	if substr(dx(j),1,&includ_dx10_n) in(&includ_dx10) then KEEP=1;	
+	if substr(dx(j),1,&includ_dx10_n) in(&includ_dx10) then KEEP=1;
+	if substr(dx(j),1,&exclud_dx10_n) in(&exclud_dx10) then DELETE=1;		
 end;
 if KEEP ne 1 then DELETE;
 if DELETE = 1 then delete;
@@ -272,11 +283,11 @@ quit;
 run;
 %mend;
 /*** this section is related to IP - inpatient claims--for eligible cohort***/
-*%claims_rev(date=&clm_beg_dt_in, source=rif2015.INpatient_claims_07,  
+%claims_rev(date=&clm_beg_dt_in, source=rif2015.INpatient_claims_07,  
 	rev_cohort=rif2015.inpatient_revenue_07, include_cohort=pop_&popN._INinclude_2015_7, ccn=ccn2016);
-*%claims_rev(date=&clm_beg_dt_in, source=rif2015.INpatient_claims_08,  
+%claims_rev(date=&clm_beg_dt_in, source=rif2015.INpatient_claims_08,  
 	rev_cohort=rif2015.INpatient_revenue_08, include_cohort=pop_&popN._INinclude_2015_8, ccn=ccn2016);
-*%claims_rev(date=&clm_beg_dt_in, source=rif2015.INpatient_claims_09,  
+%claims_rev(date=&clm_beg_dt_in, source=rif2015.INpatient_claims_09,  
 	rev_cohort=rif2015.INpatient_revenue_09, include_cohort=pop_&popN._INinclude_2015_9, ccn=ccn2016);
 %claims_rev(date=&clm_beg_dt_in, source=rif2015.INpatient_claims_10,  
 	rev_cohort=rif2015.INpatient_revenue_10, include_cohort=pop_&popN._INinclude_2015_10, ccn=ccn2016);
@@ -397,11 +408,11 @@ proc sort data=pop_&popN._INinclude NODUPKEY; by elig_compendium_hospital_id eli
 proc sort data=pop_&popN._INinclude NODUPKEY; by elig_compendium_hospital_id elig_year elig_qtr &bene_id ; run;
 
 /*** this section is related to OP - outpatient claims--for eligibility***/
-*%claims_rev(date=&clm_from_dt, source=rif2015.OUTpatient_claims_07,  
+%claims_rev(date=&clm_from_dt, source=rif2015.OUTpatient_claims_07,  
 	rev_cohort=rif2015.inpatient_revenue_07, include_cohort=pop_&popN._OUTinclude_2015_7, ccn=ccn2016);
-*%claims_rev(date=&clm_from_dt, source=rif2015.OUTpatient_claims_08,  
+%claims_rev(date=&clm_from_dt, source=rif2015.OUTpatient_claims_08,  
 	rev_cohort=rif2015.outpatient_revenue_08, include_cohort=pop_&popN._OUTinclude_2015_8, ccn=ccn2016);
-*%claims_rev(date=&clm_from_dt, source=rif2015.OUTpatient_claims_09,  
+%claims_rev(date=&clm_from_dt, source=rif2015.OUTpatient_claims_09,  
 	rev_cohort=rif2015.outpatient_revenue_09, include_cohort=pop_&popN._OUTinclude_2015_9, ccn=ccn2016);
 %claims_rev(date=&clm_from_dt, source=rif2015.OUTpatient_claims_10,  
 	rev_cohort=rif2015.outpatient_revenue_10, include_cohort=pop_&popN._OUTinclude_2015_10, ccn=ccn2016);
@@ -645,11 +656,14 @@ label pop_ed='popped: revenue center indicated emergency department';
 array pr(&proc_cd_max) &proc_pfx.&proc_cd_min - &proc_pfx.&proc_cd_max;
 do i=1 to &proc_cd_max;
 	if substr(pr(i),1,&exclud_pr10_n) in(&EXclud_pr10) then DELETE=1;	
+	if substr(pr(i),1,&includ_pr10_n) in(&includ_pr10) then KEEP=1;
 end;
 array dx(&diag_cd_max) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
 do j=1 to &diag_cd_max;
-	if substr(dx(j),1,&includ_dx10_n) in(&includ_dx10) then KEEP=1;	
+	if substr(dx(j),1,&exclud_dx10_n) in(&exclud_dx10) then DELETE=1;	
 end;
+if hcpcs_cd in(&includ_hcpcs) then KEEP=1;
+if hcpcs_cd in(&exclud_hcpcs) then DELETE=1;
 if KEEP ne 1 then DELETE;
 if DELETE = 1 then delete;
 *if clm_drg_cd notin(&includ_drg) then delete;
@@ -666,7 +680,7 @@ where
 		a.&bene_id=b.&bene_id 
 		and 
 		a.elig_dt=b.&flag_popped_dt
-		and (	(a.elig_dt-60) <= b.&flag_popped_dt <=a.elig_dt	);  *Eliana: enter the lookback here;
+		and (	(a.elig_dt-60) <= b.&flag_popped_dt <=a.elig_dt	);  *Eliana: enter the time element here;
 quit;
 %mend;
 %claims_rev(date=&clm_beg_dt_in, source=rif2016.inpatient_claims_01, rev_cohort=rif2016.inpatient_revenue_01, include_cohort=pop_&popN._IN_2016_1, ccn=ccn2016);
@@ -885,6 +899,9 @@ label pop_gndr_cd='Gender patient popped/was eligible';
 format elig_dt date9.;
 if pop_year<2016 then delete;
 if pop_year>2018 then delete;
+*delete those who were in eligibility outside range that did not pop;
+if &flag_popped ne 1 and elig_year<2016 then delete;
+if &flag_popped ne 1 and elig_year>2018 then delete;
 if &flag_popped=. then &flag_popped=0;
 popped=&flag_popped;
 run;
@@ -1253,7 +1270,6 @@ proc datasets lib=work nolist;
 		&ptnt_dschrg_stus_cd ;
 quit;
 run;
-
 *End summary checks;
 
 *create models;
@@ -1321,7 +1337,7 @@ if n<11 then delete;
 if popped=. then popped=0;
 run;
 
-*merge hospital aggregated data to health system;
+*merge hospital aggregated data to health system--request export of this dataset;
 proc sql;
 create table pop_&popN._in_out_anal3 (compress=yes) as
 select  
@@ -1333,7 +1349,7 @@ where a.pop_compendium_hospital_id = b.compendium_hospital_id
 and b.health_sys_id2016 ne ' ';
 quit;
 
-*proc bglimm not available;
+/*proc bglimm not available;
 *https://documentation.sas.com/?docsetId=statug&docsetTarget=statug_bglimm_gettingstarted01.htm&docsetVersion=15.1&locale=en;
 *used glimmix;
 *https://www.lexjansen.com/nesug/nesug05/an/an4.pdf;
@@ -1381,7 +1397,7 @@ health_sys_id2016 pop_compendium_hospital_id/param=ref;
 strata pop_compendium_hospital_id;
 run;*/
 
-*checks for missingness in case no convergence or log says missing data;
+/*checks for missingness in case no convergence or log says missing data;
 title 'checks for missingness in case no convergence or log says missing data';
 proc means nmiss data=pop_&popN._in_out_anal3; run;
 proc freq data=pop_&popN._in_out_anal3; table pop_year pop_qtr; run;
@@ -1392,4 +1408,9 @@ proc print data=pop_&popN._in_out_anal3; where pop_compendium_hospital_id=' ';
 	var pop_compendium_hospital_id health_sys_id2016; run;
 proc print data=pop_&popN._in_out_anal3; where health_sys_id2016=' '; 
 	var pop_compendium_hospital_id health_sys_id2016;run;
+*/
 
+*2 things required when program finishes running:
+(1) Export pop_&popN._in_out_anal3--this is the analytic dataset
+(2) Re-run the summary checks and request export of the PDF to review
+		-these are the summaries of inpatient/outpatient prior to n<11 exclusions made for analytic dataset;
