@@ -1314,8 +1314,10 @@ run;
 data pop_&popN._in_out_anal2;
 merge pop_&popN._means pop_&popN._popped pop_&popN._elig_gndr_cd;
 by pop_compendium_hospital_id pop_year pop_qtr;
-if n<11 then delete;
+if n=. then n=0;
+if 1<=n<=10 then n=.;
 if popped=. then popped=0;
+if 1<=popped<=10 then popped=.;
 run;
 
 *merge hospital aggregated data to health system--request export of this dataset;
