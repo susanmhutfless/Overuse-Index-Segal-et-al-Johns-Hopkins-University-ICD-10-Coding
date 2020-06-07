@@ -5,13 +5,16 @@
 ********************************************************************/
 
 /*** Indicator description ***/
-/* Description and codes from .xlsx file  "ICD-10 conversions_3_30_2020" */
+/* Description and codes from .xlsx file  "ICD-10 conversions_5_28_20" */
 
 ***************Major modifications made per 27mar2020 phone call to 
 include at risk population only and sum counts**************************************
 We need to identify the at-risk population, calculate their agecat/comorbid/female and sum 
 by hospital qtr year
 then evaluate N of the eligible that popped;
+
+***********JS changed so that there is NO LOOKBACK****************************
+*************People now become eligible and POP during the same encounter;
 
 *NOTE: Defining an array with 0 elements in log is acceptable if N identified is 0;
 
