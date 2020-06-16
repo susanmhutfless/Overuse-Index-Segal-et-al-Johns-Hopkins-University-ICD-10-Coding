@@ -5,13 +5,16 @@
 ********************************************************************/
 
 /*** Indicator description ***/
-/* Description and codes from .xlsx file  "ICD-10 conversions_3_30_2020" */
+/* Description and codes from .xlsx file  "ICD-10 conversions_5_28_20" */
 
 ***************Major modifications made per 27mar2020 phone call to 
 include at risk population only and sum counts**************************************
 We need to identify the at-risk population, calculate their agecat/comorbid/female and sum 
 by hospital qtr year
 then evaluate N of the eligible that popped;
+
+***********May 2020: JS changed so that there is NO LOOKBACK****************************
+*************People now become eligible and POP during the same encounter;
 
 *NOTE: Defining an array with 0 elements in log is acceptable if N identified is 0;
 
@@ -39,14 +42,14 @@ then evaluate N of the eligible that popped;
 
 %let includ_pr10 =
 					'0SBC4ZZ' '0SBD4ZZ'			; *use for popped visit;
-%let includ_pr10_n = 7;
+%let includ_pr10_n = 7;		*this number should match number that needs to be substringed;
 
-%let includ_dx10   = 'M17';	*use for inclusion visit;
+%let includ_dx10   = 'M17';						*use for inclusion visit--djd of knee;
 %let includ_dx10_n = 3;		*this number should match number that needs to be substringed;
 %let includ_drg = '0';
 
 /** Exclusion criteria **/
-%let exclud_hcpcs= '27447'; *use for inclusion visit & popped visit;
+%let exclud_hcpcs= '27447'; 					*use for inclusion visit & popped visit;
 
 %let EXclud_pr10 =	'0SRC' '0SRD'				; *use for inclusion visit & popped visit;
 %let EXclud_pr10_n = 4;	
@@ -263,7 +266,7 @@ proc datasets lib=work nolist;
 quit;
 run;
 %mend;
-/*** this section is related to IP - inpatient claims--for eligible cohort***/
+/*** this section is related to IP - inpatient claims--for eligible cohort***
 %claims_rev(date=&clm_beg_dt_in, source=rif2015.INpatient_claims_07,  
 	rev_cohort=rif2015.inpatient_revenue_07, include_cohort=pop_&popN._INinclude_2015_7, ccn=ccn2016);
 %claims_rev(date=&clm_beg_dt_in, source=rif2015.INpatient_claims_08,  
@@ -357,7 +360,7 @@ data pop_&popN._INinclude (keep= &bene_id &clm_id elig_dt elig: setting_elig:
 							&diag_pfx.&diag_cd_min   &proc_pfx.&proc_cd_min
 							prvdr_num prvdr_state_cd OP_PHYSN_SPCLTY_CD rev_cntr1
 							at_physn_npi op_physn_npi org_npi_num ot_physn_npi rndrng_physn_npi
-							/*RFR_PHYSN_NPI*/
+							/*RFR_PHYSN_NPI*
 							bene_cnty_cd bene_state_cd 	bene_mlg_cntct_zip_cd
 						);
 set pop_&popN._INinclude: 	;
@@ -384,7 +387,7 @@ format bene_state_cd prvdr_state_cd $state. OP_PHYSN_SPCLTY_CD $speccd. rev_cntr
 		&ptnt_dschrg_stus_cd $stuscd. &gndr_cd gender. bene_race_cd race. &clm_drg_cd drg.
 		&icd_dgns_cd1 &admtg_dgns_cd $dgns. &icd_prcdr_cd1 $prcdr. hcpcs_cd1 $hcpcs. ;
 run;
-/* get rid of duplicate rows so that each bene contributes 1x per hospital/year/qtr */
+/* get rid of duplicate rows so that each bene contributes 1x per hospital/year/qtr *
 proc sort data=pop_&popN._INinclude NODUPKEY; by elig_compendium_hospital_id elig_year elig_qtr &bene_id elig_dt; run;
 proc sort data=pop_&popN._INinclude NODUPKEY; by elig_compendium_hospital_id elig_year elig_qtr &bene_id ; run;
 
@@ -516,7 +519,7 @@ proc sort data=pop_&popN._OUTinclude NODUPKEY; by elig_compendium_hospital_id el
 
 data &permlib..pop_&popN._elig;
 set 	pop_&popN._OUTinclude 
-		pop_&popN._INinclude ;
+		/*pop_&popN._INinclude*/ ;		*as of May 2020 we are not including inpatient;
 run;
 *person can contribute only once even if seen in inpatient and outpatient in same hosp/year/qtr;
 proc sort data=&permlib..pop_&popN._elig NODUPKEY; by elig_compendium_hospital_id elig_year elig_qtr &bene_id ;run;
@@ -524,9 +527,8 @@ proc sort data=&permlib..pop_&popN._elig NODUPKEY; by elig_compendium_hospital_i
 *end identification of eligibility;
 
 *Start: Identify who popped;
-/*** this section is related to IP - inpatient claims ***/
 %macro claims_rev(date=, source=, rev_cohort=, include_cohort=, ccn=);
-/* identify hcpcs  */
+* identify hcpcs ;
 proc sql;
 create table include_cohort1a (compress=yes) as
 select &bene_id, &clm_id, &rev_cntr,
@@ -536,7 +538,7 @@ from
 where 
 	&hcpcs_cd in (&includ_hcpcs);
 quit;
-/* pull claim info for those with HCPCS (need to do this to get dx codes)*/
+* pull claim info for those with HCPCS (need to do this to get dx codes)*;
 proc sql;
 	create table include_cohort1b (compress=yes) as
 select a.&rev_cntr, a.&hcpcs_cd, a.&flag_popped, b.*
@@ -545,7 +547,8 @@ from
 	&source b
 where 
 	(a.&bene_id=b.&bene_id and a.&clm_id=b.&clm_id);
-quit;/*link to ccn*/
+quit;
+*link to ccn;
 proc sql;
 	create table include_cohort1c (compress=yes) as
 select *
@@ -556,7 +559,7 @@ where
 	b.prvdr_num = a.&ccn
 ;
 quit;
-/*pull icd procedure criteria from claims*/
+*pull icd procedure criteria from claims*;
 proc sql;
 	create table include_cohort1d (compress=yes) as
 select *
@@ -589,7 +592,7 @@ where
 		icd_prcdr_cd24 in(&includ_pr10) or
 		icd_prcdr_cd25 in(&includ_pr10)		;
 quit;
-/*link icd prcdr identified to revenue center*/
+*link icd prcdr identified to revenue center*;
 proc sql;
 	create table include_cohort1e (compress=yes) as
 select a.&rev_cntr, b.*
@@ -612,7 +615,7 @@ merge 	include_cohort1d
 by &bene_id &clm_id ;
 run;
 
-/* link to CCN */
+* link to CCN ;
 proc sql;
 	create table include_cohort1f (compress=yes) as
 select *
@@ -660,10 +663,13 @@ from
 where 
 		a.&bene_id=b.&bene_id 
 		and 
-		a.elig_dt=b.&flag_popped_dt
-		and (	(a.elig_dt-180) <= b.&flag_popped_dt <=a.elig_dt	);  *Eliana: enter the time element here;
+		a.elig_dt=b.&flag_popped_dt									/*Eliana: enter the time element here NO LOOKBACK;*/
+		/*and (	(a.elig_dt-180) <= b.&flag_popped_dt <=a.elig_dt	)*Eliana: enter the time element here-WITH LOOKBACK;*/
+;  
 quit;
 %mend;
+
+/*** this section is related to IP - inpatient claims ***
 %claims_rev(date=&clm_beg_dt_in, source=rif2016.inpatient_claims_01, rev_cohort=rif2016.inpatient_revenue_01, include_cohort=pop_&popN._IN_2016_1, ccn=ccn2016);
 %claims_rev(date=&clm_beg_dt_in, source=rif2016.inpatient_claims_02, rev_cohort=rif2016.inpatient_revenue_02, include_cohort=pop_&popN._IN_2016_2, ccn=ccn2016);
 %claims_rev(date=&clm_beg_dt_in, source=rif2016.inpatient_claims_03, rev_cohort=rif2016.inpatient_revenue_03, include_cohort=pop_&popN._IN_2016_3, ccn=ccn2016);
@@ -708,7 +714,7 @@ data pop_&popN._IN (keep=  pop: &flag_popped_dt elig: setting:
 							&admtg_dgns_cd &clm_drg_cd  rev_cntr1
 							prvdr_num prvdr_state_cd OP_PHYSN_SPCLTY_CD 
 							at_physn_npi op_physn_npi org_npi_num ot_physn_npi rndrng_physn_npi
-							/*RFR_PHYSN_NPI*/
+							/*RFR_PHYSN_NPI*
 							&gndr_cd bene_race_cd	bene_cnty_cd
 							bene_state_cd 	bene_mlg_cntct_zip_cd );
 set pop_&popN._IN_:;
@@ -743,7 +749,7 @@ format bene_state_cd prvdr_state_cd $state. &pop_OP_PHYSN_SPCLTY_CD $speccd. rev
 		&pop_icd_dgns_cd1 &pop_admtg_dgns_cd $dgns. &pop_icd_prcdr_cd1 $prcdr. &pop_hcpcs_cd $hcpcs. 
 		&gndr_cd gender. bene_race_cd race. &pop_clm_drg_cd drg. ;
 run;
-/* get rid of duplicate rows so that each bene contributes 1x per hospital/year/qtr */
+* get rid of duplicate rows so that each bene contributes 1x per hospital/year/qtr ;
 proc sort data=pop_&popN._IN NODUPKEY; by pop_compendium_hospital_id pop_year pop_qtr &bene_id elig_dt; run;
 proc sort data=pop_&popN._IN NODUPKEY; by pop_compendium_hospital_id pop_year pop_qtr &bene_id ; run; 
 
@@ -828,7 +834,7 @@ data pop_&popN._in_out_popped
 	(keep = bene_id elig: pop: setting: 
 			/*&gndr_cd bene_race_cd	bene_cnty_cd bene_state_cd 	bene_mlg_cntct_zip_cd*/
 			);
-set pop_&popN._IN pop_&popN._OUT;
+set /*pop_&popN._IN*/ pop_&popN._OUT;
 pop_year=year(&flag_popped_dt);
 pop_qtr=qtr(&flag_popped_dt);
 pop_prvdr_num=prvdr_num;
@@ -1025,7 +1031,8 @@ run;
 
 *Start summary checks;
 /**Look at freq, means, contents of final 1 record per person dataset **/
-title 'Popped Inpatient or Outpatient (No Carrier) For Analysis';
+*title 'Popped Inpatient or Outpatient (No Carrier) For Analysis';
+title 'Popped Outpatient (No Inpatient, No Carrier) For Analysis';
 proc freq data=&permlib..pop_&popN._in_out; 
 table  	popped &flag_popped &pop_year pop_year pop_qtr setting_pop setting_elig; run;
 proc means data=&permlib..pop_&popN._in_out n mean median min max; 
@@ -1202,7 +1209,7 @@ proc means data=&in mean median min max; var  elig_age elig_los; run;
 %mend;
 
 
-title 'Inpatient Popped';
+/*title 'Inpatient Popped';
 %poppedlook(in=pop_&popN._IN);
 *delete the temp datasets;
 proc datasets lib=work nolist;
@@ -1220,7 +1227,7 @@ title 'Eligible from inpatient encounter';
 %eliglook(in=pop_&popN._INinclude);
 		/*bene_state_cd prvdr_state_cd 
 		&pop_OP_PHYSN_SPCLTY_CD &pop_clm_fac_type_cd &pop_ptnt_dschrg_stus_cd
-		&pop_nch_clm_type_cd &pop_CLM_IP_ADMSN_TYPE_CD &pop_clm_src_ip_admsn_cd*/ 
+		&pop_nch_clm_type_cd &pop_CLM_IP_ADMSN_TYPE_CD &pop_clm_src_ip_admsn_cd*
 proc datasets lib=work nolist;
  delete setting: elig_ed elig_year elig_qtr pop_num icd: clm:
 		year qtr &gndr_cd  bene_race_cd 
@@ -1228,7 +1235,7 @@ proc datasets lib=work nolist;
 		&admtg_dgns_cd &OP_PHYSN_SPCLTY_CD nch_clm_type_cd
 		&ptnt_dschrg_stus_cd ;
 quit;
-run;
+run;*/
 title 'Outpatient Popped';
 %poppedlook(in=pop_&popN._OUT);
 proc datasets lib=work nolist;
@@ -1331,67 +1338,6 @@ pop_&popN._in_out_anal2 a,
 where a.pop_compendium_hospital_id = b.compendium_hospital_id 
 and b.health_sys_id2016 ne ' ';
 quit;
-
-/*proc bglimm not available;
-*https://documentation.sas.com/?docsetId=statug&docsetTarget=statug_bglimm_gettingstarted01.htm&docsetVersion=15.1&locale=en;
-*used glimmix;
-*https://www.lexjansen.com/nesug/nesug05/an/an4.pdf;
-*https://support.sas.com/documentation/cdl/en/statug/63347/HTML/default/viewer.htm#statug_glimmix_a0000001419.htm;
-title 'Model without pop size restriction';
-proc glimmix data=pop_&popN._in_out_anal3;
-	class health_sys_id2016 pop_compendium_hospital_id;
-*x = employment / 10;
-*logn = log(expCount);
-*SMR_pred = 100*exp(_zgamma_ + _xbeta_);
-model popped = health_sys_id2016 pop_year pop_qtr elig_age_mean cc_sum_mean / dist=poisson offset=n s ddfm=none;
-random pop_compendium_hospital_id;
-id health_sys_id2016 pop_compendium_hospital_id pop_year pop_qtr;
-output out=glimmixout;
-run;
-
-proc glimmix data=pop_&popN._in_out_anal3;
-class health_sys_id2016 pop_compendium_hospital_id;
-model popped = health_sys_id2016 pop_year pop_qtr elig_age_mean cc_sum_mean / ddfm=kr dist=Poisson;
-random _residual_ / group=health_sys_id2016 sub=pop_compendium_hospital_id;
-*lsmeans A / diff;
-run;
-
-proc glimmix data=pop_&popN._in_out_anal3;
-   class health_sys_id2016 pop_compendium_hospital_id;
-   model popped/N = health_sys_id2016 pop_year pop_qtr elig_age_mean cc_sum_mean/ link=log s dist=poisson;
-   random int / subject = pop_compendium_hospital_id;
-run;
-*limit to at least 11 events (=popped) in a quarter;
-title 'Model with pop size restriction (only those with n>=11 popped in quarter contribute)';
-proc glimmix data=pop_&popN._in_out_anal3;
-where popped>=11;
-class health_sys_id2016 pop_compendium_hospital_id;
-model popped = health_sys_id2016 pop_year pop_qtr elig_age_mean cc_sum_mean / ddfm=kr dist=Poisson;
-random _residual_ / group=health_sys_id2016 sub=pop_compendium_hospital_id;
-*lsmeans A / diff;
-run;
-
-
-/*look at 1 record per person logistic regression--would need to merge back to health system to run;
-proc logistic data= pop_&popN._in_out_anal; 
-class elig_gndr_cd(ref='2') elig_age_cat(ref='6070') cc_sum_cat(ref='0') pop_year(ref='2016') pop_qtr(ref='1')
-health_sys_id2016 pop_compendium_hospital_id/param=ref;
- model popped (event='1')= elig_age_cat elig_gndr_cd cc_sum_cat pop_year pop_qtr  health_sys_id2016;
-strata pop_compendium_hospital_id;
-run;*/
-
-/*checks for missingness in case no convergence or log says missing data;
-title 'checks for missingness in case no convergence or log says missing data';
-proc means nmiss data=pop_&popN._in_out_anal3; run;
-proc freq data=pop_&popN._in_out_anal3; table pop_year pop_qtr; run;
-title 'how many had pops <=12 for the hosp/year/qtr';
-proc freq data=pop_&popN._in_out_anal3; where popped<=12; table popped; run;
-title 'none should print for missing hospital id or hosp system id--if they do there is a problem';
-proc print data=pop_&popN._in_out_anal3; where pop_compendium_hospital_id=' ';
-	var pop_compendium_hospital_id health_sys_id2016; run;
-proc print data=pop_&popN._in_out_anal3; where health_sys_id2016=' '; 
-	var pop_compendium_hospital_id health_sys_id2016;run;
-*/
 
 *2 things required when program finishes running:
 (1) Export pop_&popN._in_out_anal3--this is the analytic dataset
