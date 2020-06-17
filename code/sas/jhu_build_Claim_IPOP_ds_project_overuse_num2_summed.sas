@@ -38,8 +38,14 @@ then evaluate N of the eligible that popped;
 					'0'			; *use for popped visit;
 %let includ_pr10_n = 0;		*this number should match number that needs to be substringed;
 
-%let includ_dx10   = '';						*use for inclusion visit--djd of knee;
-%let includ_dx10_n = 3;		*this number should match number that needs to be substringed;
+%let includ_dx10   = 'Z88' 'J30' ;						*use for inclusion visit;
+%let includ_dx10_n = 3;	
+%let includ_dx10   = 'Z910' 'J300' 'J301' 'J302'
+					'J305' 'J308' 'J309' ;						*use for inclusion visit;
+%let includ_dx10_n = 4;			
+%let includ_dx10   = 'J3081' 'J3089' ;						*use for inclusion visit;
+%let includ_dx10_n = 5;		*this number should match number that needs to be substringed;
+
 %let includ_drg = '0';
 
 /** Exclusion criteria **/
