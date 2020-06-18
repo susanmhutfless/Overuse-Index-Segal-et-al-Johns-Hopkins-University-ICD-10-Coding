@@ -24,7 +24,13 @@ then evaluate N of the eligible that popped;
 %global includ_hcpcs 
 		includ_pr10  includ_pr10_n
 		includ_dx10  includ_dx10_n 
+<<<<<<< Updated upstream
 		EXCLUD_dx10  exclud_dx10_n;
+=======
+		EXCLUD_dx10  exclud_dx10_n
+		EXCLUD_dx10_code3	exclud_dx10_substr3
+		EXCLUD_dx10_code4	exclud_dx10_substr4;
+>>>>>>> Stashed changes
 
 /*inclusion criteria*/
 		*people with allergy diagnosis
@@ -51,11 +57,22 @@ then evaluate N of the eligible that popped;
 /** Exclusion criteria **/
 %let exclud_hcpcs= '0'; 					*use for inclusion visit & popped visit;
 
+<<<<<<< Updated upstream
 %let EXclud_pr10 =	'0''				; *use for inclusion visit & popped visit;
 %let EXclud_pr10_n = 0;	
 
 %let EXCLUD_dx10   = 'D472'; 						* use for inclusion visit & popped visit;
 %let exclud_dx10_n = 4; 
+=======
+%let EXclud_pr10 =	'0'				; *use for inclusion visit & popped visit;
+%let EXclud_pr10_n = 0;	
+
+%let EXCLUD_dx10_code3   = 'J30' ; 						* use for inclusion visit & popped visit;
+%let exclud_dx10_substr3 = 4; 
+
+%let EXCLUD_dx10_code4   = 'D472' ; 						* use for inclusion visit & popped visit;
+%let exclud_dx10_substr4 = 4; 
+>>>>>>> Stashed changes
 
 /** Label pop specific variables  **/
 %global popN;
