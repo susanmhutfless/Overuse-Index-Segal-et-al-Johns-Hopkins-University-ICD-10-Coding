@@ -23,7 +23,13 @@ then evaluate N of the eligible that popped;
 %global includ_hcpcs 
 		includ_pr10  includ_pr10_n
 		includ_dx10  includ_dx10_n 
+<<<<<<< Updated upstream
 		EXCLUD_dx10  exclud_dx10_n;
+=======
+		EXCLUD_dx10  exclud_dx10_n
+		EXCLUD_dx10_code3	exclud_dx10_substr3
+		EXCLUD_dx10_code4	exclud_dx10_substr4;
+>>>>>>> Stashed changes
 
 /*inclusion criteria*/
 		*men with low grade prostate cancer diagnosis;
