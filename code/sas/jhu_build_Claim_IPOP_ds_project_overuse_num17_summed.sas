@@ -23,7 +23,9 @@ then evaluate N of the eligible that popped;
 %global includ_hcpcs 
 		includ_pr10  includ_pr10_n
 		includ_dx10  includ_dx10_n 
-		EXCLUD_dx10  exclud_dx10_n;
+		EXCLUD_dx10  exclud_dx10_n
+		EXCLUD_dx10_code3	exclud_dx10_substr3
+		EXCLUD_dx10_code4	exclud_dx10_substr4;
 
 /*inclusion criteria*/
 		*people without DIAGNOSES of neuropathy or weakness AND with DIAGNOSIS of low back pain;
@@ -47,7 +49,7 @@ then evaluate N of the eligible that popped;
 %let EXclud_pr10 =	'0'				; *use for inclusion visit & popped visit;
 %let EXclud_pr10_n = 0;	
 
-%let EXCLUD_dx10   = 'S34' 'C00' 'C01'
+%let EXCLUD_dx10_code3   = 'S34' 'C00' 'C01'
 					'C02' 'C03' 'C04' 'C05' 'C06'
 					'C07' 'C08' 'C09' 'C10' 'C11'
 					'C12' 'C13' 'C14' 'C15' 'C16' 
@@ -67,9 +69,9 @@ then evaluate N of the eligible that popped;
 					'C83' 'C84' 'C85' 'C86' 'C87'
 					'C88' 'C89' 'C90' 'C91' 'C92' 
 					'C93' 'C94' 'C95' 'C96' ; 						* use for inclusion visit & popped visit;
-%let exclud_dx10_n = 3; 
-%let EXCLUD_dx10   = 'M462' 'M463' 'M464' 'M465' ; 						* use for inclusion visit & popped visit;
-%let exclud_dx10_n = 4; 
+%let exclud_dx10_substr3 = 3; 
+%let EXCLUD_dx10_code4   = 'M462' 'M463' 'M464' 'M465' ; 						* use for inclusion visit & popped visit;
+%let exclud_dx10_substr4 = 4; 
 
 /** Label pop specific variables  **/
 %global popN;
@@ -259,7 +261,8 @@ end;
 array dx(&diag_cd_max) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
 do j=1 to &diag_cd_max;
 	if substr(dx(j),1,&includ_dx10_n) in(&includ_dx10) then KEEP=1;
-	if substr(dx(j),1,&exclud_dx10_n) in(&exclud_dx10) then DELETE=1;		
+	if substr(dx(j),1,&exclud_dx10_substr3) in(&EXCLUD_dx10_code3) then DELETE=1;
+	if substr(dx(j),1,&exclud_dx10_substr4) in(&EXCLUD_dx10_code4) then DELETE=1;	
 end;
 if KEEP ne 1 then DELETE;
 if DELETE = 1 then delete;
@@ -658,7 +661,8 @@ do i=1 to &proc_cd_max;
 end;
 array dx(&diag_cd_max) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
 do j=1 to &diag_cd_max;
-	if substr(dx(j),1,&exclud_dx10_n) in(&exclud_dx10) then DELETE=1;	
+		if substr(dx(j),1,&exclud_dx10_substr3) in(&EXCLUD_dx10_code3) then DELETE=1;
+	if substr(dx(j),1,&exclud_dx10_substr4) in(&EXCLUD_dx10_code4) then DELETE=1;	
 end;
 if hcpcs_cd in(&includ_hcpcs) then KEEP=1;
 if hcpcs_cd in(&exclud_hcpcs) then DELETE=1;
