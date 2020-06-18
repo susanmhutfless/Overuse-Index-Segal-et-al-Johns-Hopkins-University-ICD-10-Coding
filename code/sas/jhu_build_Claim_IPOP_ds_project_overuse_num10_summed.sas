@@ -48,7 +48,7 @@ then evaluate N of the eligible that popped;
 /** Exclusion criteria **/
 %let exclud_hcpcs= '3272F' '3273F'; 					*use for inclusion visit & popped visit;
 
-%let EXclud_pr10 =	'0''				; *use for inclusion visit & popped visit;
+%let EXclud_pr10 =	'0'				; *use for inclusion visit & popped visit;
 %let EXclud_pr10_n = 0;	
 
 %let EXCLUD_dx10   = '0'; 						* use for inclusion visit & popped visit;
