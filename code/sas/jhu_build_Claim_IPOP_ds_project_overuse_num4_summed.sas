@@ -34,10 +34,10 @@ then evaluate N of the eligible that popped;
 
 
 %let includ_pr10 =
-					'0''			; *use for popped visit;
+					'0'			; *use for popped visit;
 %let includ_pr10_n = 0;		*this number should match number that needs to be substringed;
 
-%let includ_dx10   = 'I50';						*use for inclusion visit--djd of knee;
+%let includ_dx10   = 'I50';						*use for inclusion visit--Congestive heart failure;
 %let includ_dx10_n = 3;		*this number should match number that needs to be substringed;
 %let includ_drg = '0';
 
@@ -47,7 +47,7 @@ then evaluate N of the eligible that popped;
 %let EXclud_pr10 =	'0'				; *use for inclusion visit & popped visit;
 %let EXclud_pr10_n = 0;	
 
-%let EXCLUD_dx10   = 'T460X1' 'T460X2' 'T460X3' 'T460X4' 'T460X5'; 						* use for inclusion visit & popped visit;
+%let EXCLUD_dx10   = 'T460X1' 'T460X2' 'T460X3' 'T460X4' 'T460X5'; *Digoxin toxicity; * use for inclusion visit & popped visit;
 %let exclud_dx10_n = 6; 
 
 /** Label pop specific variables  **/
