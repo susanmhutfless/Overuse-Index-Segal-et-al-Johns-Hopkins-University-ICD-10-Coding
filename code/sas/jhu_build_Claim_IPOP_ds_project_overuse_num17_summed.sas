@@ -47,7 +47,7 @@ then evaluate N of the eligible that popped;
 %let exclud_hcpcs= '0'; 					*use for inclusion visit & popped visit;
 
 %let EXclud_pr10 =	'0'				; *use for inclusion visit & popped visit;
-%let EXclud_pr10_n = 0;	
+%let EXclud_pr10_n = 7				; *Eliana: this needs to be 7 when the code is equal to 0;		
 
 %let EXCLUD_dx10_code3   = 'S34' 'C00' 'C01'
 					'C02' 'C03' 'C04' 'C05' 'C06'
