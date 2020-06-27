@@ -1,5 +1,5 @@
 /********************************************************************
-* Job Name: jhu_build_Claim_IPOP_ds_project_overuse_num18_summed.sas
+* Job Name: jhu_build_Claim_IPOP_ds_project_overuse_num19_summed.sas
 * Job Desc: Input for Inpatient & Outpatient (Including Carrier) Claims 
 * Copyright: Johns Hopkins University - SegalLab & HutflessLab 2019
 ********************************************************************/
@@ -7,18 +7,10 @@
 /*** Indicator description ***/
 /* Description and codes from .xlsx file  "ICD-10 conversions_5_28_20" */
 
-***************Major modifications made per 27mar2020 phone call to 
-include at risk population only and sum counts**************************************
-We need to identify the at-risk population, calculate their agecat/comorbid/female and sum 
-by hospital qtr year
-then evaluate N of the eligible that popped;
-
-***********May 2020: JS changed so that there is NO LOOKBACK****************************
-*************People now become eligible and POP during the same encounter;
 
 *NOTE: Defining an array with 0 elements in log is acceptable if N identified is 0;
 
-/* Indicator 18 */
+/* Indicator 19 */
 
 /*** start of indicator specific variables ***/
 
@@ -26,66 +18,69 @@ then evaluate N of the eligible that popped;
 %global includ_hcpcs 
 		includ_pr10  includ_pr10_n
 		includ_dx10  includ_dx10_n 
+		includ_dx_code4 includ_dx10_substr4 
+		includ_dx_code5 includ_dx10_substr5 
 		EXCLUD_dx10  exclud_dx10_n;
 
 /*inclusion criteria*/
-		*people with DIAGNOSES of DJD of knee 
-		and no DIAGNOSIS of knee trauma 
-		and without a concurrent knee replacement;
+		*women over 65;
 
 %let includ_hcpcs =
-					'29881' '27332' '27333' '27403'
-					'29868' '29880' '29881' '29882'
-					'29883'			;		*use for popped visit;
+					'Q0091' 'G0123'	'G0143'	'G0144'
+					'G0145'	'G0146'	'G0147'	'G0148'	
+					'G0476'			;		*use for popped visit;
 
 
 
 %let includ_pr10 =
-					'0SBC4ZZ' '0SBD4ZZ'			; *use for popped visit;
+					'0'			; *use for popped visit;
 %let includ_pr10_n = 7;		*this number should match number that needs to be substringed;
 
-%let includ_dx10   = 'M17';						*use for inclusion visit--djd of knee;
-%let includ_dx10_n = 3;		*this number should match number that needs to be substringed;
+%let includ_dx10_code4   = 'Z124';						*use for inclusion visit;
+%let includ_dx10_substr4 = 4;		*this number should match number that needs to be substringed;
+%let includ_dx10_code5   = 'Z1151';						*use for inclusion visit;
+%let includ_dx10_substr5 = 5;		*this number should match number that needs to be substringed;
+
 %let includ_drg = '0';
 
 /** Exclusion criteria **/
-%let exclud_hcpcs= '27447'; 					*use for inclusion visit & popped visit;
+%let exclud_hcpcs= '0'; 					*use for inclusion visit & popped visit;
 
-%let EXclud_pr10 =	'0SRC' '0SRD'				; *use for inclusion visit & popped visit;
-%let EXclud_pr10_n = 4;	
+%let EXclud_pr10 =	'0'				; *use for inclusion visit & popped visit;
+%let EXclud_pr10_n = 7;	
 
-%let EXCLUD_dx10   = 'V' 'W'; 						* use for inclusion visit & popped visit;
-%let exclud_dx10_n = 1; 
+%let EXCLUD_dx10   = 'C53' 'N87'; 						* use for inclusion visit & popped visit;
+%let exclud_dx10_n = 3; 
 
 /** Label pop specific variables  **/
 %global popN;
-%let	popN							= 18;
-%let 	flag_popped             		= popped18 								;
-%let 	flag_popped_label				= 'indicator 18 popped'					;	
-%let	flag_popped_dt					= popped18_dt							;
-%let 	flag_popped_dt_label			= 'indicator 18 date patient popped (IP=clm_admsn_dt OP=clm_from_dt)'	;
-%let 	pop_age							= pop_18_age							;				
-%let	pop_age_label					= 'age popped for pop 18'				;
-%let	pop_los							= pop_18_los							;
+%let	popN							= 19;
+%let 	flag_popped             		= popped19 								;
+%let 	flag_popped_label				= 'indicator 19 popped'					;	
+%let	flag_popped_dt					= popped19_dt							;
+%let 	flag_popped_dt_label			= 'indicator 19 date patient popped (IP=clm_admsn_dt OP=clm_from_dt)'	;
+%let 	pop_age							= pop_19_age							;				
+%let	pop_age_label					= 'age popped for pop 19'				;
+%let	pop_los							= pop_19_los							;
 %let	pop_los_label					= 'length of stay when patient popped'	;
-%let	pop_year						= pop_18_year							;
-%let	pop_nch_clm_type_cd				= pop_18_nch_clm_type_cd				;
-%let  	pop_CLM_IP_ADMSN_TYPE_CD		= pop_18_CLM_IP_ADMSN_TYPE_CD			;
-%let	pop_clm_fac_type_cd				= pop_18_clm_fac_type_cd				;
-%let	pop_clm_src_ip_admsn_cd			= pop_18_clm_src_ip_admsn_cd			;
-%let	pop_ptnt_dschrg_stus_cd  		= pop_18_ptnt_dschrg_stus_cd			;
-%let	pop_admtg_dgns_cd				= pop_18_admtg_dgns_cd					;
-%let	pop_icd_dgns_cd1				= pop_18_icd_dgns_cd1					;
-%let	pop_icd_prcdr_cd1				= pop_18_icd_prcdr_cd1					;
-%let	pop_clm_drg_cd					= pop_18_clm_drg_cd						;
-%let	pop_hcpcs_cd					= pop_18_hcpcs_cd						;
-%let	pop_OP_PHYSN_SPCLTY_CD			= pop_18_OP_PHYSN_SPCLTY_CD				;
-%let	pop_nch_clm_type_cd				= pop_18_nch_clm_type_cd				;
-%let	pop_nch_clm_type_cd_label		= 'claim/facility type for pop 18' 		;
-%let	pop_CLM_IP_ADMSN_TYPE_CD_label	= 'inpatient admission type code for pop 18'	;
-%let  	pop_clm_fac_type_cd_label		= 'inpatient clm_fac_type_cd for pop 18';
-%let	pop_clm_src_ip_admsn_cd_label	= 'clm_src_ip_admsn_cd for pop 18'		;
-%let	pop_ptnt_dschrg_stus_cd_label	= 'discharge status code for pop 18'	;	
+%let	pop_year						= pop_19_year							;
+%let	pop_nch_clm_type_cd				= pop_19_nch_clm_type_cd				;
+%let  	pop_CLM_IP_ADMSN_TYPE_CD		= pop_19_CLM_IP_ADMSN_TYPE_CD			;
+%let	pop_clm_fac_type_cd				= pop_19_clm_fac_type_cd				;
+%let	pop_clm_src_ip_admsn_cd			= pop_19_clm_src_ip_admsn_cd			;
+%let	pop_ptnt_dschrg_stus_cd  		= pop_19_ptnt_dschrg_stus_cd			;
+%let	pop_admtg_dgns_cd				= pop_19_admtg_dgns_cd					;
+%let	pop_icd_dgns_cd1				= pop_19_icd_dgns_cd1					;
+%let	pop_icd_prcdr_cd1				= pop_19_icd_prcdr_cd1					;
+%let	pop_clm_drg_cd					= pop_19_clm_drg_cd						;
+%let	pop_hcpcs_cd					= pop_19_hcpcs_cd						;
+%let	pop_OP_PHYSN_SPCLTY_CD			= pop_19_OP_PHYSN_SPCLTY_CD				;
+%let	pop_nch_clm_type_cd				= pop_19_nch_clm_type_cd				;
+%let	pop_nch_clm_type_cd_label		= 'claim/facility type for pop 19' 		;
+%let	pop_CLM_IP_ADMSN_TYPE_CD_label	= 'inpatient admission type code for pop 19'	;
+%let  	pop_clm_fac_type_cd_label		= 'inpatient clm_fac_type_cd for pop 19';
+%let	pop_clm_src_ip_admsn_cd_label	= 'clm_src_ip_admsn_cd for pop 19'		;
+%let	pop_ptnt_dschrg_stus_cd_label	= 'discharge status code for pop 19'	;	
 /*** end of indicator specific variables ***/
 
 
@@ -244,7 +239,8 @@ do i=1 to &proc_cd_max;
 end;
 array dx(&diag_cd_max) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
 do j=1 to &diag_cd_max;
-	if substr(dx(j),1,&includ_dx10_n) in(&includ_dx10) then KEEP=1;
+	if substr(dx(j),1,&includ_dx10_substr4) in(&includ_dx10_code4) then KEEP=1
+	if substr(dx(j),1,&includ_dx10_substr5) in(&includ_dx10_code5) then KEEP=1;
 	if substr(dx(j),1,&exclud_dx10_n) in(&exclud_dx10) then DELETE=1;		
 end;
 if KEEP ne 1 then DELETE;
