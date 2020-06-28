@@ -2,4 +2,6 @@
 Code related to past and current Johns Hopkins Overuse Index Projects (PI: Segal)
 
 # Status by indicator for June 2020 final run
-## 18: Running as of 07jun2020
+## 18: VRDC run complete.  Aggregate data, pdf checks and log exported.  
+## 17: VRDC running as of 28jun2020.  Possible problem with eligibility resulting in too few eligible.
+
