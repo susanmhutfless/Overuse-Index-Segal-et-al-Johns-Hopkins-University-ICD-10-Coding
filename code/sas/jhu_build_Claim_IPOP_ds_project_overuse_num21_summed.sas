@@ -42,7 +42,7 @@
 					'0'			; *use for popped visit;
 %let includ_pr10_n = 7;		*this number should match number that needs to be substringed;
 
-%let includ_dx10   = 'Z1211';						*use for inclusion visit--djd of knee;
+%let includ_dx10   = 'Z1211';						*use for inclusion visit; *eliana: are you sure that you want this has an inclusion criteria for all patients????;
 %let includ_dx10_n = 5;		*this number should match number that needs to be substringed;
 %let includ_drg = '0';
 
@@ -159,6 +159,9 @@ select *
 from 
 &source
 where 
+		(	((&date-&clm_dob)/365.25) >=80	
+		 )
+		and
 	    substr(icd_dgns_cd1,1,&includ_dx10_n) in(&includ_dx10) or
 		substr(icd_dgns_cd2,1,&includ_dx10_n) in(&includ_dx10) or
 		substr(icd_dgns_cd3,1,&includ_dx10_n) in(&includ_dx10) or
@@ -242,7 +245,7 @@ do i=1 to &proc_cd_max;
 end;
 array dx(&diag_cd_max) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
 do j=1 to &diag_cd_max;
-	if substr(dx(j),1,&includ_dx10_n) in(&includ_dx10) then KEEP=1;
+	if substr(dx(j),1,&includ_dx10_n) in(&includ_dx10) then KEEP=1;		*eliana: this will keep only those with a dx for CRC screening--are you sure?;
 	if substr(dx(j),1,&exclud_dx10_n) in(&exclud_dx10) then DELETE=1;		
 end;
 if KEEP ne 1 then DELETE;
