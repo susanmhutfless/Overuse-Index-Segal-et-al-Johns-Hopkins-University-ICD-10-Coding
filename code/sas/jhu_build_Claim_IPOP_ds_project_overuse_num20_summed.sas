@@ -148,7 +148,11 @@ select *
 from 
 &source
 where 
-	    substr(icd_dgns_cd1,1,&includ_dx10_n) in(&includ_dx10) or
+		&gndr_cd = '2' /*this is female gender --change number as needed for other datasets*/
+  and 	(	((&date-&clm_dob)/365.25) >=80	
+		 )
+and
+	    (substr(icd_dgns_cd1,1,&includ_dx10_n) in(&includ_dx10) or
 		substr(icd_dgns_cd2,1,&includ_dx10_n) in(&includ_dx10) or
 		substr(icd_dgns_cd3,1,&includ_dx10_n) in(&includ_dx10) or
 		substr(icd_dgns_cd4,1,&includ_dx10_n) in(&includ_dx10) or
@@ -172,7 +176,7 @@ where
 		substr(icd_dgns_cd22,1,&includ_dx10_n) in(&includ_dx10) or
 		substr(icd_dgns_cd23,1,&includ_dx10_n) in(&includ_dx10) or
 		substr(icd_dgns_cd24,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd25,1,&includ_dx10_n) in(&includ_dx10)		;
+		substr(icd_dgns_cd25,1,&includ_dx10_n) in(&includ_dx10)		);
 quit;
 *link to ahrq ccn so in hospital within a health system;
 proc sql;
@@ -219,7 +223,7 @@ array rev{*} rev_cntr:;
 do r=1 to dim(rev);
 	if rev(r) in(&ED_rev_cntr) then elig_ed=1;	
 end;
-label elig_ed='eligible visit: revenue center indicated emergency department'; 
+label elig_ed='eligible visit: revenue center indicated emergency department'; 		*Eliana: do we need an exclusion criteria associated with ED for eligibility?;
 array hcpcs{*} hcpcs_cd:;
 do h=1 to dim(hcpcs);
 	if hcpcs(h) in(&exclud_hcpcs) then DELETE=1;	
@@ -231,7 +235,7 @@ do i=1 to &proc_cd_max;
 end;
 array dx(&diag_cd_max) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
 do j=1 to &diag_cd_max;
-	if substr(dx(j),1,&includ_dx10_n) in(&includ_dx10) then KEEP=1;
+	if substr(dx(j),1,&includ_dx10_n) in(&includ_dx10) then KEEP=1;				*Eliana: are you sure you want a dx inclusion criteria?;
 	if substr(dx(j),1,&exclud_dx10_n) in(&exclud_dx10) then DELETE=1;		
 end;
 if KEEP ne 1 then DELETE;
