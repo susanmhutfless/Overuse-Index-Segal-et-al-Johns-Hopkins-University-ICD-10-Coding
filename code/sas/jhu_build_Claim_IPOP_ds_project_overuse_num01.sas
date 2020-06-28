@@ -106,7 +106,7 @@ Perhaps failure of primary care
 %let  proc_cd_min        = 1                 	;
 %let  proc_cd_max        = 25                 	;
 
-%let  clm_beg_dt_in      = clm_admsn_dt   		;
+%let  clm_beg_dt_in      = clm_admsn_dt   		;	*_in stands for inpatient;
 %let  clm_end_dt_in      = NCH_BENE_DSCHRG_DT   ;
 %let  clm_from_dt         = clm_from_dt   		;
 %let  clm_thru_dt         = clm_thru_dt   		;
@@ -132,49 +132,7 @@ Perhaps failure of primary care
 %include "&vrdc_code./medicare_formats.sas";
 *%include "&vrdc_code./jhu_build_Health_Systems.sas";
 
-/** vars to keep or delete from the different data sources **/
 
-%let vars_to_keep_ip    = 	pop: &flag_popped_dt
-							&bene_id &clm_id &gndr_cd 
-							&clm_beg_dt_in &clm_end_dt_in &clm_dob  &ptnt_dschrg_stus_cd
-							&nch_clm_type_cd &CLM_IP_ADMSN_TYPE_CD &clm_fac_type_cd &clm_src_ip_admsn_cd 
-							&admtg_dgns_cd &clm_drg_cd  &hcpcs_cd
-							&diag_pfx.&diag_cd_min   
-							prvdr_num prvdr_state_cd OP_PHYSN_SPCLTY_CD
-							at_physn_npi op_physn_npi org_npi_num ot_physn_npi rndrng_physn_npi
-							compendium_hospital_id
-							/*RFR_PHYSN_NPI*/
-							bene_race_cd	bene_cnty_cd
-							bene_state_cd 	bene_mlg_cntct_zip_cd								;                         
-%let vars_to_keep_op	=	pop: &flag_popped_dt
-							&bene_id &clm_id &gndr_cd 
-							&clm_from_dt &clm_thru_dt &clm_dob  &ptnt_dschrg_stus_cd
-							&nch_clm_type_cd &clm_fac_type_cd  
-							&hcpcs_cd  
-							&diag_pfx.&diag_cd_min   
-							prvdr_num prvdr_state_cd OP_PHYSN_SPCLTY_CD /*RFR_PHYSN_NPI*/
-							at_physn_npi op_physn_npi org_npi_num ot_physn_npi rndrng_physn_npi
-							compendium_hospital_id
-							bene_race_cd	bene_cnty_cd
-							bene_state_cd 	bene_mlg_cntct_zip_cd								;
-%let vars_to_keep_car	=	pop: &flag_popped_dt
-							&bene_id &clm_id &gndr_cd 
-							&clm_from_dt &clm_thru_dt &clm_dob  
-							&nch_clm_type_cd   
-							&hcpcs_cd  
-							&diag_pfx.&diag_cd_min   
-							/*RFR_PHYSN_NPI*/ CPO_PRVDR_NUM CPO_ORG_NPI_NUM
-							CARR_CLM_BLG_NPI_NUM   ACO_ID_NUM
-							PRF_PHYSN_NPI ORG_NPI_NUM 
-							CARR_LINE_PRVDR_TYPE_CD TAX_NUM  
-							prvdr_state_cd PRVDR_SPCLTY PRTCPTNG_IND_CD
-							LINE_CMS_TYPE_SRVC_CD LINE_PLACE_OF_SRVC_CD
-							BETOS_CD 
-							bene_race_cd	bene_cnty_cd
-							bene_state_cd 	bene_mlg_cntct_zip_cd;
-%let vars_to_drop_ip    = 	;
-%let vars_to_drop_op    =  	;
-%let vars_to_drop_car    =  ;
 
 /*first identify everyone who died*/
 %macro line(abcd=, include_cohort=);
