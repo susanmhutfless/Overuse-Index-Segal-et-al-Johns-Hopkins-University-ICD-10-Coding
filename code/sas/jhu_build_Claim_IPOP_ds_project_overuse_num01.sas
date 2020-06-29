@@ -93,7 +93,7 @@ Perhaps failure of primary care
 %let  bene_id            = bene_id      		;
 %let  clm_id             = clm_id            	;
 
-%let  gndr_cd            = gndr_cd              ;
+%let  gndr_cd            = sex_ident_cd         ;
 
 %let  hcpcs_cd           = hcpcs_cd             ;
 %let  clm_drg_cd         = clm_drg_cd    		;
@@ -239,14 +239,14 @@ run;
 *link to eligibility--require the timing of inclusion dx and procedure match-up;
 proc sql;
 	create table &include_cohort (compress=yes) as
-select a.elig_dt, b.*
+select a.elig_dt, a.bene_death_dt, b.*
 from 
 	&permlib..pop_&popN._elig a,
 	include_cohort1g		  b
 where 
 	a.bene_id = b.bene_id 
 	and 
-	( (b.bene_death_dt-30)<= a.elig_dt <=b.bene_death_dt )	
+	( (a.bene_death_dt-30)<= b.&flag_popped_dt <=a.bene_death_dt )	
 ; 
 quit;
 %mend;
@@ -293,10 +293,9 @@ data pop_&popN._IN (keep=  pop: &flag_popped_dt elig: setting:
 							&bene_id &clm_id
 							&clm_beg_dt_in &clm_end_dt_in &clm_dob  &ptnt_dschrg_stus_cd
 							&nch_clm_type_cd &CLM_IP_ADMSN_TYPE_CD &clm_fac_type_cd &clm_src_ip_admsn_cd 
-							&admtg_dgns_cd &clm_drg_cd  rev_cntr1
+							&admtg_dgns_cd &clm_drg_cd  &rev_cntr
 							prvdr_num prvdr_state_cd OP_PHYSN_SPCLTY_CD 
 							at_physn_npi op_physn_npi org_npi_num ot_physn_npi rndrng_physn_npi
-							RFR_PHYSN_NPI
 							&gndr_cd bene_race_cd	bene_cnty_cd
 							bene_state_cd 	bene_mlg_cntct_zip_cd );
 set pop_&popN._IN_:;
