@@ -197,7 +197,7 @@ proc sort data=&permlib..pop_&popN._elig NODUPKEY; by /*elig_compendium_hospital
 
 *Start: identify who popped;
 /*** identify encounters in the 30 days prior to death ***/
-%macro claims_rev(source=, rev_cohort=, include_cohort=, ccn=);
+%macro claims_rev(date=, source=, rev_cohort=, include_cohort=, ccn=);
 /* identify hcpcs  */
 proc sql;
 create table include_cohort1a (compress=yes) as
