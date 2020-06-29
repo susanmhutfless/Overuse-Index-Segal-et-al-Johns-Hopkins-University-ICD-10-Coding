@@ -1052,7 +1052,8 @@ run;
 *title 'Popped Inpatient or Outpatient (No Carrier) For Analysis';
 title 'Popped Outpatient (No Inpatient, No Carrier) For Analysis';
 proc freq data=&permlib..pop_&popN._in_out; 
-table  	popped &flag_popped &pop_year pop_year pop_qtr setting_pop setting_elig; run;
+table  	popped &flag_popped /*&pop_year*/ pop_year pop_qtr pop_year*pop_qtr setting_pop setting_elig
+setting_pop_op /*setting_pop_ip elig_year*elig_qtr*/; run;
 proc means data=&permlib..pop_&popN._in_out n mean median min max; 
 var elig_age elig_los &pop_age &pop_los pop_age cc_sum; run;
 proc contents data=&permlib..pop_&popN._in_out; run;
@@ -1256,6 +1257,7 @@ quit;
 run;*/
 title 'Outpatient Popped';
 %poppedlook(in=pop_&popN._OUT);
+proc freq data=pop_&popN._OUT; table pop_year*pop_qtr; run;
 proc datasets lib=work nolist;
  delete setting: elig_ed elig_year elig_qtr pop_num icd: clm:
  		pop_icd: 
@@ -1266,8 +1268,9 @@ proc datasets lib=work nolist;
 		&ptnt_dschrg_stus_cd ;
 quit;
 run;
-title 'Elgible from outpatient encounter';
+title 'Eligible from outpatient encounter';
 %eliglook(in=pop_&popN._OUTinclude);
+proc freq data=pop_&popN._OUTinclude; table elig_year*elig_qtr; run;
 proc datasets lib=work nolist;
  delete setting: elig_ed elig_year elig_qtr pop_num icd: clm:
 		year qtr &gndr_cd  bene_race_cd 
