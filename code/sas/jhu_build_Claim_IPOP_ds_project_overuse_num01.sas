@@ -153,9 +153,10 @@ proc sort data=&include_cohort; by bene_id;
 %line(abcd=mbsf.mbsf_abcd_2018, include_cohort=vital_2018); 
 
 data pop_&popN._include (keep= &bene_id elig_dt elig: setting_elig:
-							pop_num  &gndr_cd &clm_dob bene_race_cd
+							pop_num  bene_death_dt VALID_DEATH_DT_SW bene_birth_dt 
+							bene_race_cd sex_ident_cd
 							/*elig_compendium_hospital_id--because no requirement to die in hospital, cant assign to compendium for eligibility*/ 
-							county_cd, state_code, zip_cd
+							county_cd state_code zip_cd
 						); *note that county, state, zip are different format from claims based pops;
 set vital:	; 
 by &bene_id	;
