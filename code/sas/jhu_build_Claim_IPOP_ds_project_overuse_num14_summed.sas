@@ -155,6 +155,10 @@ select *
 from 
 &source
 where 
+		&gndr_cd = '2' /*this is female gender --change number as needed for other datasets*/
+and 	(	((&date-&clm_dob)/365.25) >=80	
+		 )
+and
 	    substr(icd_dgns_cd1,1,&includ_dx10_n) in(&includ_dx10) or
 		substr(icd_dgns_cd2,1,&includ_dx10_n) in(&includ_dx10) or
 		substr(icd_dgns_cd3,1,&includ_dx10_n) in(&includ_dx10) or
