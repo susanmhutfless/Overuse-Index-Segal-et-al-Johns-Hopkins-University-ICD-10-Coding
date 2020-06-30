@@ -31,8 +31,8 @@
 					'0'			; *use for popped visit;
 %let includ_pr10_n = 7;		*this number should match number that needs to be substringed;
 
-%let includ_dx10   = 'Z1231';						*use for inclusion visit--djd of knee;
-%let includ_dx10_n = 5;		*this number should match number that needs to be substringed;
+%let includ_dx10   = '0';						*use for inclusion visit;
+%let includ_dx10_n = 7;		*this number should match number that needs to be substringed;
 %let includ_drg = '0';
 
 /** Exclusion criteria **/
@@ -235,7 +235,7 @@ do i=1 to &proc_cd_max;
 end;
 array dx(&diag_cd_max) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
 do j=1 to &diag_cd_max;
-	if substr(dx(j),1,&includ_dx10_n) in(&includ_dx10) then KEEP=1;				*Eliana: are you sure you want a dx inclusion criteria?;
+	if substr(dx(j),1,&includ_dx10_n) in(&includ_dx10) then KEEP=1;				
 	if substr(dx(j),1,&exclud_dx10_n) in(&exclud_dx10) then DELETE=1;		
 end;
 if KEEP ne 1 then DELETE;
