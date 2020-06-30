@@ -154,8 +154,12 @@ proc sql;
 	create table include_cohort1 (compress=yes) as
 select * 
 from 
-&source
+&source 
 where 
+		&gndr_cd = '2' 
+and 	(	((&date-&clm_dob)/365.25) >=65	
+		 )
+and
 	    substr(icd_dgns_cd1,1,&includ_dx10_n) in(&includ_dx10) or
 		substr(icd_dgns_cd2,1,&includ_dx10_n) in(&includ_dx10) or
 		substr(icd_dgns_cd3,1,&includ_dx10_n) in(&includ_dx10) or
