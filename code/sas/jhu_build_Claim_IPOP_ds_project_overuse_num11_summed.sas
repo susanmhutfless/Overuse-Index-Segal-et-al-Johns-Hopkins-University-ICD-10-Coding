@@ -48,7 +48,7 @@
 					'0UT9FZL'	'0UT9FZZ'		; *use for popped visit;
 %let includ_pr10_n = 7;		*this number should match number that needs to be substringed;
 
-%let includ_dx10   = '0';						*use for inclusion visit--djd of knee;
+%let includ_dx10   = '0';						*use for inclusion visit;
 %let includ_dx10_n = 7;		*this number should match number that needs to be substringed;
 %let includ_drg = '0';
 
@@ -165,6 +165,10 @@ select *
 from 
 &source
 where 
+		&gndr_cd = '2' /*this is female gender --change number as needed for other datasets*/
+and 	(	((&date-&clm_dob)/365.25) >=80	
+		 )
+and 
 	    substr(icd_dgns_cd1,1,&includ_dx10_n) in(&includ_dx10) or
 		substr(icd_dgns_cd2,1,&includ_dx10_n) in(&includ_dx10) or
 		substr(icd_dgns_cd3,1,&includ_dx10_n) in(&includ_dx10) or
