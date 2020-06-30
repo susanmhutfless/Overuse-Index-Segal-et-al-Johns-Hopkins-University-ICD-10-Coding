@@ -7,12 +7,6 @@
 /*** Indicator description ***/
 /* Description and codes from .xlsx file  "ICD-10 conversions_5_28_20" */
 
-***************Major modifications made per 27mar2020 phone call to 
-include at risk population only and sum counts**************************************
-We need to identify the at-risk population, calculate their agecat/comorbid/female and sum 
-by hospital qtr year
-then evaluate N of the eligible that popped;
-
 *NOTE: Defining an array with 0 elements in log is acceptable if N identified is 0;
 
 /* Indicator 10 */
@@ -49,10 +43,10 @@ then evaluate N of the eligible that popped;
 %let exclud_hcpcs= '3272F' '3273F'; 					*use for inclusion visit & popped visit;
 
 %let EXclud_pr10 =	'0''				; *use for inclusion visit & popped visit;
-%let EXclud_pr10_n = 0;	
+%let EXclud_pr10_n = 7;	
 
 %let EXCLUD_dx10   = '0'; 						* use for inclusion visit & popped visit;
-%let exclud_dx10_n = 0; 
+%let exclud_dx10_n = 7; 
 
 /** Label pop specific variables  **/
 %global popN;
@@ -158,6 +152,10 @@ select *
 from 
 &source
 where 
+		&gndr_cd = '1' /*this is female gender --change number as needed for other datasets*/
+and 	(	((&date-&clm_dob)/365.25) >=80	
+		 )
+and
 	    substr(icd_dgns_cd1,1,&includ_dx10_n) in(&includ_dx10) or
 		substr(icd_dgns_cd2,1,&includ_dx10_n) in(&includ_dx10) or
 		substr(icd_dgns_cd3,1,&includ_dx10_n) in(&includ_dx10) or
