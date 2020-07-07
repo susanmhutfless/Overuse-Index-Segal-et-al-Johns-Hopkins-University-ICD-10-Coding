@@ -33,23 +33,23 @@
 
 
 %let includ_pr10 =
-					'0'			; *use for popped visit;
+					'0'			; 
 %let includ_pr10_n = 7;		*this number should match number that needs to be substringed;
 
-%let includ_dx10_code4   = 'Z124';						*use for inclusion visit;
+%let includ_dx10_code4   = 'Z124';						
 %let includ_dx10_substr4 = 4;		*this number should match number that needs to be substringed;
-%let includ_dx10_code5   = 'Z1151';						*use for inclusion visit;
+%let includ_dx10_code5   = 'Z1151';						
 %let includ_dx10_substr5 = 5;		*this number should match number that needs to be substringed;
 
 %let includ_drg = '0';
 
 /** Exclusion criteria **/
-%let exclud_hcpcs= '0'; 					*use for inclusion visit & popped visit;
+%let exclud_hcpcs= '0'; 					
 
-%let EXclud_pr10 =	'0'				; *use for inclusion visit & popped visit;
+%let EXclud_pr10 =	'0'				; 
 %let EXclud_pr10_n = 7;	
 
-%let EXCLUD_dx10   = 'C53' 'N87'; 						* use for inclusion visit & popped visit;
+%let EXCLUD_dx10   = 'C53' 'N87'; 						
 %let exclud_dx10_n = 3; 
 
 /** Label pop specific variables  **/
