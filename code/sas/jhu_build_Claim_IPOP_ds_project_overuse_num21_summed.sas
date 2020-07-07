@@ -39,20 +39,20 @@
 
 
 %let includ_pr10 =
-					'0'			; *use for popped visit;
+					'0'			; 
 %let includ_pr10_n = 7;		*this number should match number that needs to be substringed;
 
-%let includ_dx10   = 'Z1211';						*use for inclusion visit; *eliana: are you sure that you want this has an inclusion criteria for all patients????;
+%let includ_dx10   = 'Z1211';						*use for popped visit; 
 %let includ_dx10_n = 5;		*this number should match number that needs to be substringed;
 %let includ_drg = '0';
 
 /** Exclusion criteria **/
-%let exclud_hcpcs= '0'; 					*use for inclusion visit & popped visit;
+%let exclud_hcpcs= '0'; 					
 
-%let EXclud_pr10 =	'0'				; *use for inclusion visit & popped visit;
+%let EXclud_pr10 =	'0'				; 
 %let EXclud_pr10_n = 7;	
 
-%let EXCLUD_dx10   = '0'; 						* use for inclusion visit & popped visit;
+%let EXCLUD_dx10   = '0'; 						
 %let exclud_dx10_n = 7; 
 
 /** Label pop specific variables  **/
@@ -160,33 +160,7 @@ from
 &source
 where 
 		(	((&date-&clm_dob)/365.25) >=80	
-		 )
-		and
-	    substr(icd_dgns_cd1,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd2,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd3,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd4,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd5,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd6,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd7,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd8,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd9,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd10,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd11,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd12,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd13,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd14,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd15,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd16,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd17,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd18,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd19,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd20,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd21,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd22,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd23,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd24,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd25,1,&includ_dx10_n) in(&includ_dx10)		;
+		 )	;
 quit;
 *link to ahrq ccn so in hospital within a health system;
 proc sql;
@@ -245,11 +219,9 @@ do i=1 to &proc_cd_max;
 end;
 array dx(&diag_cd_max) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
 do j=1 to &diag_cd_max;
-	if substr(dx(j),1,&includ_dx10_n) in(&includ_dx10) then KEEP=1;		*eliana: this will keep only those with a dx for CRC screening--are you sure?;
+	if substr(dx(j),1,&includ_dx10_n) in(&includ_dx10) then KEEP=1;		
 	if substr(dx(j),1,&exclud_dx10_n) in(&exclud_dx10) then DELETE=1;		
 end;
-if KEEP ne 1 then DELETE;
-if DELETE = 1 then delete;
 elig_dt=&date;
 elig_age=(&date-&clm_dob)/365.25; label elig_age='age at eligibility';
 if &clm_end_dt_in ne . then do;
@@ -560,40 +532,40 @@ where
 	b.prvdr_num = a.&ccn
 ;
 quit;
-*pull icd procedure criteria from claims*;
+*pull icd diagnosis criteria from claims*;
 proc sql;
 	create table include_cohort1d (compress=yes) as
 select *
 from 
 	&source
 where
-		icd_prcdr_cd1 in(&includ_pr10) or
-		icd_prcdr_cd2 in(&includ_pr10) or
-		icd_prcdr_cd3 in(&includ_pr10) or
-		icd_prcdr_cd4 in(&includ_pr10) or
-		icd_prcdr_cd5 in(&includ_pr10) or
-		icd_prcdr_cd6 in(&includ_pr10) or
-		icd_prcdr_cd7 in(&includ_pr10) or
-		icd_prcdr_cd8 in(&includ_pr10) or
-		icd_prcdr_cd9 in(&includ_pr10) or
-		icd_prcdr_cd10 in(&includ_pr10) or
-		icd_prcdr_cd11 in(&includ_pr10) or
-		icd_prcdr_cd12 in(&includ_pr10) or
-		icd_prcdr_cd13 in(&includ_pr10) or
-		icd_prcdr_cd14 in(&includ_pr10) or
-		icd_prcdr_cd15 in(&includ_pr10) or
-		icd_prcdr_cd16 in(&includ_pr10) or
-		icd_prcdr_cd17 in(&includ_pr10) or
-		icd_prcdr_cd18 in(&includ_pr10) or
-		icd_prcdr_cd19 in(&includ_pr10) or
-		icd_prcdr_cd20 in(&includ_pr10) or
-		icd_prcdr_cd21 in(&includ_pr10) or
-		icd_prcdr_cd22 in(&includ_pr10) or
-		icd_prcdr_cd23 in(&includ_pr10) or
-		icd_prcdr_cd24 in(&includ_pr10) or
-		icd_prcdr_cd25 in(&includ_pr10)		;
+		icd_dgns_cd1 in(&includ_dx10) or
+		icd_dgns_cd2 in(&includ_dx10) or
+		icd_dgns_cd3 in(&includ_dx10) or
+		icd_dgns_cd4 in(&includ_dx10) or
+		icd_dgns_cd5 in(&includ_dx10) or
+		icd_dgns_cd6 in(&includ_dx10) or
+		icd_dgns_cd7 in(&includ_dx10) or
+		icd_dgns_cd8 in(&includ_dx10) or
+		icd_dgns_cd9 in(&includ_dx10) or
+		icd_dgns_cd10 in(&includ_dx10) or
+		icd_dgns_cd11 in(&includ_dx10) or
+		icd_dgns_cd12 in(&includ_dx10) or
+		icd_dgns_cd13 in(&includ_dx10) or
+		icd_dgns_cd14 in(&includ_dx10) or
+		icd_dgns_cd15 in(&includ_dx10) or
+		icd_dgns_cd16 in(&includ_dx10) or
+		icd_dgns_cd17 in(&includ_dx10) or
+		icd_dgns_cd18 in(&includ_dx10) or
+		icd_dgns_cd19 in(&includ_dx10) or
+		icd_dgns_cd20 in(&includ_dx10) or
+		icd_dgns_cd21 in(&includ_dx10) or
+		icd_dgns_cd22 in(&includ_dx10) or
+		icd_dgns_cd23 in(&includ_dx10) or
+		icd_dgns_cd24 in(&includ_dx10) or
+		icd_dgns_cd25 in(&includ_dx10)		;
 quit;
-*link icd prcdr identified to revenue center*;
+*link icd dx identified to revenue center*;
 proc sql;
 	create table include_cohort1e (compress=yes) as
 select a.&rev_cntr, b.*
