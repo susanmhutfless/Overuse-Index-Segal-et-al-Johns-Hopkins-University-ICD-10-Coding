@@ -20,6 +20,7 @@
 		includ_dx10  includ_dx10_n 
 		includ_dx_code4 includ_dx10_substr4 
 		includ_dx_code5 includ_dx10_substr5 
+		includ_dx_code6 includ_dx10_substr6 
 		EXCLUD_dx10  exclud_dx10_n;
 
 /*inclusion criteria*/
@@ -34,12 +35,14 @@
 
 %let includ_pr10 =
 					'0'			; 
-%let includ_pr10_n = 7;		*this number should match number that needs to be substringed;
+%let includ_pr10_n = 7;		
 
-%let includ_dx10_code4   = 'Z124';						
+%let includ_dx10_code4   = 'Z124';		*use for popped visit;				
 %let includ_dx10_substr4 = 4;		*this number should match number that needs to be substringed;
-%let includ_dx10_code5   = 'Z1151';						
+%let includ_dx10_code5   = 'Z1272' 'Z1279' 'Z1151' 'Z1289' 'Z1151' ;		*use for popped visit;				
 %let includ_dx10_substr5 = 5;		*this number should match number that needs to be substringed;
+%let includ_dx10_code6   = 'Z01411' 'Z01419' ;		*use for popped visit;				
+%let includ_dx10_substr6 = 6;		*this number should match number that needs to be substringed;
 
 %let includ_drg = '0';
 
@@ -49,8 +52,8 @@
 %let EXclud_pr10 =	'0'				; 
 %let EXclud_pr10_n = 7;	
 
-%let EXCLUD_dx10   = 'C53' 'N87'; 						
-%let exclud_dx10_n = 3; 
+%let EXCLUD_dx10   = '0'; 						
+%let exclud_dx10_n = 7; 
 
 /** Label pop specific variables  **/
 %global popN;
@@ -158,33 +161,7 @@ from
 where 
 		&gndr_cd = '2' 
 and 	(	((&date-&clm_dob)/365.25) >=65	
-		 )
-and
-	    substr(icd_dgns_cd1,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd2,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd3,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd4,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd5,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd6,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd7,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd8,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd9,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd10,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd11,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd12,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd13,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd14,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd15,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd16,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd17,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd18,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd19,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd20,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd21,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd22,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd23,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd24,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd25,1,&includ_dx10_n) in(&includ_dx10)		;
+		 )		;
 quit;
 *link to ahrq ccn so in hospital within a health system;
 proc sql;
@@ -244,11 +221,10 @@ end;
 array dx(&diag_cd_max) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
 do j=1 to &diag_cd_max;
 	if substr(dx(j),1,&includ_dx10_substr4) in(&includ_dx10_code4) then KEEP=1
-	if substr(dx(j),1,&includ_dx10_substr5) in(&includ_dx10_code5) then KEEP=1;
+	if substr(dx(j),1,&includ_dx10_substr5) in(&includ_dx10_code5) then KEEP=1
+	if substr(dx(j),1,&includ_dx10_substr6) in(&includ_dx10_code6) then KEEP=1;
 	if substr(dx(j),1,&exclud_dx10_n) in(&exclud_dx10) then DELETE=1;		
 end;
-if KEEP ne 1 then DELETE;
-if DELETE = 1 then delete;
 elig_dt=&date;
 elig_age=(&date-&clm_dob)/365.25; label elig_age='age at eligibility';
 if &clm_end_dt_in ne . then do;
@@ -566,31 +542,31 @@ select *
 from 
 	&source
 where
-		icd_prcdr_cd1 in(&includ_pr10) or
-		icd_prcdr_cd2 in(&includ_pr10) or
-		icd_prcdr_cd3 in(&includ_pr10) or
-		icd_prcdr_cd4 in(&includ_pr10) or
-		icd_prcdr_cd5 in(&includ_pr10) or
-		icd_prcdr_cd6 in(&includ_pr10) or
-		icd_prcdr_cd7 in(&includ_pr10) or
-		icd_prcdr_cd8 in(&includ_pr10) or
-		icd_prcdr_cd9 in(&includ_pr10) or
-		icd_prcdr_cd10 in(&includ_pr10) or
-		icd_prcdr_cd11 in(&includ_pr10) or
-		icd_prcdr_cd12 in(&includ_pr10) or
-		icd_prcdr_cd13 in(&includ_pr10) or
-		icd_prcdr_cd14 in(&includ_pr10) or
-		icd_prcdr_cd15 in(&includ_pr10) or
-		icd_prcdr_cd16 in(&includ_pr10) or
-		icd_prcdr_cd17 in(&includ_pr10) or
-		icd_prcdr_cd18 in(&includ_pr10) or
-		icd_prcdr_cd19 in(&includ_pr10) or
-		icd_prcdr_cd20 in(&includ_pr10) or
-		icd_prcdr_cd21 in(&includ_pr10) or
-		icd_prcdr_cd22 in(&includ_pr10) or
-		icd_prcdr_cd23 in(&includ_pr10) or
-		icd_prcdr_cd24 in(&includ_pr10) or
-		icd_prcdr_cd25 in(&includ_pr10)		;
+		icd_dgns_cd1 in(&includ_dx10) or
+		icd_dgns_cd2 in(&includ_dx10) or
+		icd_dgns_cd3 in(&includ_dx10) or
+		icd_dgns_cd4 in(&includ_dx10) or
+		icd_dgns_cd5 in(&includ_dx10) or
+		icd_dgns_cd6 in(&includ_dx10) or
+		icd_dgns_cd7 in(&includ_dx10) or
+		icd_dgns_cd8 in(&includ_dx10) or
+		icd_dgns_cd9 in(&includ_dx10) or
+		icd_dgns_cd10 in(&includ_dx10) or
+		icd_dgns_cd11 in(&includ_dx10) or
+		icd_dgns_cd12 in(&includ_dx10) or
+		icd_dgns_cd13 in(&includ_dx10) or
+		icd_dgns_cd14 in(&includ_dx10) or
+		icd_dgns_cd15 in(&includ_dx10) or
+		icd_dgns_cd16 in(&includ_dx10) or
+		icd_dgns_cd17 in(&includ_dx10) or
+		icd_dgns_cd18 in(&includ_dx10) or
+		icd_dgns_cd19 in(&includ_dx10) or
+		icd_dgns_cd20 in(&includ_dx10) or
+		icd_dgns_cd21 in(&includ_dx10) or
+		icd_dgns_cd22 in(&includ_dx10) or
+		icd_dgns_cd23 in(&includ_dx10) or
+		icd_dgns_cd24 in(&includ_dx10) or
+		icd_dgns_cd25 in(&includ_dx10)		;	
 quit;
 *link icd prcdr identified to revenue center*;
 proc sql;
@@ -626,7 +602,7 @@ where
 	b.prvdr_num = a.&ccn
 ;
 quit;
-*merge HCPCS and PRCDR identified pops together;
+*merge HCPCS and DX identified pops together;
 Data include_cohort1g; 
 set include_cohort1c include_cohort1f; 
 array rev{*} rev_cntr:;
@@ -643,8 +619,11 @@ do i=1 to &proc_cd_max;
 	if substr(pr(i),1,&includ_pr10_n) in(&includ_pr10) then KEEP=1;
 end;
 array dx(&diag_cd_max) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
-do j=1 to &diag_cd_max;
-	if substr(dx(j),1,&exclud_dx10_n) in(&exclud_dx10) then DELETE=1;	
+do j=1 to &diag_cd_max;	
+	if substr(dx(j),1,&includ_dx10_substr4) in(&includ_dx10_code4) then KEEP=1
+	if substr(dx(j),1,&includ_dx10_substr5) in(&includ_dx10_code5) then KEEP=1
+	if substr(dx(j),1,&includ_dx10_substr6) in(&includ_dx10_code6) then KEEP=1;
+	if substr(dx(j),1,&exclud_dx10_n) in(&exclud_dx10) then DELETE=1;
 end;
 if hcpcs_cd in(&includ_hcpcs) then KEEP=1;
 if hcpcs_cd in(&exclud_hcpcs) then DELETE=1;
