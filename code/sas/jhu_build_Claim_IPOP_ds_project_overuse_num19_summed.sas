@@ -220,8 +220,8 @@ do i=1 to &proc_cd_max;
 end;
 array dx(&diag_cd_max) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
 do j=1 to &diag_cd_max;
-	if substr(dx(j),1,&includ_dx10_substr4) in(&includ_dx10_code4) then KEEP=1
-	if substr(dx(j),1,&includ_dx10_substr5) in(&includ_dx10_code5) then KEEP=1
+	if substr(dx(j),1,&includ_dx10_substr4) in(&includ_dx10_code4) then KEEP=1;
+	if substr(dx(j),1,&includ_dx10_substr5) in(&includ_dx10_code5) then KEEP=1;
 	if substr(dx(j),1,&includ_dx10_substr6) in(&includ_dx10_code6) then KEEP=1;
 	if substr(dx(j),1,&exclud_dx10_n) in(&exclud_dx10) then DELETE=1;		
 end;
@@ -620,8 +620,8 @@ do i=1 to &proc_cd_max;
 end;
 array dx(&diag_cd_max) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
 do j=1 to &diag_cd_max;	
-	if substr(dx(j),1,&includ_dx10_substr4) in(&includ_dx10_code4) then KEEP=1
-	if substr(dx(j),1,&includ_dx10_substr5) in(&includ_dx10_code5) then KEEP=1
+	if substr(dx(j),1,&includ_dx10_substr4) in(&includ_dx10_code4) then KEEP=1;
+	if substr(dx(j),1,&includ_dx10_substr5) in(&includ_dx10_code5) then KEEP=1;
 	if substr(dx(j),1,&includ_dx10_substr6) in(&includ_dx10_code6) then KEEP=1;
 	if substr(dx(j),1,&exclud_dx10_n) in(&exclud_dx10) then DELETE=1;
 end;
