@@ -464,7 +464,7 @@ create table &include_cohort (compress=yes) as
 select  
 a.bene_id, a.elig_dt, b.*
 from 
-&permlib..pop_&popN._in_out a,
+pop_&popN._in_out_popped a,
 &abcd b
 where a.bene_id = b.bene_id and a.pop_year = b.BENE_ENROLLMT_REF_YR;
 quit;
@@ -578,7 +578,7 @@ run;
 
 data &permlib..pop_&popN._in_out;
 merge 
-cc (in=a) &permlib..pop_&popN._in_out (in=b);
+cc (in=a) pop_&popN._in_out_popped (in=b);
 by bene_id elig_dt;
 if a and b;
 run; 
