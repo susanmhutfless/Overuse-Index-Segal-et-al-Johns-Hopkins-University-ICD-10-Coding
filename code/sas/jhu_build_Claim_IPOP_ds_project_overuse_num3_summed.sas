@@ -15,6 +15,7 @@ then evaluate N of the eligible that popped;
 
 /* Indicator 3 */
 
+
 /*** start of indicator specific variables ***/
 
 /*global variables for inclusion and exclusion*/
@@ -30,15 +31,15 @@ then evaluate N of the eligible that popped;
 %let includ_pr10 =
 					'BW03ZZZ' 			;
 
-%let includ_dx10   = '0';
-%let includ_dx10_n = 0	;		*this number should match number that needs to be substringed;
-%let includ_drg = '0'	;
+%let includ_dx10   = 'Z0181';
+%let includ_dx10_n = 5	;		*this number should match number that needs to be substringed;
+%let includ_drg    = '0'	;
 
 /** Exclusion criteria **/
 %let exclud_hcpcs= '0';
 
 %let EXclud_pr10 =	'0'				;
-%let EXclud_pr10_n = 0	;	
+%let EXclud_pr10_n = 7	;	
 
 %let EXCLUD_dx10   = 'J00' 'J01' 'J02' 'J03' 'J04' 'J05' 'J06' 
 					'J09' 'J10' 'J11' 'J12' 'J13' 'J14' 'J15' 
@@ -237,7 +238,8 @@ do i=1 to &proc_cd_max;
 end;
 array dx(&diag_cd_max) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
 do j=1 to &diag_cd_max;
-	if substr(dx(j),1,&includ_dx10_n) in(&includ_dx10) then KEEP=1;	
+	if substr(dx(j),1,&includ_dx10_n) in(&includ_dx10) then KEEP=1;
+	***need exclusionary diagnosis here;****susie eliana;
 end;
 if KEEP ne 1 then DELETE;
 if DELETE = 1 then delete;
@@ -635,7 +637,8 @@ do i=1 to &proc_cd_max;
 end;
 array dx(&diag_cd_max) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
 do j=1 to &diag_cd_max;
-	if substr(dx(j),1,&includ_dx10_n) in(&includ_dx10) then KEEP=1;	
+	if substr(dx(j),1,&includ_dx10_n) in(&includ_dx10) then KEEP=1;	*NOOOOOOOO!!!!!!!!!! SUSIE ELIANA;
+	****need exclusionary dx		susie;
 end;
 if KEEP ne 1 then DELETE;
 if DELETE = 1 then delete;
@@ -1012,6 +1015,7 @@ by bene_id elig_dt;
 if a and b;
 run; 
 
+
 *Start summary checks;
 /**Look at freq, means, contents of final 1 record per person dataset **/
 title 'Popped Inpatient or Outpatient (No Carrier) For Analysis';
@@ -1320,63 +1324,4 @@ where a.pop_compendium_hospital_id = b.compendium_hospital_id
 and b.health_sys_id2016 ne ' ';
 quit;
 
-*proc bglimm not available;
-*https://documentation.sas.com/?docsetId=statug&docsetTarget=statug_bglimm_gettingstarted01.htm&docsetVersion=15.1&locale=en;
-*used glimmix;
-*https://www.lexjansen.com/nesug/nesug05/an/an4.pdf;
-*https://support.sas.com/documentation/cdl/en/statug/63347/HTML/default/viewer.htm#statug_glimmix_a0000001419.htm;
-title 'Model without pop size restriction';
-proc glimmix data=pop_&popN._in_out_anal3;
-	class health_sys_id2016 pop_compendium_hospital_id;
-*x = employment / 10;
-*logn = log(expCount);
-*SMR_pred = 100*exp(_zgamma_ + _xbeta_);
-model popped = health_sys_id2016 pop_year pop_qtr elig_age_mean cc_sum_mean / dist=poisson offset=n s ddfm=none;
-random pop_compendium_hospital_id;
-id health_sys_id2016 pop_compendium_hospital_id pop_year pop_qtr;
-output out=glimmixout;
-run;
-
-proc glimmix data=pop_&popN._in_out_anal3;
-class health_sys_id2016 pop_compendium_hospital_id;
-model popped = health_sys_id2016 pop_year pop_qtr elig_age_mean cc_sum_mean / ddfm=kr dist=Poisson;
-random _residual_ / group=health_sys_id2016 sub=pop_compendium_hospital_id;
-*lsmeans A / diff;
-run;
-
-proc glimmix data=pop_&popN._in_out_anal3;
-   class health_sys_id2016 pop_compendium_hospital_id;
-   model popped/N = health_sys_id2016 pop_year pop_qtr elig_age_mean cc_sum_mean/ link=log s dist=poisson;
-   random int / subject = pop_compendium_hospital_id;
-run;
-*limit to at least 11 events (=popped) in a quarter;
-title 'Model with pop size restriction (only those with n>=11 popped in quarter contribute)';
-proc glimmix data=pop_&popN._in_out_anal3;
-where popped>=11;
-class health_sys_id2016 pop_compendium_hospital_id;
-model popped = health_sys_id2016 pop_year pop_qtr elig_age_mean cc_sum_mean / ddfm=kr dist=Poisson;
-random _residual_ / group=health_sys_id2016 sub=pop_compendium_hospital_id;
-*lsmeans A / diff;
-run;
-
-
-/*look at 1 record per person logistic regression--would need to merge back to health system to run;
-proc logistic data= pop_&popN._in_out_anal; 
-class elig_gndr_cd(ref='2') elig_age_cat(ref='6070') cc_sum_cat(ref='0') pop_year(ref='2016') pop_qtr(ref='1')
-health_sys_id2016 pop_compendium_hospital_id/param=ref;
- model popped (event='1')= elig_age_cat elig_gndr_cd cc_sum_cat pop_year pop_qtr  health_sys_id2016;
-strata pop_compendium_hospital_id;
-run;*/
-
-*checks for missingness in case no convergence or log says missing data;
-title 'checks for missingness in case no convergence or log says missing data';
-proc means nmiss data=pop_&popN._in_out_anal3; run;
-proc freq data=pop_&popN._in_out_anal3; table pop_year pop_qtr; run;
-title 'how many had pops <=12 for the hosp/year/qtr';
-proc freq data=pop_&popN._in_out_anal3; where popped<=12; table popped; run;
-title 'none should print for missing hospital id or hosp system id--if they do there is a problem';
-proc print data=pop_&popN._in_out_anal3; where pop_compendium_hospital_id=' ';
-	var pop_compendium_hospital_id health_sys_id2016; run;
-proc print data=pop_&popN._in_out_anal3; where health_sys_id2016=' '; 
-	var pop_compendium_hospital_id health_sys_id2016;run;
 

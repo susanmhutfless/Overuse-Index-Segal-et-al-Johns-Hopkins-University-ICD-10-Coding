@@ -252,7 +252,7 @@ if DELETE = 1 then delete;
 elig_dt=&date;
 elig_age=(&date-&clm_dob)/365.25; label elig_age='age at eligibility';
 if &clm_end_dt_in ne . then do;
-	elig_los=&clm_end_dt_in-&date;	label elig_los ='length of stay at eligbility';
+	elig_los=&clm_end_dt_in-&date;	label elig_los ='length of stay at eligbility (inpatient only)';
 end;
 if elig_los =. then do;
 	elig_los=&clm_thru_dt-&date;	label elig_los ='length of stay at eligbility';
