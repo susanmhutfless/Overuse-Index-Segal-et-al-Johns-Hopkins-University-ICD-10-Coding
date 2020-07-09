@@ -535,38 +535,38 @@ where
 	b.prvdr_num = a.&ccn
 ;
 quit;
-*pull icd diagnosis criteria from claims*;
+*pull icd procedure criteria from claims--if no procedure requirement do not change*;
 proc sql;
 	create table include_cohort1d (compress=yes) as
 select *
 from 
 	&source
 where
-		substr(icd_dgns_cd1,1,&includ_dx10_substr4) in(&includ_dx10_code4) or /*eliana like this*/
-		icd_dgns_cd2 in(&includ_dx10) or
-		icd_dgns_cd3 in(&includ_dx10) or
-		icd_dgns_cd4 in(&includ_dx10) or
-		icd_dgns_cd5 in(&includ_dx10) or
-		icd_dgns_cd6 in(&includ_dx10) or
-		icd_dgns_cd7 in(&includ_dx10) or
-		icd_dgns_cd8 in(&includ_dx10) or
-		icd_dgns_cd9 in(&includ_dx10) or
-		icd_dgns_cd10 in(&includ_dx10) or
-		icd_dgns_cd11 in(&includ_dx10) or
-		icd_dgns_cd12 in(&includ_dx10) or
-		icd_dgns_cd13 in(&includ_dx10) or
-		icd_dgns_cd14 in(&includ_dx10) or
-		icd_dgns_cd15 in(&includ_dx10) or
-		icd_dgns_cd16 in(&includ_dx10) or
-		icd_dgns_cd17 in(&includ_dx10) or
-		icd_dgns_cd18 in(&includ_dx10) or
-		icd_dgns_cd19 in(&includ_dx10) or
-		icd_dgns_cd20 in(&includ_dx10) or
-		icd_dgns_cd21 in(&includ_dx10) or
-		icd_dgns_cd22 in(&includ_dx10) or
-		icd_dgns_cd23 in(&includ_dx10) or
-		icd_dgns_cd24 in(&includ_dx10) or
-		icd_dgns_cd25 in(&includ_dx10)		;	
+		icd_prcdr_cd1 in(&includ_pr10) or
+		icd_prcdr_cd2 in(&includ_pr10) or
+		icd_prcdr_cd3 in(&includ_pr10) or
+		icd_prcdr_cd4 in(&includ_pr10) or
+		icd_prcdr_cd5 in(&includ_pr10) or
+		icd_prcdr_cd6 in(&includ_pr10) or
+		icd_prcdr_cd7 in(&includ_pr10) or
+		icd_prcdr_cd8 in(&includ_pr10) or
+		icd_prcdr_cd9 in(&includ_pr10) or
+		icd_prcdr_cd10 in(&includ_pr10) or
+		icd_prcdr_cd11 in(&includ_pr10) or
+		icd_prcdr_cd12 in(&includ_pr10) or
+		icd_prcdr_cd13 in(&includ_pr10) or
+		icd_prcdr_cd14 in(&includ_pr10) or
+		icd_prcdr_cd15 in(&includ_pr10) or
+		icd_prcdr_cd16 in(&includ_pr10) or
+		icd_prcdr_cd17 in(&includ_pr10) or
+		icd_prcdr_cd18 in(&includ_pr10) or
+		icd_prcdr_cd19 in(&includ_pr10) or
+		icd_prcdr_cd20 in(&includ_pr10) or
+		icd_prcdr_cd21 in(&includ_pr10) or
+		icd_prcdr_cd22 in(&includ_pr10) or
+		icd_prcdr_cd23 in(&includ_pr10) or
+		icd_prcdr_cd24 in(&includ_pr10) or
+		icd_prcdr_cd25 in(&includ_pr10)		;	
 quit;
 *link icd prcdr identified to revenue center*;
 proc sql;
@@ -604,7 +604,7 @@ where
 quit;
 *merge HCPCS and DX identified pops together;
 Data include_cohort1g; 
-set include_cohort1c include_cohort1f; 
+set include_cohort1c;* include_cohort1f; 
 array rev{*} rev_cntr:;
 do r=1 to dim(rev);
 	if rev(r) in(&ED_rev_cntr) then pop_ed=1;	
@@ -616,18 +616,18 @@ label pop_ed='popped: revenue center indicated emergency department';
 array pr(&proc_cd_max) &proc_pfx.&proc_cd_min - &proc_pfx.&proc_cd_max;
 do i=1 to &proc_cd_max;
 	if substr(pr(i),1,&exclud_pr10_n) in(&EXclud_pr10) then DELETE=1;	
-	if substr(pr(i),1,&includ_pr10_n) in(&includ_pr10) then KEEP=1;
+	*if substr(pr(i),1,&includ_pr10_n) in(&includ_pr10) then KEEP=1;
 end;
 array dx(&diag_cd_max) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
 do j=1 to &diag_cd_max;	
-	if substr(dx(j),1,&includ_dx10_substr4) in(&includ_dx10_code4) then KEEP=1;
-	if substr(dx(j),1,&includ_dx10_substr5) in(&includ_dx10_code5) then KEEP=1;
-	if substr(dx(j),1,&includ_dx10_substr6) in(&includ_dx10_code6) then KEEP=1;
+	if substr(dx(j),1,&includ_dx10_substr4) in(&includ_dx10_code4) then KEEPdx=1;
+	if substr(dx(j),1,&includ_dx10_substr5) in(&includ_dx10_code5) then KEEPdx=1;
+	if substr(dx(j),1,&includ_dx10_substr6) in(&includ_dx10_code6) then KEEPdx=1;
 	if substr(dx(j),1,&exclud_dx10_n) in(&exclud_dx10) then DELETE=1;
 end;
-if hcpcs_cd in(&includ_hcpcs) then KEEP=1;
+if hcpcs_cd in(&includ_hcpcs) then KEEPhcpcs=1;
 if hcpcs_cd in(&exclud_hcpcs) then DELETE=1;
-if KEEP ne 1 then DELETE;
+if KEEPhcpcs ne 1 AND KEEPdx ne 1 then DELETE;		*susie---watch out for this in output--logic needs a check;
 if DELETE = 1 then delete;
 *if clm_drg_cd notin(&includ_drg) then delete;
 if &flag_popped ne 1 then delete;
