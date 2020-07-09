@@ -535,14 +535,14 @@ where
 	b.prvdr_num = a.&ccn
 ;
 quit;
-*pull icd procedure criteria from claims*;
+*pull icd diagnosis criteria from claims*;
 proc sql;
 	create table include_cohort1d (compress=yes) as
 select *
 from 
 	&source
 where
-		icd_dgns_cd1 in(&includ_dx10) or
+		substr(icd_dgns_cd1,1,&includ_dx10_substr4) in(&includ_dx10_code4) or /*eliana like this*/
 		icd_dgns_cd2 in(&includ_dx10) or
 		icd_dgns_cd3 in(&includ_dx10) or
 		icd_dgns_cd4 in(&includ_dx10) or
