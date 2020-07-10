@@ -24,7 +24,9 @@ then evaluate N of the eligible that popped;
 %global includ_hcpcs 
 		includ_pr10  includ_pr10_n
 		includ_dx10  includ_dx10_n 
-		EXCLUD_dx10  exclud_dx10_n;
+		EXCLUD_dx10  exclud_dx10_n
+		EXCLUD_dx10_code3	exclud_dx10_substr3
+		EXCLUD_dx10_code4	exclud_dx10_substr4;
 
 /*inclusion criteria*/
 		*people with allergy diagnosis
@@ -51,11 +53,14 @@ then evaluate N of the eligible that popped;
 /** Exclusion criteria **/
 %let exclud_hcpcs= '0'; 					*use for inclusion visit & popped visit;
 
-%let EXclud_pr10 =	'0''				; *use for inclusion visit & popped visit;
+%let EXclud_pr10 =	'0'				; *use for inclusion visit & popped visit;
 %let EXclud_pr10_n = 0;	
 
-%let EXCLUD_dx10   = 'D472'; 						* use for inclusion visit & popped visit;
-%let exclud_dx10_n = 4; 
+%let EXCLUD_dx10_code3   = 'J30' ; 						* use for inclusion visit & popped visit;
+%let exclud_dx10_substr3 = 4; 
+
+%let EXCLUD_dx10_code4   = 'D472' ; 						* use for inclusion visit & popped visit;
+%let exclud_dx10_substr4 = 4; 
 
 /** Label pop specific variables  **/
 %global popN;
@@ -245,7 +250,8 @@ end;
 array dx(&diag_cd_max) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
 do j=1 to &diag_cd_max;
 	if substr(dx(j),1,&includ_dx10_n) in(&includ_dx10) then KEEP=1;
-	if substr(dx(j),1,&exclud_dx10_n) in(&exclud_dx10) then DELETE=1;		
+	if substr(dx(j),1,&exclud_dx10_substr3) in(&EXCLUD_dx10_code3) then DELETE=1;
+	if substr(dx(j),1,&exclud_dx10_substr4) in(&EXCLUD_dx10_code4) then DELETE=1;		
 end;
 if KEEP ne 1 then DELETE;
 if DELETE = 1 then delete;
@@ -644,7 +650,8 @@ do i=1 to &proc_cd_max;
 end;
 array dx(&diag_cd_max) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
 do j=1 to &diag_cd_max;
-	if substr(dx(j),1,&exclud_dx10_n) in(&exclud_dx10) then DELETE=1;	
+		if substr(dx(j),1,&exclud_dx10_substr3) in(&EXCLUD_dx10_code3) then DELETE=1;
+	if substr(dx(j),1,&exclud_dx10_substr4) in(&EXCLUD_dx10_code4) then DELETE=1;	
 end;
 if hcpcs_cd in(&includ_hcpcs) then KEEP=1;
 if hcpcs_cd in(&exclud_hcpcs) then DELETE=1;

@@ -535,7 +535,9 @@ where
 	b.prvdr_num = a.&ccn
 ;
 quit;
+
 *pull icd procedure criteria from claims--if no procedure requirement do not change*;
+
 proc sql;
 	create table include_cohort1d (compress=yes) as
 select *
@@ -627,7 +629,7 @@ do j=1 to &diag_cd_max;
 end;
 if hcpcs_cd in(&includ_hcpcs) then KEEPhcpcs=1;
 if hcpcs_cd in(&exclud_hcpcs) then DELETE=1;
-if KEEPhcpcs ne 1 AND KEEPdx ne 1 then DELETE;		*susie---watch out for this in output--logic needs a check;
+if KEEPhcpcs ne 1 AND KEEPdx ne 1 then DELETE;		
 if DELETE = 1 then delete;
 *if clm_drg_cd notin(&includ_drg) then delete;
 if &flag_popped ne 1 then delete;
