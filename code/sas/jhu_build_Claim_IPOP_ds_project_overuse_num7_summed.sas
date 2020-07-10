@@ -5,13 +5,7 @@
 ********************************************************************/
 
 /*** Indicator description ***/
-/* Description and codes from .xlsx file  "ICD-10 conversions_3_30_2020" */
-
-***************Major modifications made per 27mar2020 phone call to 
-include at risk population only and sum counts**************************************
-We need to identify the at-risk population, calculate their agecat/comorbid/female and sum 
-by hospital qtr year
-then evaluate N of the eligible that popped;
+/* Description and codes from .xlsx file  "ICD-10 conversions_7_8_2020" */
 
 *NOTE: Defining an array with 0 elements in log is acceptable if N identified is 0;
 
@@ -47,13 +41,13 @@ then evaluate N of the eligible that popped;
 %let includ_drg = '0';
 
 /** Exclusion criteria **/
-%let exclud_hcpcs= '0'; *use for inclusion visit & popped visit;
+%let exclud_hcpcs= '0'; 
 
-%let EXclud_pr10 =	'0'				; *use for inclusion visit & popped visit;
+%let EXclud_pr10 =	'0';
 %let EXclud_pr10_n = 0;	
 
 %let EXCLUD_dx10   = 'J320' 'J321' 'J322' 'J323'
-					'J324' 'J328' 'J329'; 						* use for inclusion visit & popped visit;
+					 'J324' 'J328' 'J329'; 		* use for inclusion visit & popped visit;
 %let exclud_dx10_n = 4; 
 
 /** Label pop specific variables  **/
