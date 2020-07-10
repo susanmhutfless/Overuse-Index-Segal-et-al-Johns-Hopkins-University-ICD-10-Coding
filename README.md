@@ -9,5 +9,5 @@ Code related to past and current Johns Hopkins Overuse Index Projects (PI: Segal
 ## 18: VRDC run complete.  Aggregate data, pdf checks and log exported. Final approved. DONE. 
 ## 17: VRDC run complete.  Aggregate data, pdf checks and log exported. Final approved. DONE.
 
-## 01: Running on VRDC for output as on 09jul2020
+## 01: VRDC run complete.  Pdf checks exported.  With death in any location as qualifying criteria this can't be attributed to hospital.
 
