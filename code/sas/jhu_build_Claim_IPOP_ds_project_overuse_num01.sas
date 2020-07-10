@@ -484,7 +484,7 @@ proc sort data=cc_2018; by bene_id elig_dt;
 proc sort data=otcc_2016; by bene_id elig_dt;
 proc sort data=otcc_2017; by bene_id elig_dt;
 proc sort data=otcc_2018; by bene_id elig_dt;
-proc sort data=&permlib..pop_&popN._in_out; by bene_id elig_dt;
+proc sort data=pop_&popN._in_out_popped; by bene_id elig_dt;
 run;
 data cc (keep=bene: elig_dt enrl_src ami ami_ever alzh_ever alzh_demen_ever atrial_fib_ever
 cataract_ever chronickidney_ever copd_ever chf_ever diabetes_ever glaucoma_ever  hip_fracture_ever 
