@@ -40,7 +40,7 @@
 %let exclud_hcpcs= '0'; 					
 
 %let EXclud_pr10 =	'0'				; 
-%let EXclud_pr10_n = 0;	
+%let EXclud_pr10_n = 7;	
 
 %let EXCLUD_dx10   = 'J320' 'J321' 'J322' 'J323'
 					'J324' 'J328' 'J329'	; 					* use for inclusion visit & popped visit;
@@ -652,7 +652,7 @@ from
 where 
 		a.&bene_id=b.&bene_id 
 		and 
-		a.elig_dt-180) <= b.&flag_popped_dt <=a.elig_dt								/*Eliana: enter the time element here NO LOOKBACK;*/
+		a.elig_dt-180 <= b.&flag_popped_dt <=a.elig_dt								/*Eliana: enter the time element here NO LOOKBACK;*/
 		/*and (	(a.elig_dt-180) <= b.&flag_popped_dt <=a.elig_dt	)*Eliana: enter the time element here-WITH LOOKBACK;*/
 ;  
 quit;

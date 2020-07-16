@@ -40,9 +40,9 @@
 
 %let includ_pr10 =
 					'0'			; 
-%let includ_pr10_n = 7;		
+%let includ_pr10_n = 7;		*this number should match number that needs to be substringed;
 
-%let includ_dx10   = 'Z1211';						*use for popped visit;
+%let includ_dx10   = 'Z1211';						*use for popped visit; 
 %let includ_dx10_n = 5;		*this number should match number that needs to be substringed;
 %let includ_drg = '0';
 
@@ -159,7 +159,7 @@ select *
 from 
 &source
 where 
-	   (	((&date-&clm_dob)/365.25) >=80	
+		(	((&date-&clm_dob)/365.25) >=80	
 		 )	;
 quit;
 *link to ahrq ccn so in hospital within a health system;
@@ -219,7 +219,7 @@ do i=1 to &proc_cd_max;
 end;
 array dx(&diag_cd_max) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
 do j=1 to &diag_cd_max;
-	if substr(dx(j),1,&includ_dx10_n) in(&includ_dx10) then KEEP=1;
+	if substr(dx(j),1,&includ_dx10_n) in(&includ_dx10) then KEEP=1;		
 	if substr(dx(j),1,&exclud_dx10_n) in(&exclud_dx10) then DELETE=1;		
 end;
 elig_dt=&date;
@@ -532,40 +532,40 @@ where
 	b.prvdr_num = a.&ccn
 ;
 quit;
-*pull icd procedure criteria from claims*;
+*pull icd diagnosis criteria from claims*;
 proc sql;
 	create table include_cohort1d (compress=yes) as
 select *
 from 
 	&source
 where
-		icd_prcdr_cd1 in(&includ_pr10) or
-		icd_prcdr_cd2 in(&includ_pr10) or
-		icd_prcdr_cd3 in(&includ_pr10) or
-		icd_prcdr_cd4 in(&includ_pr10) or
-		icd_prcdr_cd5 in(&includ_pr10) or
-		icd_prcdr_cd6 in(&includ_pr10) or
-		icd_prcdr_cd7 in(&includ_pr10) or
-		icd_prcdr_cd8 in(&includ_pr10) or
-		icd_prcdr_cd9 in(&includ_pr10) or
-		icd_prcdr_cd10 in(&includ_pr10) or
-		icd_prcdr_cd11 in(&includ_pr10) or
-		icd_prcdr_cd12 in(&includ_pr10) or
-		icd_prcdr_cd13 in(&includ_pr10) or
-		icd_prcdr_cd14 in(&includ_pr10) or
-		icd_prcdr_cd15 in(&includ_pr10) or
-		icd_prcdr_cd16 in(&includ_pr10) or
-		icd_prcdr_cd17 in(&includ_pr10) or
-		icd_prcdr_cd18 in(&includ_pr10) or
-		icd_prcdr_cd19 in(&includ_pr10) or
-		icd_prcdr_cd20 in(&includ_pr10) or
-		icd_prcdr_cd21 in(&includ_pr10) or
-		icd_prcdr_cd22 in(&includ_pr10) or
-		icd_prcdr_cd23 in(&includ_pr10) or
-		icd_prcdr_cd24 in(&includ_pr10) or
-		icd_prcdr_cd25 in(&includ_pr10)		;
+		icd_dgns_cd1 in(&includ_dx10) or
+		icd_dgns_cd2 in(&includ_dx10) or
+		icd_dgns_cd3 in(&includ_dx10) or
+		icd_dgns_cd4 in(&includ_dx10) or
+		icd_dgns_cd5 in(&includ_dx10) or
+		icd_dgns_cd6 in(&includ_dx10) or
+		icd_dgns_cd7 in(&includ_dx10) or
+		icd_dgns_cd8 in(&includ_dx10) or
+		icd_dgns_cd9 in(&includ_dx10) or
+		icd_dgns_cd10 in(&includ_dx10) or
+		icd_dgns_cd11 in(&includ_dx10) or
+		icd_dgns_cd12 in(&includ_dx10) or
+		icd_dgns_cd13 in(&includ_dx10) or
+		icd_dgns_cd14 in(&includ_dx10) or
+		icd_dgns_cd15 in(&includ_dx10) or
+		icd_dgns_cd16 in(&includ_dx10) or
+		icd_dgns_cd17 in(&includ_dx10) or
+		icd_dgns_cd18 in(&includ_dx10) or
+		icd_dgns_cd19 in(&includ_dx10) or
+		icd_dgns_cd20 in(&includ_dx10) or
+		icd_dgns_cd21 in(&includ_dx10) or
+		icd_dgns_cd22 in(&includ_dx10) or
+		icd_dgns_cd23 in(&includ_dx10) or
+		icd_dgns_cd24 in(&includ_dx10) or
+		icd_dgns_cd25 in(&includ_dx10)		;
 quit;
-*link icd prcdr identified to revenue center*;
+*link icd dx identified to revenue center*;
 proc sql;
 	create table include_cohort1e (compress=yes) as
 select a.&rev_cntr, b.*
@@ -613,16 +613,16 @@ label pop_ed='popped: revenue center indicated emergency department';
 array pr(&proc_cd_max) &proc_pfx.&proc_cd_min - &proc_pfx.&proc_cd_max;
 do i=1 to &proc_cd_max;
 	if substr(pr(i),1,&exclud_pr10_n) in(&EXclud_pr10) then DELETE=1;	
-	*if substr(pr(i),1,&includ_pr10_n) in(&includ_pr10) then KEEP=1;
+	if substr(pr(i),1,&includ_pr10_n) in(&includ_pr10) then KEEP=1;
 end;
 array dx(&diag_cd_max) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
 do j=1 to &diag_cd_max;
-	if substr(dx(j),1,&includ_dx10_n) in(&includ_dx10) then KEEPdx=1; 
+	if substr(dx(j),1,&includ_dx10_n) in(&includ_dx10) then KEEPdx=1;
 	if substr(dx(j),1,&exclud_dx10_n) in(&exclud_dx10) then DELETE=1;	
 end;
 if hcpcs_cd in(&includ_hcpcs) then KEEPhcpcs=1;
 if hcpcs_cd in(&exclud_hcpcs) then DELETE=1;
-if KEEPhcpcs ne 1 AND KEEP dx ne 1 then DELETE;
+if KEEPdx= 1 and KEEPhcpcs= 1 then KEEP;
 if DELETE = 1 then delete;
 *if clm_drg_cd notin(&includ_drg) then delete;
 if &flag_popped ne 1 then delete;
