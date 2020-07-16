@@ -152,7 +152,7 @@ where
   and 	(	((&date-&clm_dob)/365.25) >=80	
 		 );
 quit;
-*link to ahrq ccn so in hospital within a health system;
+*link to ahrq ccn so can identify if in hospital within a health system;
 proc sql;
 	create table include_cohort2 (compress=yes) as
 select *
