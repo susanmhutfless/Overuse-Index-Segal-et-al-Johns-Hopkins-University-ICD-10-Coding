@@ -5,14 +5,7 @@
 ********************************************************************/
 
 /*** Indicator description ***/
-/* Description and codes from .xlsx file  "ICD-10 conversions_5_28_20" */
-
-***************Major modifications made per 27mar2020 phone call to 
-include at risk population only and sum counts**************************************
-We need to identify the at-risk population, calculate their agecat/comorbid/female and sum 
-by hospital qtr year
-then evaluate N of the eligible that popped;
-
+/* Description and codes from .xlsx file  "ICD-10 conversions_7_8_20" */
 
 *NOTE: Defining an array with 0 elements in log is acceptable if N identified is 0;
 
@@ -39,18 +32,18 @@ then evaluate N of the eligible that popped;
 %let includ_pr10_n = 7;		*this number should match number that needs to be substringed;
 
 %let includ_dx10   = 'J0100' 'J0110' 'J0120'
-					'J0130' 'J0140' 'J0190'	;						*use for inclusion visit--djd of knee;
+					'J0130' 'J0140' 'J0190'	;						*use for inclusion visit;
 %let includ_dx10_n = 5;		*this number should match number that needs to be substringed;
 %let includ_drg = '0';
 
 /** Exclusion criteria **/
-%let exclud_hcpcs= '0'; 					*use for inclusion visit & popped visit;
+%let exclud_hcpcs= '0'; 					
 
-%let EXclud_pr10 =	'0'				; *use for inclusion visit & popped visit;
+%let EXclud_pr10 =	'0'				; 
 %let EXclud_pr10_n = 0;	
 
 %let EXCLUD_dx10   = 'J320' 'J321' 'J322' 'J323'
-					'J324' 'J328' 'J329'	; 						* use for inclusion visit & popped visit;
+					'J324' 'J328' 'J329'	; 					* use for inclusion visit & popped visit;
 %let exclud_dx10_n = 4; 
 
 /** Label pop specific variables  **/
