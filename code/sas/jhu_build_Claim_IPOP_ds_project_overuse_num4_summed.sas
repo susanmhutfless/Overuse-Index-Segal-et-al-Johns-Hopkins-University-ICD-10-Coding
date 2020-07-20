@@ -7,12 +7,6 @@
 /*** Indicator description ***/
 /* Description and codes from .xlsx file  "ICD-10 conversions_5_28_20" */
 
-***************Major modifications made per 27mar2020 phone call to 
-include at risk population only and sum counts**************************************
-We need to identify the at-risk population, calculate their agecat/comorbid/female and sum 
-by hospital qtr year
-then evaluate N of the eligible that popped;
-
 *NOTE: Defining an array with 0 elements in log is acceptable if N identified is 0;
 
 /* Indicator 4 */
@@ -32,22 +26,20 @@ then evaluate N of the eligible that popped;
 					'80162'		;		*use for popped visit;
 
 
-
 %let includ_pr10 =
-					'0''			; *use for popped visit;
-%let includ_pr10_n = 0;		*this number should match number that needs to be substringed;
-
-%let includ_dx10   = 'I50';						*use for inclusion visit--djd of knee;
+					'0'			; 
+%let includ_pr10_n = 7;		
+%let includ_dx10   = 'I50';						*use for inclusion visit;
 %let includ_dx10_n = 3;		*this number should match number that needs to be substringed;
 %let includ_drg = '0';
 
 /** Exclusion criteria **/
-%let exclud_hcpcs= '0'; 					*use for inclusion visit & popped visit;
+%let exclud_hcpcs= '0'; 					
 
-%let EXclud_pr10 =	'0'				; *use for inclusion visit & popped visit;
-%let EXclud_pr10_n = 0;	
+%let EXclud_pr10 =	'0'				; 
+%let EXclud_pr10_n = 7;	
 
-%let EXCLUD_dx10   = 'T460X1' 'T460X2' 'T460X3' 'T460X4' 'T460X5'; 						* use for inclusion visit & popped visit;
+%let EXCLUD_dx10   = 'T460X1' 'T460X2' 'T460X3' 'T460X4' 'T460X5'; 	*use for inclusion and popped visit;					* use for inclusion visit & popped visit;
 %let exclud_dx10_n = 6; 
 
 /** Label pop specific variables  **/
@@ -259,7 +251,7 @@ proc datasets lib=work nolist;
 quit;
 run;
 %mend;
-/*** this section is related to IP - inpatient claims--for eligible cohort***
+/*** this section is related to IP - inpatient claims--for eligible cohort***/
 %claims_rev(date=&clm_beg_dt_in, source=rif2015.INpatient_claims_07,  
 	rev_cohort=rif2015.inpatient_revenue_07, include_cohort=pop_&popN._INinclude_2015_7, ccn=ccn2016);
 %claims_rev(date=&clm_beg_dt_in, source=rif2015.INpatient_claims_08,  
@@ -662,7 +654,7 @@ where
 quit;
 %mend;
 
-/*** this section is related to IP - inpatient claims ***
+/*** this section is related to IP - inpatient claims ***/
 %claims_rev(date=&clm_beg_dt_in, source=rif2016.inpatient_claims_01, rev_cohort=rif2016.inpatient_revenue_01, include_cohort=pop_&popN._IN_2016_1, ccn=ccn2016);
 %claims_rev(date=&clm_beg_dt_in, source=rif2016.inpatient_claims_02, rev_cohort=rif2016.inpatient_revenue_02, include_cohort=pop_&popN._IN_2016_2, ccn=ccn2016);
 %claims_rev(date=&clm_beg_dt_in, source=rif2016.inpatient_claims_03, rev_cohort=rif2016.inpatient_revenue_03, include_cohort=pop_&popN._IN_2016_3, ccn=ccn2016);
