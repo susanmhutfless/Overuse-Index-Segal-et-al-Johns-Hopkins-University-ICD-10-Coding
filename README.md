@@ -8,6 +8,7 @@ Code related to past and current Johns Hopkins Overuse Index Projects (PI: Segal
 ## 19: VRDC run complete.  Aggregate data, pdf checks and log exported as of 09jul2020. Sent to JS on 16jul2020. JS, EKG to confirm correct dx/pr--this requires AND for popped.
 ## 18: VRDC run complete.  Aggregate data, pdf checks and log exported. Final approved. DONE. 
 ## 17: VRDC run complete.  Aggregate data, pdf checks and log exported. Final approved. DONE.
+## 16: Running on VRDC.
 
 ## 08: VRDC run complete. Export requested.
 ## 07: VRDC run complete.  Aggregate data, pdf checks and log exported.
