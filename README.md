@@ -10,6 +10,8 @@ Code related to past and current Johns Hopkins Overuse Index Projects (PI: Segal
 ## 17: VRDC run complete.  Aggregate data, pdf checks and log exported. Final approved. DONE.
 ## 16: Running on VRDC.
 
+## 12: Running on VRDC.
+
 ## 08: VRDC run complete. Export requested.
 ## 07: VRDC run complete.  Aggregate data, pdf checks and log exported.
 ## 06: Running on VRDC.
