@@ -21,7 +21,6 @@
 
 /*inclusion criteria*/
 		*people with congestive heart failure diagnosis minus those with suspected digoxix toxicicity diagnosis;
-
 %let includ_hcpcs =
 					'80162'		;		*use for popped visit;
 
@@ -139,7 +138,6 @@
 
 /*** this macro is for inpatient and outpatient claims--must have DX code of interest***/
 %macro claims_rev(date=,	source=,  rev_cohort=, include_cohort=, ccn=);
-*identify dx codes of interest;
 proc sql;
 	create table include_cohort1 (compress=yes) as
 select * 
