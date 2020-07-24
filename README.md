@@ -12,7 +12,7 @@ Code related to past and current Johns Hopkins Overuse Index Projects (PI: Segal
 
 ## 12: Running on VRDC.
 
-## 09: Running on VRDC.
+## 09: Problem with logic and templated used.  Returned to EKG and JS on 24jul2020.
 ## 08: VRDC run complete.  Aggregate data and log exported as of 23jul2020.
 ## 07: VRDC run complete.  Aggregate data, pdf checks and log exported.
 ## 06: VRDC run complete. Output requested.
