@@ -8,15 +8,15 @@ Code related to past and current Johns Hopkins Overuse Index Projects (PI: Segal
 ## 19: VRDC run complete.  Aggregate data, pdf checks and log exported as of 09jul2020. Sent to JS on 16jul2020. JS, EKG to confirm correct dx/pr--this requires AND for popped.
 ## 18: VRDC run complete.  Aggregate data, pdf checks and log exported. Final approved. DONE. 
 ## 17: VRDC run complete.  Aggregate data, pdf checks and log exported. Final approved. DONE.
-## 16: VRDC run complete. Output requested.
+## 16: VRDC run complete.  Aggregate data and log exported as of 26jul2020.
 
 ## 12: Problem with qualifying dx code.  Returned to EKG and JS on 24jul2020.
 
 ## 09: Problem with logic and templated used.  Returned to EKG and JS on 24jul2020.
 ## 08: VRDC run complete.  Aggregate data and log exported as of 23jul2020.
 ## 07: VRDC run complete.  Aggregate data, pdf checks and log exported.
-## 06: VRDC run complete. Output requested.
-## 05: VRDC run complete. Output requested.
+## 06: VRDC run complete.  Aggregate data and log exported as of 26jul2020.
+## 05: VRDC run complete.  Aggregate data and log exported as of 26jul2020.
 ## 04: Running on VRDC.
 ## 01: VRDC run complete.  Pdf checks exported.  With death in any location as qualifying criteria this can't be attributed to hospital.
 
