@@ -5,7 +5,7 @@
 ********************************************************************/
 
 /*** Indicator description ***/
-/* Description and codes from .xlsx file  "ICD-10 conversions_5_28_20" */
+/* Description and codes from .xlsx file  "ICD-10 conversions_7_24_20" */
 
 *NOTE: Defining an array with 0 elements in log is acceptable if N identified is 0;
 
@@ -46,19 +46,19 @@
 					'0UT94ZL'	'0UT94ZZ'	'0UT97ZL'
 					'0UT97ZZ'	'0UT98ZL'	'0UT98ZZ'
 					'0UT9FZL'	'0UT9FZZ'		; *use for popped visit;
-%let includ_pr10_n = 7;		*this number should match number that needs to be substringed;
+%let includ_pr10_n = 7;		
 
-%let includ_dx10   = '0';						*use for inclusion visit;
-%let includ_dx10_n = 7;		*this number should match number that needs to be substringed;
+%let includ_dx10   = '0';						
+%let includ_dx10_n = 7;		
 %let includ_drg = '0';
 
 /** Exclusion criteria **/
-%let exclud_hcpcs= '0'; 					*use for inclusion visit & popped visit;
+%let exclud_hcpcs= '0'; 					
 
-%let EXclud_pr10 =	'0'				; *use for inclusion visit & popped visit;
+%let EXclud_pr10 =	'0'				; 
 %let EXclud_pr10_n = 7;	
 
-%let EXCLUD_dx10   = 'C53' 'C54' 'C55' 'C56' ; 						* use for inclusion visit & popped visit;
+%let EXCLUD_dx10   = 'C53' 'C54' 'C55' 'C56' ; 						* use for inclusion visit;
 %let exclud_dx10_n = 3; 
 
 /** Label pop specific variables  **/
