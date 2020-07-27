@@ -119,7 +119,7 @@
 %let  icd_dgns_cd1       = icd_dgns_cd1         ;
 %let  icd_prcdr_cd1       = icd_prcdr_cd1       ;
 %let  OP_PHYSN_SPCLTY_CD = OP_PHYSN_SPCLTY_CD   ;
-/*revenue center for inpatient/outpatient identifies ED*/ *exclude ED for this indicator
+/*revenue center for inpatient/outpatient identifies ED*/ *exclude ED for this 
 %global rev_cntr;
 %let rev_cntr = rev_cntr;
 %let ED_rev_cntr = 	'0450' '0451' '0452' '0453' '0454' '0455' '0456'
@@ -232,10 +232,9 @@ do i=1 to &proc_cd_max;
 end;
 array dx(&diag_cd_max) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
 do j=1 to &diag_cd_max;
+	if substr(dx(j),1,&includ_dx10_n) in(&includ_dx10) then KEEP=1;
 	if substr(dx(j),1,&exclud_dx10_n) in(&exclud_dx10) then DELETE=1;		
 end;
-if KEEP ne 1 then DELETE;
-if DELETE = 1 then delete;
 elig_dt=&date;
 elig_age=(&date-&clm_dob)/365.25; label elig_age='age at eligibility';
 if &clm_end_dt_in ne . then do;
