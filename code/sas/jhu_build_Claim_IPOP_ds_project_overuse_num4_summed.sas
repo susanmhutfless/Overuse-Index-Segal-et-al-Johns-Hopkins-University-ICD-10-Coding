@@ -343,7 +343,7 @@ data pop_&popN._INinclude (keep= &bene_id &clm_id elig_dt elig: setting_elig:
 							&diag_pfx.&diag_cd_min   &proc_pfx.&proc_cd_min
 							prvdr_num prvdr_state_cd OP_PHYSN_SPCLTY_CD rev_cntr1
 							at_physn_npi op_physn_npi org_npi_num ot_physn_npi rndrng_physn_npi
-							/*RFR_PHYSN_NPI*
+							/*RFR_PHYSN_NPI*/
 							bene_cnty_cd bene_state_cd 	bene_mlg_cntct_zip_cd
 						);
 set pop_&popN._INinclude: 	;
@@ -370,7 +370,7 @@ format bene_state_cd prvdr_state_cd $state. OP_PHYSN_SPCLTY_CD $speccd. rev_cntr
 		&ptnt_dschrg_stus_cd $stuscd. &gndr_cd gender. bene_race_cd race. &clm_drg_cd drg.
 		&icd_dgns_cd1 &admtg_dgns_cd $dgns. &icd_prcdr_cd1 $prcdr. hcpcs_cd1 $hcpcs. ;
 run;
-/* get rid of duplicate rows so that each bene contributes 1x per hospital/year/qtr *
+/* get rid of duplicate rows so that each bene contributes 1x per hospital/year/qtr */
 proc sort data=pop_&popN._INinclude NODUPKEY; by elig_compendium_hospital_id elig_year elig_qtr &bene_id elig_dt; run;
 proc sort data=pop_&popN._INinclude NODUPKEY; by elig_compendium_hospital_id elig_year elig_qtr &bene_id ; run;
 
@@ -502,7 +502,7 @@ proc sort data=pop_&popN._OUTinclude NODUPKEY; by elig_compendium_hospital_id el
 
 data &permlib..pop_&popN._elig;
 set 	pop_&popN._OUTinclude 
-		/*pop_&popN._INinclude*/ ;		*as of May 2020 we are not including inpatient;
+		pop_&popN._INinclude ;	
 run;
 *person can contribute only once even if seen in inpatient and outpatient in same hosp/year/qtr;
 proc sort data=&permlib..pop_&popN._elig NODUPKEY; by elig_compendium_hospital_id elig_year elig_qtr &bene_id ;run;
@@ -697,7 +697,7 @@ data pop_&popN._IN (keep=  pop: &flag_popped_dt elig: setting:
 							&admtg_dgns_cd &clm_drg_cd  rev_cntr1
 							prvdr_num prvdr_state_cd OP_PHYSN_SPCLTY_CD 
 							at_physn_npi op_physn_npi org_npi_num ot_physn_npi rndrng_physn_npi
-							/*RFR_PHYSN_NPI*
+							/*RFR_PHYSN_NPI*/
 							&gndr_cd bene_race_cd	bene_cnty_cd
 							bene_state_cd 	bene_mlg_cntct_zip_cd );
 set pop_&popN._IN_:;
@@ -878,10 +878,10 @@ run;
 /*allow to pop only once per qtr*/
 proc sort data=&permlib..pop_&popN._in_out NODUPKEY; by pop_compendium_hospital_id pop_year pop_qtr &bene_id;run;
 
-/*title 'Popped Inpatient or Outpatient (No Carrier) For Analysis';
+title 'Popped Inpatient or Outpatient (No Carrier) For Analysis';
 proc freq data=&permlib..pop_&popN._in_out; 
 table  	popped &flag_popped &pop_year pop_year pop_qtr setting_pop setting_elig; run;
-proc contents data=&permlib..pop_&popN._in_out; run;*/
+proc contents data=&permlib..pop_&popN._in_out; run;
 *End link eligible and popped;
 
 *start linkage to MBSF for comorbidities;
@@ -1014,8 +1014,8 @@ run;
 
 *Start summary checks;
 /**Look at freq, means, contents of final 1 record per person dataset **/
-*title 'Popped Inpatient or Outpatient (No Carrier) For Analysis';
-title 'Popped Outpatient (No Inpatient, No Carrier) For Analysis';
+title 'Popped Inpatient or Outpatient (No Carrier) For Analysis';
+*title 'Popped Outpatient (No Inpatient, No Carrier) For Analysis';
 proc freq data=&permlib..pop_&popN._in_out; 
 table  	popped &flag_popped &pop_year pop_year pop_qtr setting_pop setting_elig; run;
 proc means data=&permlib..pop_&popN._in_out n mean median min max; 
@@ -1192,7 +1192,7 @@ proc means data=&in mean median min max; var  elig_age elig_los; run;
 %mend;
 
 
-/*title 'Inpatient Popped';
+title 'Inpatient Popped';
 %poppedlook(in=pop_&popN._IN);
 *delete the temp datasets;
 proc datasets lib=work nolist;
@@ -1210,7 +1210,7 @@ title 'Eligible from inpatient encounter';
 %eliglook(in=pop_&popN._INinclude);
 		/*bene_state_cd prvdr_state_cd 
 		&pop_OP_PHYSN_SPCLTY_CD &pop_clm_fac_type_cd &pop_ptnt_dschrg_stus_cd
-		&pop_nch_clm_type_cd &pop_CLM_IP_ADMSN_TYPE_CD &pop_clm_src_ip_admsn_cd*
+		&pop_nch_clm_type_cd &pop_CLM_IP_ADMSN_TYPE_CD &pop_clm_src_ip_admsn_cd*/
 proc datasets lib=work nolist;
  delete setting: elig_ed elig_year elig_qtr pop_num icd: clm:
 		year qtr &gndr_cd  bene_race_cd 
@@ -1218,7 +1218,7 @@ proc datasets lib=work nolist;
 		&admtg_dgns_cd &OP_PHYSN_SPCLTY_CD nch_clm_type_cd
 		&ptnt_dschrg_stus_cd ;
 quit;
-run;*/
+run;
 title 'Outpatient Popped';
 %poppedlook(in=pop_&popN._OUT);
 proc datasets lib=work nolist;
