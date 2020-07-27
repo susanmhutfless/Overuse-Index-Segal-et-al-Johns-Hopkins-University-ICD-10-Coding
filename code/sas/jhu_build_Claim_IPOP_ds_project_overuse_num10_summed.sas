@@ -5,13 +5,7 @@
 ********************************************************************/
 
 /*** Indicator description ***/
-/* Description and codes from .xlsx file  "ICD-10 conversions_5_28_20" */
-
-***************Major modifications made per 27mar2020 phone call to 
-include at risk population only and sum counts**************************************
-We need to identify the at-risk population, calculate their agecat/comorbid/female and sum 
-by hospital qtr year
-then evaluate N of the eligible that popped;
+/* Description and codes from .xlsx file  "ICD-10 conversions_7_24_20" */
 
 *NOTE: Defining an array with 0 elements in log is acceptable if N identified is 0;
 
@@ -23,13 +17,8 @@ then evaluate N of the eligible that popped;
 %global includ_hcpcs 
 		includ_pr10  includ_pr10_n
 		includ_dx10  includ_dx10_n 
-<<<<<<< Updated upstream
-		EXCLUD_dx10  exclud_dx10_n;
-=======
 		EXCLUD_dx10  exclud_dx10_n
-		EXCLUD_dx10_code3	exclud_dx10_substr3
-		EXCLUD_dx10_code4	exclud_dx10_substr4;
->>>>>>> Stashed changes
+		exclud_hcpcs;
 
 /*inclusion criteria*/
 		*men with low grade prostate cancer diagnosis;
@@ -40,24 +29,23 @@ then evaluate N of the eligible that popped;
 					'72194'	'3269F'	'77074'	'77075'		;		*use for popped visit;
 
 
-
 %let includ_pr10 =
 					'CW3NYZZ' 'BW2G00Z' 'BW2G0ZZ'
 					'BW2G10Z' 'BW2G1ZZ' 'BW2GY0Z'
 					'BW2GYZZ' 'BW2GZZZ' 'CP1Z1ZZ'			; *use for popped visit;
-%let includ_pr10_n = 7;		*this number should match number that needs to be substringed;
+%let includ_pr10_n = 7;		
 
 %let includ_dx10   = 'D075';						*use for inclusion visit;
-%let includ_dx10_n = 4;		*this number should match number that needs to be substringed;
+%let includ_dx10_n = 4;		
 %let includ_drg = '0';
 
 /** Exclusion criteria **/
-%let exclud_hcpcs= '3272F' '3273F'; 					*use for inclusion visit & popped visit;
+%let exclud_hcpcs= '3272F' '3273F'; 				*use for inclusion visit & popped visit;
 
-%let EXclud_pr10 =	'0'				; *use for inclusion visit & popped visit;
+%let EXclud_pr10 =	'0'				; 
 %let EXclud_pr10_n = 0;	
 
-%let EXCLUD_dx10   = '0'; 						* use for inclusion visit & popped visit;
+%let EXCLUD_dx10   = '0'; 						
 %let exclud_dx10_n = 0; 
 
 /** Label pop specific variables  **/
