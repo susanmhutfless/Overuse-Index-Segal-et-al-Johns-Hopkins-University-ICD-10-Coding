@@ -5,7 +5,7 @@
 ********************************************************************/
 
 /*** Indicator description ***/
-/* Description and codes from .xlsx file  "ICD-10 conversions_5_28_20" */
+/* Description and codes from .xlsx file  "ICD-10 conversions_7_24_20" */
 
 *NOTE: Defining an array with 0 elements in log is acceptable if N identified is 0;
 
@@ -31,18 +31,18 @@
 					'B345ZZ3' 'B345ZZZ' 'B348ZZ3' 'B348ZZZ'		; *use for popped visit;
 %let includ_pr10_n = 7;		*this number should match number that needs to be substringed;
 
-%let includ_dx10   = '0';						*use for inclusion visit;
-%let includ_dx10_n = 7;		*this number should match number that needs to be substringed;
+%let includ_dx10   = '0';						
+%let includ_dx10_n = 7;		
 %let includ_drg = '0';
 
 /** Exclusion criteria **/
-%let exclud_hcpcs= '0'; 					*use for inclusion visit & popped visit;
+%let exclud_hcpcs= '0'; 					
 
-%let EXclud_pr10 =	'0'				; *use for inclusion visit & popped visit;
+%let EXclud_pr10 =	'0'				; 
 %let EXclud_pr10_n = 7;	
 
 %let EXCLUD_dx10   = 'I63' 'I64' 'I65' 'I66'		
-					'I67' 'I68' 'I69' 'R55'	; 						* use for inclusion visit & popped visit;
+					'I67' 'I68' 'I69' 'R55'	; 		* use for inclusion visit visit;
 %let exclud_dx10_n = 3; 
 
 /** Label pop specific variables  **/
@@ -119,7 +119,7 @@
 %let  icd_dgns_cd1       = icd_dgns_cd1         ;
 %let  icd_prcdr_cd1       = icd_prcdr_cd1       ;
 %let  OP_PHYSN_SPCLTY_CD = OP_PHYSN_SPCLTY_CD   ;
-/*revenue center for inpatient/outpatient identifies ED*/
+/*revenue center for inpatient/outpatient identifies ED*/ *exclude ED for this indicator
 %global rev_cntr;
 %let rev_cntr = rev_cntr;
 %let ED_rev_cntr = 	'0450' '0451' '0452' '0453' '0454' '0455' '0456'
@@ -232,7 +232,6 @@ do i=1 to &proc_cd_max;
 end;
 array dx(&diag_cd_max) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
 do j=1 to &diag_cd_max;
-	if substr(dx(j),1,&includ_dx10_n) in(&includ_dx10) then KEEP=1;
 	if substr(dx(j),1,&exclud_dx10_n) in(&exclud_dx10) then DELETE=1;		
 end;
 if KEEP ne 1 then DELETE;
