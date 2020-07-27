@@ -649,7 +649,7 @@ from
 where 
 		a.&bene_id=b.&bene_id 
 		and 
-		a.elig_dt-30) <= b.&flag_popped_dt <=a.elig_dt								/*Eliana: enter the time element here NO LOOKBACK;*/
+		a.elig_dt-30 <= b.&flag_popped_dt <=a.elig_dt								/*Eliana: enter the time element here NO LOOKBACK;*/
 		/*and (	(a.elig_dt-180) <= b.&flag_popped_dt <=a.elig_dt	)*Eliana: enter the time element here-WITH LOOKBACK;*/
 ;  
 quit;
