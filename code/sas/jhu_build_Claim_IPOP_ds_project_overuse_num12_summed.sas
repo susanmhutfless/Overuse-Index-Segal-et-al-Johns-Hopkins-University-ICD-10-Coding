@@ -38,7 +38,7 @@
 					'4A10X4Z'			; *use for popped visit;
 %let includ_pr10_n = 7;		*this number should match number that needs to be substringed;
 
-%let includ_dx10   = 'R55';						*use for inclusion visit;*does this code exist???? Jodi/Eliana--do you see this code in hcup data or pufs?  there are 0 people in medicare data with this code--do you mean r55 without the 9?;
+%let includ_dx10   = 'R55';						*use for inclusion visit;
 %let includ_dx10_n = 4;		*this number should match number that needs to be substringed;
 %let includ_drg = '0';
 
