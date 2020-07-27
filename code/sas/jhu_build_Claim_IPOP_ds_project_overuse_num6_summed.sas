@@ -5,7 +5,7 @@
 ********************************************************************/
 
 /*** Indicator description ***/
-/* Description and codes from .xlsx file  "ICD-10 conversions_5_28_20" */
+/* Description and codes from .xlsx file  "ICD-10 conversions_5_28_20" -- note date*/
 
 *NOTE: Defining an array with 0 elements in log is acceptable if N identified is 0;
 
