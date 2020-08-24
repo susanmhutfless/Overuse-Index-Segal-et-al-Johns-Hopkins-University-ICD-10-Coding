@@ -5,7 +5,7 @@
 ********************************************************************/
 
 /*** Indicator description ***/
-/* Description and codes from .xlsx file  "ICD-10 conversions_5_28_20" */
+/* Description and codes from .xlsx file  "ICD-10 conversions_7_24_20" */
 
 *NOTE: Defining an array with 0 elements in log is acceptable if N identified is 0;
 
@@ -23,26 +23,25 @@
 		*people with an abdomen;
 
 %let includ_hcpcs =
-					'71270' '71250' '71260'				;		*use for popped visit;
+					'71270' '71250' '71260'				;		*use for inclusion visit with at least 1. popped requires both with and without dye;
 
 
 
 %let includ_pr10 =
-					'BP2W1ZZ' 'BP2WYZZ' 'BP2W0ZZ'
-					'BB24007' 'BB2410Z' 'BB24Y07'	; *use for popped visit;
-%let includ_pr10_n = 7;		*this number should match number that needs to be substringed;
+					'0'	; 
+%let includ_pr10_n = 7;		
 
-%let includ_dx10   = '0';						*use for inclusion visit--djd of knee;
-%let includ_dx10_n = 7;		*this number should match number that needs to be substringed;
+%let includ_dx10   = '0';						
+%let includ_dx10_n = 7;		
 %let includ_drg = '0';
 
 /** Exclusion criteria **/
-%let exclud_hcpcs= '0'; 					*use for inclusion visit & popped visit;
+%let exclud_hcpcs= '0'; 					
 
-%let EXclud_pr10 =	'0'				; *use for inclusion visit & popped visit;
+%let EXclud_pr10 =	'0'				; 
 %let EXclud_pr10_n = 7;	
 
-%let EXCLUD_dx10   = '0'; 						* use for inclusion visit & popped visit;
+%let EXCLUD_dx10   = '0'; 						
 %let exclud_dx10_n = 7; 
 
 /** Label pop specific variables  **/
@@ -142,38 +141,13 @@
 
 /*** this macro is for inpatient and outpatient claims--must have DX code of interest***/
 %macro claims_rev(date=,	source=,  rev_cohort=, include_cohort=, ccn=);
-*identify dx codes of interest;
+*identify hcpcs codes of interest;
 proc sql;
 	create table include_cohort1 (compress=yes) as
 select * 
 from 
 &source
-where 
-	    substr(icd_dgns_cd1,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd2,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd3,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd4,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd5,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd6,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd7,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd8,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd9,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd10,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd11,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd12,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd13,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd14,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd15,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd16,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd17,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd18,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd19,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd20,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd21,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd22,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd23,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd24,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd25,1,&includ_dx10_n) in(&includ_dx10)		;
+where hcpcs_cd in(&includ_hcpcs);
 quit;
 *link to ahrq ccn so in hospital within a health system;
 proc sql;
@@ -223,7 +197,8 @@ end;
 label elig_ed='eligible visit: revenue center indicated emergency department'; 
 array hcpcs{*} hcpcs_cd:;
 do h=1 to dim(hcpcs);
-	if hcpcs(h) in(&exclud_hcpcs) then DELETE=1;	
+	if hcpcs(h) in(&exclud_hcpcs) then DELETE=1;
+	if hcpcs(h) in(&includ_hcpcs) then KEEP=1; 
 end;
 label elig_ed='eligible visit: revenue center indicated emergency department'; 
 array pr(&proc_cd_max) &proc_pfx.&proc_cd_min - &proc_pfx.&proc_cd_max;
@@ -236,7 +211,6 @@ do j=1 to &diag_cd_max;
 	if substr(dx(j),1,&exclud_dx10_n) in(&exclud_dx10) then DELETE=1;		
 end;
 if KEEP ne 1 then DELETE;
-if DELETE = 1 then delete;
 elig_dt=&date;
 elig_age=(&date-&clm_dob)/365.25; label elig_age='age at eligibility';
 if &clm_end_dt_in ne . then do;
@@ -524,7 +498,9 @@ select &bene_id, &clm_id, &rev_cntr,
 from 
 	&rev_cohort
 where 
-	&hcpcs_cd in (&includ_hcpcs);
+	(&hcpcs_cd='71250' and &hcpcs_cd='71260')
+	or
+	&hcpcs_cd='71270'	;
 quit;
 * pull claim info for those with HCPCS (need to do this to get dx codes)*;
 proc sql;
