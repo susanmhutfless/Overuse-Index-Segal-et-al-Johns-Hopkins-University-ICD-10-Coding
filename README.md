@@ -19,5 +19,7 @@ Code related to past and current Johns Hopkins Overuse Index Projects (PI: Segal
 ## 06: VRDC run complete.  Aggregate data and log exported as of 26jul2020.
 ## 05: VRDC run complete.  Aggregate data and log exported as of 26jul2020.
 ## 04: VRDC run complete.  Aggregate data and log exported as of 27jul2020.
+## 03: Running on VRDC on 24aug2020.
+
 ## 01: VRDC run complete.  Pdf checks exported.  With death in any location as qualifying criteria this can't be attributed to hospital.
 
