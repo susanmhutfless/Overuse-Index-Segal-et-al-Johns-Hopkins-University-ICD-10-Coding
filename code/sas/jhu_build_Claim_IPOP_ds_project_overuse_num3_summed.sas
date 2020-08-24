@@ -5,13 +5,7 @@
 ********************************************************************/
 
 /*** Indicator description ***/
-/* Description and codes from .xlsx file  "ICD-10 conversions_3_30_2020" */
-
-***************Major modifications made per 27mar2020 phone call to 
-include at risk population only and sum counts**************************************
-We need to identify the at-risk population, calculate their agecat/comorbid/female and sum 
-by hospital qtr year
-then evaluate N of the eligible that popped;
+/* Description and codes from .xlsx file  "ICD-10 conversions_7_24_2020" */
 
 /* Indicator 3 */
 
@@ -25,13 +19,13 @@ then evaluate N of the eligible that popped;
 
 /*inclusion criteria*/
 %let includ_hcpcs =
-					'71045' '71046' '71010' '71020'		;
+					'71045' '71046' '71010' '71020'		; *use for popped visits; 
 
 
 %let includ_pr10 =
-					'BW03ZZZ' 			;
+					'BW03ZZZ' 			; *use for popped visits;
 
-%let includ_dx10   = 'Z0181';
+%let includ_dx10   = 'Z0181';	*use for inclusion visits;
 %let includ_dx10_n = 5	;		*this number should match number that needs to be substringed;
 %let includ_drg    = '0'	;
 
@@ -49,7 +43,7 @@ then evaluate N of the eligible that popped;
 					'J45' 'J46' 'J47' 'J60' 'J61' 'J62' 'J63' 
 					'J64' 'J65' 'J66' 'J67' 'J68' 'J69' 'J70' 
 					'J80' 'J81' 'J82' 'J83' 'J84' 'J85' 'J86' 
-					'J90' 'J91' 'J92' 'J93' 'J94' 	; 
+					'J90' 'J91' 'J92' 'J93' 'J94' 	;  *use for popped & inclusion visits;
 %let exclud_dx10_n = 3; 
 
 /** Label pop specific variables  **/
@@ -126,7 +120,7 @@ then evaluate N of the eligible that popped;
 %let  icd_dgns_cd1       = icd_dgns_cd1         ;
 %let  icd_prcdr_cd1       = icd_prcdr_cd1       ;
 %let  OP_PHYSN_SPCLTY_CD = OP_PHYSN_SPCLTY_CD   ;
-/*revenue center for inpatient/outpatient identifies ED*/
+/*revenue center for inpatient/outpatient identifies ED*/ *exclude ED visits
 %global rev_cntr;
 %let rev_cntr = rev_cntr;
 %let ED_rev_cntr = 	'0450' '0451' '0452' '0453' '0454' '0455' '0456'
@@ -226,12 +220,12 @@ array rev{*} rev_cntr:;
 do r=1 to dim(rev);
 	if rev(r) in(&ED_rev_cntr) then elig_ed=1;	
 end;
-label elig_ed='eligible visit: revenue center indicated emergency department'; 
+label elig_ed='eligible visit: revenue center indicated emergency department'; *exclude ED visits
 array hcpcs{*} hcpcs_cd:;
 do h=1 to dim(hcpcs);
 	if hcpcs(h) in(&exclud_hcpcs) then DELETE=1;	
 end;
-label elig_ed='eligible visit: revenue center indicated emergency department'; 
+label elig_ed='eligible visit: revenue center indicated emergency department'; *exclude ED visits
 array pr(&proc_cd_max) &proc_pfx.&proc_cd_min - &proc_pfx.&proc_cd_max;
 do i=1 to &proc_cd_max;
 	if substr(pr(i),1,&exclud_pr10_n) in(&EXclud_pr10) then DELETE=1;	
@@ -239,7 +233,7 @@ end;
 array dx(&diag_cd_max) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
 do j=1 to &diag_cd_max;
 	if substr(dx(j),1,&includ_dx10_n) in(&includ_dx10) then KEEP=1;
-	***need exclusionary diagnosis here;****susie eliana;
+	if substr(dx(j),1,&exclud_dx10_n) in(&exclud_dx10) then DELETE=1
 end;
 if KEEP ne 1 then DELETE;
 if DELETE = 1 then delete;
@@ -260,12 +254,12 @@ proc datasets lib=work nolist;
 quit;
 run;
 %mend;
-/*** this section is related to IP - inpatient claims--for eligible cohort***/
-*%claims_rev(date=&clm_beg_dt_in, source=rif2015.INpatient_claims_07,  
+/*** this section is related to IP - inpatient claims--for eligible cohort***
+%claims_rev(date=&clm_beg_dt_in, source=rif2015.INpatient_claims_07,  
 	rev_cohort=rif2015.inpatient_revenue_07, include_cohort=pop_&popN._INinclude_2015_7, ccn=ccn2016);
-*%claims_rev(date=&clm_beg_dt_in, source=rif2015.INpatient_claims_08,  
+%claims_rev(date=&clm_beg_dt_in, source=rif2015.INpatient_claims_08,  
 	rev_cohort=rif2015.INpatient_revenue_08, include_cohort=pop_&popN._INinclude_2015_8, ccn=ccn2016);
-*%claims_rev(date=&clm_beg_dt_in, source=rif2015.INpatient_claims_09,  
+%claims_rev(date=&clm_beg_dt_in, source=rif2015.INpatient_claims_09,  
 	rev_cohort=rif2015.INpatient_revenue_09, include_cohort=pop_&popN._INinclude_2015_9, ccn=ccn2016);
 %claims_rev(date=&clm_beg_dt_in, source=rif2015.INpatient_claims_10,  
 	rev_cohort=rif2015.INpatient_revenue_10, include_cohort=pop_&popN._INinclude_2015_10, ccn=ccn2016);
@@ -354,7 +348,7 @@ data pop_&popN._INinclude (keep= &bene_id &clm_id elig_dt elig: setting_elig:
 							&diag_pfx.&diag_cd_min   &proc_pfx.&proc_cd_min
 							prvdr_num prvdr_state_cd OP_PHYSN_SPCLTY_CD rev_cntr1
 							at_physn_npi op_physn_npi org_npi_num ot_physn_npi rndrng_physn_npi
-							/*RFR_PHYSN_NPI*/
+							/*RFR_PHYSN_NPI*
 							bene_cnty_cd bene_state_cd 	bene_mlg_cntct_zip_cd
 						);
 set pop_&popN._INinclude: 	;
@@ -381,16 +375,16 @@ format bene_state_cd prvdr_state_cd $state. OP_PHYSN_SPCLTY_CD $speccd. rev_cntr
 		&ptnt_dschrg_stus_cd $stuscd. &gndr_cd gender. bene_race_cd race. &clm_drg_cd drg.
 		&icd_dgns_cd1 &admtg_dgns_cd $dgns. &icd_prcdr_cd1 $prcdr. hcpcs_cd1 $hcpcs. ;
 run;
-/* get rid of duplicate rows so that each bene contributes 1x per hospital/year/qtr */
+/* get rid of duplicate rows so that each bene contributes 1x per hospital/year/qtr *
 proc sort data=pop_&popN._INinclude NODUPKEY; by elig_compendium_hospital_id elig_year elig_qtr &bene_id elig_dt; run;
 proc sort data=pop_&popN._INinclude NODUPKEY; by elig_compendium_hospital_id elig_year elig_qtr &bene_id ; run;
 
 /*** this section is related to OP - outpatient claims--for eligibility***/
-*%claims_rev(date=&clm_from_dt, source=rif2015.OUTpatient_claims_07,  
+%claims_rev(date=&clm_from_dt, source=rif2015.OUTpatient_claims_07,  
 	rev_cohort=rif2015.inpatient_revenue_07, include_cohort=pop_&popN._OUTinclude_2015_7, ccn=ccn2016);
-*%claims_rev(date=&clm_from_dt, source=rif2015.OUTpatient_claims_08,  
+%claims_rev(date=&clm_from_dt, source=rif2015.OUTpatient_claims_08,  
 	rev_cohort=rif2015.outpatient_revenue_08, include_cohort=pop_&popN._OUTinclude_2015_8, ccn=ccn2016);
-*%claims_rev(date=&clm_from_dt, source=rif2015.OUTpatient_claims_09,  
+%claims_rev(date=&clm_from_dt, source=rif2015.OUTpatient_claims_09,  
 	rev_cohort=rif2015.outpatient_revenue_09, include_cohort=pop_&popN._OUTinclude_2015_9, ccn=ccn2016);
 %claims_rev(date=&clm_from_dt, source=rif2015.OUTpatient_claims_10,  
 	rev_cohort=rif2015.outpatient_revenue_10, include_cohort=pop_&popN._OUTinclude_2015_10, ccn=ccn2016);
@@ -659,6 +653,7 @@ where
 		and (	(a.elig_dt-180) <= b.&flag_popped_dt <=a.elig_dt	);  *Eliana: enter the lookback here;
 quit;
 %mend;
+/*** this section is related to IN Popped- INpatient claims ***
 %claims_rev(date=&clm_beg_dt_in, source=rif2016.inpatient_claims_01, rev_cohort=rif2016.inpatient_revenue_01, include_cohort=pop_&popN._IN_2016_1, ccn=ccn2016);
 %claims_rev(date=&clm_beg_dt_in, source=rif2016.inpatient_claims_02, rev_cohort=rif2016.inpatient_revenue_02, include_cohort=pop_&popN._IN_2016_2, ccn=ccn2016);
 %claims_rev(date=&clm_beg_dt_in, source=rif2016.inpatient_claims_03, rev_cohort=rif2016.inpatient_revenue_03, include_cohort=pop_&popN._IN_2016_3, ccn=ccn2016);
@@ -703,7 +698,7 @@ data pop_&popN._IN (keep=  pop: &flag_popped_dt elig: setting:
 							&admtg_dgns_cd &clm_drg_cd  rev_cntr1
 							prvdr_num prvdr_state_cd OP_PHYSN_SPCLTY_CD 
 							at_physn_npi op_physn_npi org_npi_num ot_physn_npi rndrng_physn_npi
-							/*RFR_PHYSN_NPI*/
+							/*RFR_PHYSN_NPI*
 							&gndr_cd bene_race_cd	bene_cnty_cd
 							bene_state_cd 	bene_mlg_cntct_zip_cd );
 set pop_&popN._IN_:;
@@ -738,7 +733,7 @@ format bene_state_cd prvdr_state_cd $state. &pop_OP_PHYSN_SPCLTY_CD $speccd. rev
 		&pop_icd_dgns_cd1 &pop_admtg_dgns_cd $dgns. &pop_icd_prcdr_cd1 $prcdr. &pop_hcpcs_cd $hcpcs. 
 		&gndr_cd gender. bene_race_cd race. &pop_clm_drg_cd drg. ;
 run;
-/* get rid of duplicate rows so that each bene contributes 1x per hospital/year/qtr */
+/* get rid of duplicate rows so that each bene contributes 1x per hospital/year/qtr *
 proc sort data=pop_&popN._IN NODUPKEY; by pop_compendium_hospital_id pop_year pop_qtr &bene_id elig_dt; run;
 proc sort data=pop_&popN._IN NODUPKEY; by pop_compendium_hospital_id pop_year pop_qtr &bene_id ; run; 
 
