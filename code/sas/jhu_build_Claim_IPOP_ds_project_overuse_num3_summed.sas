@@ -220,12 +220,12 @@ array rev{*} rev_cntr:;
 do r=1 to dim(rev);
 	if rev(r) in(&ED_rev_cntr) then elig_ed=1;	
 end;
-label elig_ed='eligible visit: revenue center indicated emergency department'; *exclude ED visits
+label elig_ed='eligible visit: revenue center indicated emergency department'; *exclude ED visits;
 array hcpcs{*} hcpcs_cd:;
 do h=1 to dim(hcpcs);
 	if hcpcs(h) in(&exclud_hcpcs) then DELETE=1;	
 end;
-label elig_ed='eligible visit: revenue center indicated emergency department'; *exclude ED visits
+label elig_ed='eligible visit: revenue center indicated emergency department'; *exclude ED visits;
 array pr(&proc_cd_max) &proc_pfx.&proc_cd_min - &proc_pfx.&proc_cd_max;
 do i=1 to &proc_cd_max;
 	if substr(pr(i),1,&exclud_pr10_n) in(&EXclud_pr10) then DELETE=1;	
