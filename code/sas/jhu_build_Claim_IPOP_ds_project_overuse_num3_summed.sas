@@ -506,8 +506,8 @@ proc sort data=pop_&popN._OUTinclude NODUPKEY; by elig_compendium_hospital_id el
 proc sort data=pop_&popN._OUTinclude NODUPKEY; by elig_compendium_hospital_id elig_year elig_qtr &bene_id ; run; 
 
 data &permlib..pop_&popN._elig;
-set 	pop_&popN._OUTinclude 
-		pop_&popN._INinclude ;
+set 	pop_&popN._OUTinclude ;
+		*pop_&popN._INinclude ;
 run;
 *person can contribute only once even if seen in inpatient and outpatient in same hosp/year/qtr;
 proc sort data=&permlib..pop_&popN._elig NODUPKEY; by elig_compendium_hospital_id elig_year elig_qtr &bene_id ;run;
@@ -819,7 +819,7 @@ data pop_&popN._in_out_popped
 	(keep = bene_id elig: pop: setting: 
 			/*&gndr_cd bene_race_cd	bene_cnty_cd bene_state_cd 	bene_mlg_cntct_zip_cd*/
 			);
-set pop_&popN._IN pop_&popN._OUT;
+set /*pop_&popN._IN*/ pop_&popN._OUT;
 pop_year=year(&flag_popped_dt);
 pop_qtr=qtr(&flag_popped_dt);
 pop_prvdr_num=prvdr_num;
@@ -1190,7 +1190,7 @@ proc print data=bene_race_cd noobs; run;
 proc means data=&in mean median min max; var  elig_age elig_los; run;
 %mend;
 
-
+/*
 title 'Inpatient Popped';
 %poppedlook(in=pop_&popN._IN);
 *delete the temp datasets;
@@ -1209,7 +1209,7 @@ title 'Eligible from inpatient encounter';
 %eliglook(in=pop_&popN._INinclude);
 		/*bene_state_cd prvdr_state_cd 
 		&pop_OP_PHYSN_SPCLTY_CD &pop_clm_fac_type_cd &pop_ptnt_dschrg_stus_cd
-		&pop_nch_clm_type_cd &pop_CLM_IP_ADMSN_TYPE_CD &pop_clm_src_ip_admsn_cd*/ 
+		&pop_nch_clm_type_cd &pop_CLM_IP_ADMSN_TYPE_CD &pop_clm_src_ip_admsn_cd*
 proc datasets lib=work nolist;
  delete setting: elig_ed elig_year elig_qtr pop_num icd: clm:
 		year qtr &gndr_cd  bene_race_cd 
@@ -1217,7 +1217,7 @@ proc datasets lib=work nolist;
 		&admtg_dgns_cd &OP_PHYSN_SPCLTY_CD nch_clm_type_cd
 		&ptnt_dschrg_stus_cd ;
 quit;
-run;
+run;*/
 title 'Outpatient Popped';
 %poppedlook(in=pop_&popN._OUT);
 proc datasets lib=work nolist;
@@ -1230,7 +1230,7 @@ proc datasets lib=work nolist;
 		&ptnt_dschrg_stus_cd ;
 quit;
 run;
-title 'Elgible from outpatient encounter';
+title 'Eligible from outpatient encounter';
 %eliglook(in=pop_&popN._OUTinclude);
 proc datasets lib=work nolist;
  delete setting: elig_ed elig_year elig_qtr pop_num icd: clm:
