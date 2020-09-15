@@ -33,10 +33,10 @@
 					'0'			; 
 %let includ_pr10_n = 0;		
 %let includ_dx10_code3   = 'Z88' ;						*use for inclusion visit;
-%let includ_dx10_substr3 = 3;	
+%let includ_dx10_code3_n = 3;	
 %let includ_dx10_code4   = 'Z910' 'J301' 'J302'
 					'J305' 'J308' 'J309' ;						*use for inclusion visit;
-%let includ_dx10_substr4 = 4;			
+%let includ_dx10_code4_n = 4;			
 
 %let includ_drg = '0';
 
@@ -153,31 +153,31 @@ select *
 from 
 &source
 where 
-	    substr(icd_dgns_cd1,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd2,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd3,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd4,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd5,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd6,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd7,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd8,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd9,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd10,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd11,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd12,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd13,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd14,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd15,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd16,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd17,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd18,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd19,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd20,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd21,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd22,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd23,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd24,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd25,1,&includ_dx10_n) in(&includ_dx10)		;
+	    substr(icd_dgns_cd1,1,&includ_dx10_code3_n) in(&includ_dx10_code3) or
+		substr(icd_dgns_cd2,1,&includ_dx10_code3_n) in(&includ_dx10_code3) or
+		substr(icd_dgns_cd3,1,&includ_dx10_code3_n) in(&includ_dx10_code3) or
+		substr(icd_dgns_cd4,1,&includ_dx10_code3_n) in(&includ_dx10_code3) or
+		substr(icd_dgns_cd5,1,&includ_dx10_code3_n) in(&includ_dx10_code3) or
+		substr(icd_dgns_cd6,1,&includ_dx10_code3_n) in(&includ_dx10_code3) or
+		substr(icd_dgns_cd7,1,&includ_dx10_code3_n) in(&includ_dx10_code3) or
+		substr(icd_dgns_cd8,1,&includ_dx10_code3_n) in(&includ_dx10_code3) or
+		substr(icd_dgns_cd9,1,&includ_dx10_code3_n) in(&includ_dx10_code3) or
+		substr(icd_dgns_cd10,1,&includ_dx10_code3_n) in(&includ_dx10_code3) or
+		substr(icd_dgns_cd11,1,&includ_dx10_code3_n) in(&includ_dx10_code3) or
+		substr(icd_dgns_cd12,1,&includ_dx10_code3_n) in(&includ_dx10_code3) or
+		substr(icd_dgns_cd13,1,&includ_dx10_code3_n) in(&includ_dx10_code3) or
+		substr(icd_dgns_cd14,1,&includ_dx10_code3_n) in(&includ_dx10_code3) or
+		substr(icd_dgns_cd15,1,&includ_dx10_code3_n) in(&includ_dx10_code3) or
+		substr(icd_dgns_cd16,1,&includ_dx10_code3_n) in(&includ_dx10_code3) or
+		substr(icd_dgns_cd17,1,&includ_dx10_code3_n) in(&includ_dx10_code3) or
+		substr(icd_dgns_cd18,1,&includ_dx10_code3_n) in(&includ_dx10_code3) or
+		substr(icd_dgns_cd19,1,&includ_dx10_code3_n) in(&includ_dx10_code3) or
+		substr(icd_dgns_cd20,1,&includ_dx10_code3_n) in(&includ_dx10_code3) or
+		substr(icd_dgns_cd21,1,&includ_dx10_code3_n) in(&includ_dx10_code3) or
+		substr(icd_dgns_cd22,1,&includ_dx10_code3_n) in(&includ_dx10_code3) or
+		substr(icd_dgns_cd23,1,&includ_dx10_code3_n) in(&includ_dx10_code3) or
+		substr(icd_dgns_cd24,1,&includ_dx10_code3_n) in(&includ_dx10_code3) or
+		substr(icd_dgns_cd25,1,&includ_dx10_code3_n) in(&includ_dx10_code3)		;
 quit;
 *link to ahrq ccn so in hospital within a health system;
 proc sql;
