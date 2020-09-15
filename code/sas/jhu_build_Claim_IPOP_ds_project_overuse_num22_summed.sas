@@ -139,14 +139,14 @@
 *start identification of eligibility;
 *First identify all who are eligible;
 
-/*** this macro is for inpatient and outpatient claims--must have DX code of interest***/
+/*** this macro is for inpatient and outpatient claims***/
 %macro claims_rev(date=,	source=,  rev_cohort=, include_cohort=, ccn=);
 *identify hcpcs codes of interest;
 proc sql;
 	create table include_cohort1 (compress=yes) as
 select * 
 from 
-&source
+&rev_cohort
 where hcpcs_cd in(&includ_hcpcs);
 quit;
 *link to ahrq ccn so in hospital within a health system;
