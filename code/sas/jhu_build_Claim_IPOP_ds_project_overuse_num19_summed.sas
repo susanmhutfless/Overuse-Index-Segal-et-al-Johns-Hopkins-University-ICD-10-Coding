@@ -535,20 +535,101 @@ where
 	b.prvdr_num = a.&ccn
 ;
 quit;
-*pull icd procedure criteria from claims*;				/*Eliana: this says procedure but below is list of dx codes?*/
+
+*pull icd procedure criteria from claims--if no procedure requirement do not change*;
+
 proc sql;
 	create table include_cohort1d (compress=yes) as
 select *
 from 
 	&source
 where
+		icd_prcdr_cd1 in(&includ_pr10) or
+		icd_prcdr_cd2 in(&includ_pr10) or
+		icd_prcdr_cd3 in(&includ_pr10) or
+		icd_prcdr_cd4 in(&includ_pr10) or
+		icd_prcdr_cd5 in(&includ_pr10) or
+		icd_prcdr_cd6 in(&includ_pr10) or
+		icd_prcdr_cd7 in(&includ_pr10) or
+		icd_prcdr_cd8 in(&includ_pr10) or
+		icd_prcdr_cd9 in(&includ_pr10) or
+		icd_prcdr_cd10 in(&includ_pr10) or
+		icd_prcdr_cd11 in(&includ_pr10) or
+		icd_prcdr_cd12 in(&includ_pr10) or
+		icd_prcdr_cd13 in(&includ_pr10) or
+		icd_prcdr_cd14 in(&includ_pr10) or
+		icd_prcdr_cd15 in(&includ_pr10) or
+		icd_prcdr_cd16 in(&includ_pr10) or
+		icd_prcdr_cd17 in(&includ_pr10) or
+		icd_prcdr_cd18 in(&includ_pr10) or
+		icd_prcdr_cd19 in(&includ_pr10) or
+		icd_prcdr_cd20 in(&includ_pr10) or
+		icd_prcdr_cd21 in(&includ_pr10) or
+		icd_prcdr_cd22 in(&includ_pr10) or
+		icd_prcdr_cd23 in(&includ_pr10) or
+		icd_prcdr_cd24 in(&includ_pr10) or
+		icd_prcdr_cd25 in(&includ_pr10)		;	
+quit;
+*link icd prcdr identified to revenue center*;
+proc sql;
+	create table include_cohort1e (compress=yes) as
+select a.&rev_cntr, b.*
+from 
+	&rev_cohort 		a,
+	include_cohort1d 	b 
+where 
+	(a.&bene_id=b.&bene_id and a.&clm_id=b.&clm_id);
+quit;
+*transpose the revenue to 1 row per bene/clm;
+proc sort data=include_cohort1e nodupkey out=rev_transposed; by &bene_id &clm_id &rev_cntr; run;
+proc transpose data=rev_transposed out=rev_transposed (drop = _name_ _label_) prefix=rev_cntr;
+    by &bene_id &clm_id ;
+    var &rev_cntr;
+run;
+*bring transposed rev center in with claim;
+data include_cohort1e2 ; 
+merge 	include_cohort1d  
+		rev_transposed; *have separate criteria for hcpcs above so no need to grab hcpcs here;
+by &bene_id &clm_id ;
+run;
 
-	if substr(dx(j),1,&includ_dx10_substr6) in(&includ_dx10_code6) then KEEP=1;
+* link to CCN ;
+proc sql;
+	create table include_cohort1f (compress=yes) as
+select *
+from 
+	&permlib..ahrq_ccn a,
+	include_cohort1e2 b	
+where 
+	b.prvdr_num = a.&ccn
+;
+quit;
+*merge HCPCS and DX identified pops together;
+Data include_cohort1g; 
+set include_cohort1c;* include_cohort1f; 
+array rev{*} rev_cntr:;
+do r=1 to dim(rev);
+	if rev(r) in(&ED_rev_cntr) then pop_ed=1;	
+end; 
+label pop_ed='popped: revenue center indicated emergency department';
+&flag_popped_dt=&date; 
+	format &flag_popped_dt date9.; 						label &flag_popped_dt			=	&flag_popped_dt_label;
+				 										label &flag_popped				=	&flag_popped_label;
+array pr(&proc_cd_max) &proc_pfx.&proc_cd_min - &proc_pfx.&proc_cd_max;
+do i=1 to &proc_cd_max;
+	if substr(pr(i),1,&exclud_pr10_n) in(&EXclud_pr10) then DELETE=1;	
+	*if substr(pr(i),1,&includ_pr10_n) in(&includ_pr10) then KEEP=1;
+end;
+array dx(&diag_cd_max) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
+do j=1 to &diag_cd_max;	
+	if substr(dx(j),1,&includ_dx10_substr4) in(&includ_dx10_code4) then KEEPdx=1;
+	if substr(dx(j),1,&includ_dx10_substr5) in(&includ_dx10_code5) then KEEPdx=1;
+	if substr(dx(j),1,&includ_dx10_substr6) in(&includ_dx10_code6) then KEEPdx=1;
 	if substr(dx(j),1,&exclud_dx10_n) in(&exclud_dx10) then DELETE=1;
 end;
-if hcpcs_cd in(&includ_hcpcs) then KEEP=1;
+if hcpcs_cd in(&includ_hcpcs) then KEEPhcpcs=1;
 if hcpcs_cd in(&exclud_hcpcs) then DELETE=1;
-if KEEP ne 1 then DELETE;
+if KEEPhcpcs ne 1 AND KEEPdx ne 1 then DELETE;		
 if DELETE = 1 then delete;
 *if clm_drg_cd notin(&includ_drg) then delete;
 if &flag_popped ne 1 then delete;
