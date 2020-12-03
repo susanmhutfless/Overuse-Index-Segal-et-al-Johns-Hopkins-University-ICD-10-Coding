@@ -649,7 +649,7 @@ from
 	include_cohort1g		  b	
 where 
 		a.&bene_id=b.&bene_id 
-		and b.&flag_popped_dt <=a.elig_dt<= b.&flag_popped_dt+30	);  *Eliana: enter the lookback here;
+		and (	a.elig_dt <= b.&flag_popped_dt <=a.elig_dt+30	);  *Eliana: enter the lookback here;
 quit;
 %mend;
 /*** this section is related to IN Popped- INpatient claims ***
