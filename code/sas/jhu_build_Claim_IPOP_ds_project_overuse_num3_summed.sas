@@ -13,9 +13,11 @@
 /*** start of indicator specific variables ***/
 
 /*global variables for inclusion and exclusion*/
-%global includ_hcpcs includ_pr10 
+%global includ_hcpcs 
+		includ_pr10 includ_pr10_n
 		includ_dx10  includ_dx10_n 
-		EXCLUD_dx10  exclud_dx10_n;
+		EXCLUD_dx10  exclud_dx10_n
+		EXCLUD_pr10  exclud_pr10_n;
 
 /*inclusion criteria*/
 %let includ_hcpcs =
@@ -24,6 +26,7 @@
 
 %let includ_pr10 =
 					'BW03ZZZ' 			; *use for popped visits;
+%let includ_pr10_n = 7	;		*this number should match number that needs to be substringed;
 
 %let includ_dx10   = 'Z0181';	*use for inclusion visits;
 %let includ_dx10_n = 5	;		*this number should match number that needs to be substringed;
@@ -232,7 +235,7 @@ do i=1 to &proc_cd_max;
 end;
 array dx(&diag_cd_max) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
 do j=1 to &diag_cd_max;
-	if substr(dx(j),1,&includ_dx10_n) in(&includ_dx10) then KEEP=1;						*SUSIE: HOW OFTEN DOES Z CODE OCCUR????;
+	if substr(dx(j),1,&includ_dx10_n) in(&includ_dx10) then KEEP=1;					
 	if substr(dx(j),1,&exclud_dx10_n) in(&exclud_dx10) then DELETE=1;
 end;
 if KEEP ne 1 then DELETE;
@@ -629,7 +632,8 @@ label pop_ed='popped: revenue center indicated emergency department';
 				 										label &flag_popped				=	&flag_popped_label;
 array pr(&proc_cd_max) &proc_pfx.&proc_cd_min - &proc_pfx.&proc_cd_max;
 do i=1 to &proc_cd_max;
-	if substr(pr(i),1,&exclud_pr10_n) in(&EXclud_pr10) then DELETE=1;	
+	if substr(pr(i),1,&exclud_pr10_n) in(&EXclud_pr10) then DELETE=1;
+	if substr(pr(i),1,&includ_pr10_n) in(&includ_pr10) then &flag_popped=1;	*if had icd proc then popped;
 end;
 array dx(&diag_cd_max) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
 do j=1 to &diag_cd_max;
@@ -638,7 +642,7 @@ end;
 if KEEP ne 1 then DELETE;
 if DELETE = 1 then delete;
 *if clm_drg_cd notin(&includ_drg) then delete;
-if &flag_popped ne 1 then delete;
+if &flag_popped ne 1 then delete; *identify from hcpcs in sql or in array for icd proc;
 run; 
 *link to eligibility--require the timing of inclusion dx and procedure match-up;
 proc sql;
