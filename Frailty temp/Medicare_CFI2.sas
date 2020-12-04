@@ -159,6 +159,7 @@ data include_cohort;
 	if exclude^=1;
 
 	age=(&end.-&bene_dob.)/365.25;
+	if age<65 then delete; *added 04dec2020;
 
 	if &bene_sex.=1 then male=1; else if &bene_sex.=2 then male=0;
 
