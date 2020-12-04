@@ -639,7 +639,7 @@ array dx(&diag_cd_max) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
 do j=1 to &diag_cd_max;
 	if substr(dx(j),1,&exclud_dx10_n) in(&exclud_dx10) then DELETE=1;
 end;
-if KEEP ne 1 then DELETE;
+*if KEEP ne 1 then DELETE;		*if no keep statement above, deletes all--do not include this line if no keep statement;
 if DELETE = 1 then delete;
 *if clm_drg_cd notin(&includ_drg) then delete;
 if &flag_popped ne 1 then delete; *identify from hcpcs in sql or in array for icd proc;
