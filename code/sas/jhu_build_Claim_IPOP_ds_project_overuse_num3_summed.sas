@@ -1322,4 +1322,5 @@ where a.pop_compendium_hospital_id = b.compendium_hospital_id
 and b.health_sys_id2016 ne ' ';
 quit;
 
+*eliana this is missing code to drop n<11 and directions on what to output.  please be sure to use updated templates
 
