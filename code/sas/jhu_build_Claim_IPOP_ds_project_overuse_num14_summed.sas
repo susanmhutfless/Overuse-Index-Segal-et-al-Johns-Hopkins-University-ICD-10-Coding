@@ -14,7 +14,7 @@
 /*** start of indicator specific variables ***/
 
 /*global variables for inclusion and exclusion*/
-%global includ_hcpcs 
+%global includ_hcpcs includ_hcpcs1
 		includ_pr10  includ_pr10_n
 		includ_dx10  includ_dx10_n 
 		EXCLUD_dx10  exclud_dx10_n;
@@ -25,7 +25,7 @@
 %let includ_hcpcs =
 					'82378'	'86300'				;		*use for popped visit;
 
-%let includ_hcpcs =
+%let includ_hcpcs1 =
 					'19160'	'19161'	'19162' '19180'	
 					'19181'	'19182'	'19200' '19220'
 					'19240'	'19301'	'19302' '19303'
@@ -157,31 +157,7 @@ from
 where 
 		&gndr_cd = '2' 
 and
-	    substr(icd_dgns_cd1,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd2,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd3,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd4,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd5,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd6,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd7,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd8,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd9,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd10,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd11,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd12,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd13,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd14,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd15,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd16,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd17,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd18,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd19,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd20,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd21,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd22,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd23,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd24,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd25,1,&includ_dx10_n) in(&includ_dx10)		;
+	&hcpcs_cd in (&includ_hcpcs1);   
 quit;
 *link to ahrq ccn so in hospital within a health system;
 proc sql;
@@ -236,13 +212,15 @@ end;
 label elig_ed='eligible visit: revenue center indicated emergency department'; 
 array pr(&proc_cd_max) &proc_pfx.&proc_cd_min - &proc_pfx.&proc_cd_max;
 do i=1 to &proc_cd_max;
-	if substr(pr(i),1,&exclud_pr10_n) in(&EXclud_pr10) then DELETE=1;	
+	if substr(pr(i),1,&exclud_pr10_n) in(&EXclud_pr10) then DELETE=1;
+	if substr(pr(i),1,&includ_pr10_n) in(&includ_pr10) then KEEP=1;	
 end;
 array dx(&diag_cd_max) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
 do j=1 to &diag_cd_max;
 	if substr(dx(j),1,&includ_dx10_n) in(&includ_dx10) then KEEP=1;
 	if substr(dx(j),1,&exclud_dx10_n) in(&exclud_dx10) then DELETE=1;		
 end;
+if  &hcpcs_cd in (&includ_hcpcs1) then keep=1;
 if KEEP ne 1 then DELETE;
 if DELETE = 1 then delete;
 elig_dt=&date;
@@ -562,7 +540,7 @@ select *
 from 
 	&source
 where
-		icd_prcdr_cd1 in(&includ_pr10) or
+		icd_prcdr_cd1 in(&includ_pr10) or 
 		icd_prcdr_cd2 in(&includ_pr10) or
 		icd_prcdr_cd3 in(&includ_pr10) or
 		icd_prcdr_cd4 in(&includ_pr10) or
