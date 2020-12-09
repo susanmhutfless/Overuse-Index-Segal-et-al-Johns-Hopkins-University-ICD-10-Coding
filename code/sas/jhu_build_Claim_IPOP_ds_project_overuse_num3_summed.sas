@@ -13,9 +13,11 @@
 /*** start of indicator specific variables ***/
 
 /*global variables for inclusion and exclusion*/
-%global includ_hcpcs includ_pr10 
+%global includ_hcpcs 
+		includ_pr10 includ_pr10_n
 		includ_dx10  includ_dx10_n 
-		EXCLUD_dx10  exclud_dx10_n;
+		EXCLUD_dx10  exclud_dx10_n
+		EXCLUD_pr10  exclud_pr10_n;
 
 /*inclusion criteria*/
 %let includ_hcpcs =
@@ -24,6 +26,7 @@
 
 %let includ_pr10 =
 					'BW03ZZZ' 			; *use for popped visits;
+%let includ_pr10_n = 7	;		*this number should match number that needs to be substringed;
 
 %let includ_dx10   = 'Z0181';	*use for inclusion visits;
 %let includ_dx10_n = 5	;		*this number should match number that needs to be substringed;
@@ -220,20 +223,20 @@ array rev{*} rev_cntr:;
 do r=1 to dim(rev);
 	if rev(r) in(&ED_rev_cntr) then elig_ed=1;	
 end;
-label elig_ed='eligible visit: revenue center indicated emergency department'; *exclude ED visits
+label elig_ed='eligible visit: revenue center indicated emergency department'; *exclude ED visits;
 array hcpcs{*} hcpcs_cd:;
 do h=1 to dim(hcpcs);
 	if hcpcs(h) in(&exclud_hcpcs) then DELETE=1;	
 end;
-label elig_ed='eligible visit: revenue center indicated emergency department'; *exclude ED visits
+label elig_ed='eligible visit: revenue center indicated emergency department'; *exclude ED visits;
 array pr(&proc_cd_max) &proc_pfx.&proc_cd_min - &proc_pfx.&proc_cd_max;
 do i=1 to &proc_cd_max;
 	if substr(pr(i),1,&exclud_pr10_n) in(&EXclud_pr10) then DELETE=1;	
 end;
 array dx(&diag_cd_max) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
 do j=1 to &diag_cd_max;
-	if substr(dx(j),1,&includ_dx10_n) in(&includ_dx10) then KEEP=1;
-	if substr(dx(j),1,&exclud_dx10_n) in(&exclud_dx10) then DELETE=1
+	if substr(dx(j),1,&includ_dx10_n) in(&includ_dx10) then KEEP=1;					
+	if substr(dx(j),1,&exclud_dx10_n) in(&exclud_dx10) then DELETE=1;
 end;
 if KEEP ne 1 then DELETE;
 if DELETE = 1 then delete;
@@ -506,8 +509,8 @@ proc sort data=pop_&popN._OUTinclude NODUPKEY; by elig_compendium_hospital_id el
 proc sort data=pop_&popN._OUTinclude NODUPKEY; by elig_compendium_hospital_id elig_year elig_qtr &bene_id ; run; 
 
 data &permlib..pop_&popN._elig;
-set 	pop_&popN._OUTinclude 
-		pop_&popN._INinclude ;
+set 	pop_&popN._OUTinclude ;
+		*pop_&popN._INinclude ;
 run;
 *person can contribute only once even if seen in inpatient and outpatient in same hosp/year/qtr;
 proc sort data=&permlib..pop_&popN._elig NODUPKEY; by elig_compendium_hospital_id elig_year elig_qtr &bene_id ;run;
@@ -621,23 +624,25 @@ array rev{*} rev_cntr:;
 do r=1 to dim(rev);
 	if rev(r) in(&ED_rev_cntr) then pop_ed=1;	
 end; 
+*if outcome event occurs in ED then do NOT consider it a pop;
+if pop_ed=1 then delete;
 label pop_ed='popped: revenue center indicated emergency department';
 &flag_popped_dt=&date; 
 	format &flag_popped_dt date9.; 						label &flag_popped_dt			=	&flag_popped_dt_label;
 				 										label &flag_popped				=	&flag_popped_label;
 array pr(&proc_cd_max) &proc_pfx.&proc_cd_min - &proc_pfx.&proc_cd_max;
 do i=1 to &proc_cd_max;
-	if substr(pr(i),1,&exclud_pr10_n) in(&EXclud_pr10) then DELETE=1;	
+	if substr(pr(i),1,&exclud_pr10_n) in(&EXclud_pr10) then DELETE=1;
+	if substr(pr(i),1,&includ_pr10_n) in(&includ_pr10) then &flag_popped=1;	*if had icd proc then popped;
 end;
 array dx(&diag_cd_max) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
 do j=1 to &diag_cd_max;
-	if substr(dx(j),1,&includ_dx10_n) in(&includ_dx10) then KEEP=1;	*NOOOOOOOO!!!!!!!!!! SUSIE ELIANA;
-	****need exclusionary dx		susie;
+	if substr(dx(j),1,&exclud_dx10_n) in(&exclud_dx10) then DELETE=1;
 end;
-if KEEP ne 1 then DELETE;
+*if KEEP ne 1 then DELETE;		*if no keep statement above, deletes all--do not include this line if no keep statement;
 if DELETE = 1 then delete;
 *if clm_drg_cd notin(&includ_drg) then delete;
-if &flag_popped ne 1 then delete;
+if &flag_popped ne 1 then delete; *identify from hcpcs in sql or in array for icd proc;
 run; 
 *link to eligibility--require the timing of inclusion dx and procedure match-up;
 proc sql;
@@ -648,9 +653,7 @@ from
 	include_cohort1g		  b	
 where 
 		a.&bene_id=b.&bene_id 
-		and 
-		a.elig_dt=b.&flag_popped_dt
-		and (	(a.elig_dt-180) <= b.&flag_popped_dt <=a.elig_dt	);  *Eliana: enter the lookback here;
+		and (	a.elig_dt <= b.&flag_popped_dt <=a.elig_dt+30	);  *Eliana: enter the lookback here;
 quit;
 %mend;
 /*** this section is related to IN Popped- INpatient claims ***
@@ -818,7 +821,7 @@ data pop_&popN._in_out_popped
 	(keep = bene_id elig: pop: setting: 
 			/*&gndr_cd bene_race_cd	bene_cnty_cd bene_state_cd 	bene_mlg_cntct_zip_cd*/
 			);
-set pop_&popN._IN pop_&popN._OUT;
+set /*pop_&popN._IN*/ pop_&popN._OUT;
 pop_year=year(&flag_popped_dt);
 pop_qtr=qtr(&flag_popped_dt);
 pop_prvdr_num=prvdr_num;
@@ -1189,7 +1192,7 @@ proc print data=bene_race_cd noobs; run;
 proc means data=&in mean median min max; var  elig_age elig_los; run;
 %mend;
 
-
+/*
 title 'Inpatient Popped';
 %poppedlook(in=pop_&popN._IN);
 *delete the temp datasets;
@@ -1208,7 +1211,7 @@ title 'Eligible from inpatient encounter';
 %eliglook(in=pop_&popN._INinclude);
 		/*bene_state_cd prvdr_state_cd 
 		&pop_OP_PHYSN_SPCLTY_CD &pop_clm_fac_type_cd &pop_ptnt_dschrg_stus_cd
-		&pop_nch_clm_type_cd &pop_CLM_IP_ADMSN_TYPE_CD &pop_clm_src_ip_admsn_cd*/ 
+		&pop_nch_clm_type_cd &pop_CLM_IP_ADMSN_TYPE_CD &pop_clm_src_ip_admsn_cd*
 proc datasets lib=work nolist;
  delete setting: elig_ed elig_year elig_qtr pop_num icd: clm:
 		year qtr &gndr_cd  bene_race_cd 
@@ -1216,7 +1219,7 @@ proc datasets lib=work nolist;
 		&admtg_dgns_cd &OP_PHYSN_SPCLTY_CD nch_clm_type_cd
 		&ptnt_dschrg_stus_cd ;
 quit;
-run;
+run;*/
 title 'Outpatient Popped';
 %poppedlook(in=pop_&popN._OUT);
 proc datasets lib=work nolist;
@@ -1229,7 +1232,7 @@ proc datasets lib=work nolist;
 		&ptnt_dschrg_stus_cd ;
 quit;
 run;
-title 'Elgible from outpatient encounter';
+title 'Eligible from outpatient encounter';
 %eliglook(in=pop_&popN._OUTinclude);
 proc datasets lib=work nolist;
  delete setting: elig_ed elig_year elig_qtr pop_num icd: clm:
@@ -1319,4 +1322,5 @@ where a.pop_compendium_hospital_id = b.compendium_hospital_id
 and b.health_sys_id2016 ne ' ';
 quit;
 
+*eliana this is missing code to drop n<11 and directions on what to output.  please be sure to use updated templates
 
