@@ -38,7 +38,7 @@
 					'4A10X4Z'			; *use for popped visit;
 %let includ_pr10_n = 7;		*this number should match number that needs to be substringed;
 
-%let includ_dx10   = 'R559';						*use for inclusion visit;
+%let includ_dx10   = 'R55';						*use for inclusion visit;
 %let includ_dx10_n = 4;		*this number should match number that needs to be substringed;
 %let includ_drg = '0';
 
