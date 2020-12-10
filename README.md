@@ -12,7 +12,7 @@ Code related to past and current Johns Hopkins Overuse Index Projects (PI: Segal
 ## 15:
 ## 14: Problem with code, attempting to pull codes from table without those codes.  Log exported 10dec2020.
 ## 13: VRDC run complete.  Data requested from vrdc on 10dec2020.
-## 12: Problem with qualifying dx code.  Returned to EKG and JS on 24jul2020.
+## 12: Problem with qualifying dx code.  Returned to EKG and JS on 24jul2020.  Asked to run again without changes on 09dec2020.  Running on VRDC as of 10dec2020.
 ## 11: 
 ## 10: Needs review of codes/format in setup vs content of code vs excel sheet.
 ## 09: Problem with logic and templated used.  Returned to EKG and JS on 24jul2020.
