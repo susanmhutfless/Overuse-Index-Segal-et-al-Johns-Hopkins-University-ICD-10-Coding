@@ -3,7 +3,7 @@ Code related to past and current Johns Hopkins Overuse Index Projects (PI: Segal
 
 # Status by indicator for June-July 2020 final run
 ## 22: Problem with code.  Code requires dx code=0 to contributed.  Returned to EKG and JS on 15sep2020.
-## 21: VRDC run complete.  Aggregate data and log exported as of 23jul2020.
+## 21: VRDC run complete.  Aggregate data and log exported as of 23jul2020.  Re-running on 17dec2020 for pdf re-export per 14dec2020 request from JS.
 ## 20: VRDC run complete.  Aggregate data and log exported as of 16jul2020 & Aggregate data and log exported as of 09dec2020.
 ## 19: VRDC run complete.  Aggregate data, pdf checks and log exported as of 09jul2020. Sent to JS on 16jul2020. JS, EKG to confirm correct dx/pr--this requires AND for popped.
 ## 18: VRDC run complete.  Aggregate data, pdf checks and log exported. Final approved. DONE. 
@@ -12,7 +12,7 @@ Code related to past and current Johns Hopkins Overuse Index Projects (PI: Segal
 ## 15:
 ## 14: Problem with code, attempting to pull codes from table without those codes.  Log exported 10dec2020.
 ## 13: VRDC run complete.  Data requested from vrdc on 10dec2020.
-## 12: Problem with qualifying dx code.  Returned to EKG and JS on 24jul2020.  Asked to run again without changes on 09dec2020.  Running on VRDC as of 10dec2020.
+## 12: Problem with qualifying dx code.  Returned to EKG and JS on 24jul2020.  Asked to run again without changes on 09dec2020.  Running on VRDC as of 10dec2020.  Problems remain, exporting log that shows null tables based on codes and requested logic.
 ## 11: 
 ## 10: Needs review of codes/format in setup vs content of code vs excel sheet.
 ## 09: Problem with logic and templated used.  Returned to EKG and JS on 24jul2020.
