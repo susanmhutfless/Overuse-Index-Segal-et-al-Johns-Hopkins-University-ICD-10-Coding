@@ -32,17 +32,17 @@
 %let includ_pr10_n = 7;		*this number should match number that needs to be substringed;
 
 %let includ_dx10   = '0';						
-%let includ_dx10_n = 0;		
+%let includ_dx10_n = 7;		
 %let includ_drg = '0';
 
 /** Exclusion criteria **/
 %let exclud_hcpcs= '0'; 					
 
 %let EXclud_pr10 =	'0'				; 
-%let EXclud_pr10_n = 0;	
+%let EXclud_pr10_n = 7;	
 
 %let EXCLUD_dx10   = '0'; 						
-%let exclud_dx10_n = 0; 
+%let exclud_dx10_n = 7; 
 
 /** Label pop specific variables  **/
 %global popN;
