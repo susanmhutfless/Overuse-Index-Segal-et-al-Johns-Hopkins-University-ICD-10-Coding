@@ -1305,7 +1305,7 @@ run;
 
 *merge hospital aggregated data to health system--request export of this dataset;
 proc sql;
-create table pop_&popN._in_out_anal3 (compress=yes) as
+create table shu172sl.pop_&popN._in_out_anal3 (compress=yes) as
 select  
 *
 from 
