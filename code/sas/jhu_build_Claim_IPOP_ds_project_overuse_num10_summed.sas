@@ -35,7 +35,7 @@
 					'BW2GYZZ' 'BW2GZZZ' 'CP1Z1ZZ'			; *use for popped visit;
 %let includ_pr10_n = 7;		
 
-%let includ_dx10   = 'D075';						*use for inclusion visit;
+%let includ_dx10   = 'D075';						*use for inclusion visit and popped;
 %let includ_dx10_n = 4;		
 %let includ_drg = '0';
 
