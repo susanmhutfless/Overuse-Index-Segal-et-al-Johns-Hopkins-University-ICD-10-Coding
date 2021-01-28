@@ -23,12 +23,12 @@
 		*entire population;
 
 %let includ_hcpcs =
-					'74150'	'74160'	'74170'		;		*use for popped visit;
-
+					'74150'	'74160'	'74170'		;		*use for inclusion visit with at least 1;
+														*popped requires both with and without dye coded;
 
 
 %let includ_pr10 =
-					'BW2000Z' 'BW2010Z' 'BW20Y0Z'		; *use for popped visit;
+					'BW2000Z' 'BW2010Z' 'BW20Y0Z'		; *use for popped visit--Jodi--all people with at least 1 of these codes are considered popped based on the excel sheet criteria--are you sure that matches your stated preference. Jodi to confirm;
 %let includ_pr10_n = 7;		*this number should match number that needs to be substringed;
 
 %let includ_dx10   = '0';						
@@ -141,13 +141,13 @@
 
 /*** this macro is for inpatient and outpatient claims--must have DX code of interest***/
 %macro claims_rev(date=,	source=,  rev_cohort=, include_cohort=, ccn=);
-*identify dx codes of interest;
+*identify hcpcs codes of interest;
 proc sql;
 	create table include_cohort1 (compress=yes) as
 select * 
 from 
 &source
-where 
+where hcpcs_cd in(&includ_hcpcs);
 quit;
 *link to ahrq ccn so in hospital within a health system;
 proc sql;
@@ -197,7 +197,8 @@ end;
 label elig_ed='eligible visit: revenue center indicated emergency department'; 
 array hcpcs{*} hcpcs_cd:;
 do h=1 to dim(hcpcs);
-	if hcpcs(h) in(&exclud_hcpcs) then DELETE=1;	
+	if hcpcs(h) in(&exclud_hcpcs) then DELETE=1;
+	if hcpcs(h) in(&includ_hcpcs) then KEEP=1;	
 end;
 label elig_ed='eligible visit: revenue center indicated emergency department'; 
 array pr(&proc_cd_max) &proc_pfx.&proc_cd_min - &proc_pfx.&proc_cd_max;
@@ -209,6 +210,7 @@ do j=1 to &diag_cd_max;
 	if substr(dx(j),1,&includ_dx10_n) in(&includ_dx10) then KEEP=1;
 	if substr(dx(j),1,&exclud_dx10_n) in(&exclud_dx10) then DELETE=1;		
 end;
+if keep ne 1 then delete;
 elig_dt=&date;
 elig_age=(&date-&clm_dob)/365.25; label elig_age='age at eligibility';
 if &clm_end_dt_in ne . then do;
@@ -496,7 +498,10 @@ select &bene_id, &clm_id, &rev_cntr,
 from 
 	&rev_cohort
 where 
-	&hcpcs_cd in (&includ_hcpcs);
+	(&hcpcs_cd ='74150' and &hcpcs_cd ='74160')
+	or
+	&hcpcs_cd ='74170'
+;
 quit;
 * pull claim info for those with HCPCS (need to do this to get dx codes)*;
 proc sql;
