@@ -9,7 +9,7 @@
 
 *NOTE: Defining an array with 0 elements in log is acceptable if N identified is 0;
 
-/* Indicator 16 */
+/* Indicator 8 (old indicator 16) */
 
 /*** start of indicator specific variables ***/
 
@@ -46,7 +46,8 @@
 
 /** Label pop specific variables  **/
 %global popN;
-%let	popN							= 16;
+%let	popN							= 08;
+%let	poptext							= "traction"; 
 %let 	flag_popped             		= popped16 								;
 %let 	flag_popped_label				= 'indicator 16 popped'					;	
 %let	flag_popped_dt					= popped16_dt							;
@@ -1308,15 +1309,13 @@ run;
 data pop_&popN._in_out_anal2;
 merge pop_&popN._means pop_&popN._popped pop_&popN._elig_gndr_cd;
 by pop_compendium_hospital_id pop_year pop_qtr;
-if n=. then n=0;
-if 1<=n<=10 then n=.;
-if popped=. then popped=0;
-if 1<=popped<=10 then popped=.;
+pop_num=&popN;
+pop_text=&poptext;
 run;
 
 *merge hospital aggregated data to health system--request export of this dataset;
 proc sql;
-create table pop_&popN._in_out_anal3 (compress=yes) as
+create table &permlib..pop_&popN (compress=yes) as
 select  
 *
 from 
