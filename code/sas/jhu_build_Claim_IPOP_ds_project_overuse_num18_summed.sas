@@ -18,7 +18,7 @@ then evaluate N of the eligible that popped;
 
 *NOTE: Defining an array with 0 elements in log is acceptable if N identified is 0;
 
-/* Indicator 18 */
+/* Indicator 11 (old indicator 18) */
 
 /*** start of indicator specific variables ***/
 
@@ -59,7 +59,8 @@ then evaluate N of the eligible that popped;
 
 /** Label pop specific variables  **/
 %global popN;
-%let	popN							= 18;
+%let	popN							= 11;
+%let	poptext							= "meniscectomy"; 
 %let 	flag_popped             		= popped18 								;
 %let 	flag_popped_label				= 'indicator 18 popped'					;	
 %let	flag_popped_dt					= popped18_dt							;
@@ -1321,15 +1322,13 @@ run;
 data pop_&popN._in_out_anal2;
 merge pop_&popN._means pop_&popN._popped pop_&popN._elig_gndr_cd;
 by pop_compendium_hospital_id pop_year pop_qtr;
-if n=. then n=0;
-if 1<=n<=10 then n=.;
-if popped=. then popped=0;
-if 1<=popped<=10 then popped=.;
+pop_num=&popN;
+pop_text=&poptext;
 run;
 
 *merge hospital aggregated data to health system--request export of this dataset;
 proc sql;
-create table pop_&popN._in_out_anal3 (compress=yes) as
+create table &permlib..pop_&popN (compress=yes) as
 select  
 *
 from 
