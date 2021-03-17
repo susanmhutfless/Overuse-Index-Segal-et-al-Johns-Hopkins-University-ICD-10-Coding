@@ -23,12 +23,12 @@
 		*entire population;
 
 %let includ_hcpcs =
-					'74150'	'74160'	'74170'		;		*use for popped visit;
-
+					'74150'	'74160'	'74170'		;		*use for inclusion visit with at least 1;
+														*popped requires both with and without dye coded;
 
 
 %let includ_pr10 =
-					'BW2000Z' 'BW2010Z' 'BW20Y0Z'		; *use for popped visit;
+					'BW2000Z' 'BW2010Z' 'BW20Y0Z'		; *use for popped visit--Jodi--all people with at least 1 of these codes are considered popped based on the excel sheet criteria--are you sure that matches your stated preference. Jodi to confirm;
 %let includ_pr10_n = 7;		*this number should match number that needs to be substringed;
 
 %let includ_dx10   = '0';						
@@ -139,15 +139,15 @@
 *start identification of eligibility;
 *First identify all who are eligible;
 
-/*** this macro is for inpatient and outpatient claims--must have DX code of interest***/
+/*** this macro is for inpatient and outpatient claims***/
 %macro claims_rev(date=,	source=,  rev_cohort=, include_cohort=, ccn=);
-*identify dx codes of interest;
+*identify hcpcs codes of interest;
 proc sql;
 	create table include_cohort1 (compress=yes) as
 select * 
 from 
 &source
-where 
+where hcpcs_cd in(&includ_hcpcs);
 quit;
 *link to ahrq ccn so in hospital within a health system;
 proc sql;
@@ -194,14 +194,48 @@ array rev{*} rev_cntr:;
 do r=1 to dim(rev);
 	if rev(r) in(&ED_rev_cntr) then elig_ed=1;	
 end;
+proc sql;
+	create table include_cohort1d (compress=yes) as
+select *
+from 
+	&source
+where
+		icd_prcdr_cd1 in(&includ_pr10) or
+		icd_prcdr_cd2 in(&includ_pr10) or
+		icd_prcdr_cd3 in(&includ_pr10) or
+		icd_prcdr_cd4 in(&includ_pr10) or
+		icd_prcdr_cd5 in(&includ_pr10) or
+		icd_prcdr_cd6 in(&includ_pr10) or
+		icd_prcdr_cd7 in(&includ_pr10) or
+		icd_prcdr_cd8 in(&includ_pr10) or
+		icd_prcdr_cd9 in(&includ_pr10) or
+		icd_prcdr_cd10 in(&includ_pr10) or
+		icd_prcdr_cd11 in(&includ_pr10) or
+		icd_prcdr_cd12 in(&includ_pr10) or
+		icd_prcdr_cd13 in(&includ_pr10) or
+		icd_prcdr_cd14 in(&includ_pr10) or
+		icd_prcdr_cd15 in(&includ_pr10) or
+		icd_prcdr_cd16 in(&includ_pr10) or
+		icd_prcdr_cd17 in(&includ_pr10) or
+		icd_prcdr_cd18 in(&includ_pr10) or
+		icd_prcdr_cd19 in(&includ_pr10) or
+		icd_prcdr_cd20 in(&includ_pr10) or
+		icd_prcdr_cd21 in(&includ_pr10) or
+		icd_prcdr_cd22 in(&includ_pr10) or
+		icd_prcdr_cd23 in(&includ_pr10) or
+		icd_prcdr_cd24 in(&includ_pr10) or
+		icd_prcdr_cd25 in(&includ_pr10)		;
+run;
 label elig_ed='eligible visit: revenue center indicated emergency department'; 
 array hcpcs{*} hcpcs_cd:;
 do h=1 to dim(hcpcs);
-	if hcpcs(h) in(&exclud_hcpcs) then DELETE=1;	
+	if hcpcs(h) in(&exclud_hcpcs) then DELETE=1;
+	if hcpcs(h) in(&includ_hcpcs) then KEEP=1;	
 end;
 label elig_ed='eligible visit: revenue center indicated emergency department'; 
 array pr(&proc_cd_max) &proc_pfx.&proc_cd_min - &proc_pfx.&proc_cd_max;
 do i=1 to &proc_cd_max;
+	if substr(pr(i),1,&includ_pr10_n) in(&includ_pr10) then KEEP=1;
 	if substr(pr(i),1,&exclud_pr10_n) in(&EXclud_pr10) then DELETE=1;	
 end;
 array dx(&diag_cd_max) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
@@ -209,6 +243,7 @@ do j=1 to &diag_cd_max;
 	if substr(dx(j),1,&includ_dx10_n) in(&includ_dx10) then KEEP=1;
 	if substr(dx(j),1,&exclud_dx10_n) in(&exclud_dx10) then DELETE=1;		
 end;
+if keep ne 1 then delete;
 elig_dt=&date;
 elig_age=(&date-&clm_dob)/365.25; label elig_age='age at eligibility';
 if &clm_end_dt_in ne . then do;
@@ -219,14 +254,14 @@ if elig_los =. then do;
 end;
 elig=1;
 pop_num=&popN;
-run; 
+run;
 *delete the temp datasets;
 proc datasets lib=work nolist;
  delete include: ;
 quit;
 run;
 %mend;
-/*** this section is related to IP - inpatient claims--for eligible cohort***
+/*this section is related to IP - inpatient claims--for eligible cohort***/
 %claims_rev(date=&clm_beg_dt_in, source=rif2015.INpatient_claims_07,  
 	rev_cohort=rif2015.inpatient_revenue_07, include_cohort=pop_&popN._INinclude_2015_7, ccn=ccn2016);
 %claims_rev(date=&clm_beg_dt_in, source=rif2015.INpatient_claims_08,  
@@ -320,7 +355,7 @@ data pop_&popN._INinclude (keep= &bene_id &clm_id elig_dt elig: setting_elig:
 							&diag_pfx.&diag_cd_min   &proc_pfx.&proc_cd_min
 							prvdr_num prvdr_state_cd OP_PHYSN_SPCLTY_CD rev_cntr1
 							at_physn_npi op_physn_npi org_npi_num ot_physn_npi rndrng_physn_npi
-							/*RFR_PHYSN_NPI*
+							/*RFR_PHYSN_NPI*/
 							bene_cnty_cd bene_state_cd 	bene_mlg_cntct_zip_cd
 						);
 set pop_&popN._INinclude: 	;
@@ -347,7 +382,7 @@ format bene_state_cd prvdr_state_cd $state. OP_PHYSN_SPCLTY_CD $speccd. rev_cntr
 		&ptnt_dschrg_stus_cd $stuscd. &gndr_cd gender. bene_race_cd race. &clm_drg_cd drg.
 		&icd_dgns_cd1 &admtg_dgns_cd $dgns. &icd_prcdr_cd1 $prcdr. hcpcs_cd1 $hcpcs. ;
 run;
-/* get rid of duplicate rows so that each bene contributes 1x per hospital/year/qtr *
+/* get rid of duplicate rows so that each bene contributes 1x per hospital/year/qtr */
 proc sort data=pop_&popN._INinclude NODUPKEY; by elig_compendium_hospital_id elig_year elig_qtr &bene_id elig_dt; run;
 proc sort data=pop_&popN._INinclude NODUPKEY; by elig_compendium_hospital_id elig_year elig_qtr &bene_id ; run;
 
@@ -496,7 +531,10 @@ select &bene_id, &clm_id, &rev_cntr,
 from 
 	&rev_cohort
 where 
-	&hcpcs_cd in (&includ_hcpcs);
+	(&hcpcs_cd ='74150' and &hcpcs_cd ='74160')
+	or
+	&hcpcs_cd ='74170'
+;
 quit;
 * pull claim info for those with HCPCS (need to do this to get dx codes)*;
 proc sql;
@@ -628,8 +666,7 @@ where
 ;  
 quit;
 %mend;
-
-/*** this section is related to IP - inpatient claims ***
+/*** this section is related to IP - inpatient claims ***/
 %claims_rev(date=&clm_beg_dt_in, source=rif2016.inpatient_claims_01, rev_cohort=rif2016.inpatient_revenue_01, include_cohort=pop_&popN._IN_2016_1, ccn=ccn2016);
 %claims_rev(date=&clm_beg_dt_in, source=rif2016.inpatient_claims_02, rev_cohort=rif2016.inpatient_revenue_02, include_cohort=pop_&popN._IN_2016_2, ccn=ccn2016);
 %claims_rev(date=&clm_beg_dt_in, source=rif2016.inpatient_claims_03, rev_cohort=rif2016.inpatient_revenue_03, include_cohort=pop_&popN._IN_2016_3, ccn=ccn2016);
@@ -674,7 +711,7 @@ data pop_&popN._IN (keep=  pop: &flag_popped_dt elig: setting:
 							&admtg_dgns_cd &clm_drg_cd  rev_cntr1
 							prvdr_num prvdr_state_cd OP_PHYSN_SPCLTY_CD 
 							at_physn_npi op_physn_npi org_npi_num ot_physn_npi rndrng_physn_npi
-							/*RFR_PHYSN_NPI*
+							/*RFR_PHYSN_NPI*/
 							&gndr_cd bene_race_cd	bene_cnty_cd
 							bene_state_cd 	bene_mlg_cntct_zip_cd );
 set pop_&popN._IN_:;
