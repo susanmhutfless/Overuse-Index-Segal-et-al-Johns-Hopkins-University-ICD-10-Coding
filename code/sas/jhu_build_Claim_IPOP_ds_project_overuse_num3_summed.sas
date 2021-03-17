@@ -7,7 +7,7 @@
 /*** Indicator description ***/
 /* Description and codes from .xlsx file  "ICD-10 conversions_7_24_2020" */
 
-/* Indicator 3 */
+/* Indicator 1 (old indicator 3) */
 
 
 /*** start of indicator specific variables ***/
@@ -51,7 +51,8 @@
 
 /** Label pop specific variables  **/
 %global popN;
-%let	popN							= 3;
+%let	popN							= 01;
+%let 	poptext							= "preopchest"							;
 %let 	flag_popped             		= popped3 								;
 %let 	flag_popped_label				= 'indicator 3 popped'					;	
 %let	flag_popped_dt					= popped3_dt							;
@@ -1306,13 +1307,14 @@ run;
 data pop_&popN._in_out_anal2;
 merge pop_&popN._means pop_&popN._popped pop_&popN._elig_gndr_cd;
 by pop_compendium_hospital_id pop_year pop_qtr;
-if n<11 then delete;
-if popped=. then popped=0;
+pop_num=&popN;
+pop_text=&poptext;
 run;
+
 
 *merge hospital aggregated data to health system;
 proc sql;
-create table pop_&popN._in_out_anal3 (compress=yes) as
+create table &permlib..pop_&popN (compress=yes) as		
 select  
 *
 from 
@@ -1321,6 +1323,4 @@ pop_&popN._in_out_anal2 a,
 where a.pop_compendium_hospital_id = b.compendium_hospital_id 
 and b.health_sys_id2016 ne ' ';
 quit;
-
-*eliana this is missing code to drop n<11 and directions on what to output.  please be sure to use updated templates
 
