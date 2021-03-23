@@ -17,7 +17,7 @@ Setting		ED
 System		All 	
 
 Actor		Perhaps failure of primary care
-*/
+
 
 Updated with information from ICD-10 conversions_12_06-19*/
 
@@ -28,13 +28,13 @@ Updated with information from ICD-10 conversions_12_06-19*/
 %global includ_hcpcs;
 %global includ_pr10;
 
-%let includ_hcpcs =
-					Use revenue codes for site of care			;
+%let includ_hcpcs = '0';
+					*Use revenue codes for site of care			;
 
-%let includ_pr10 =
+%let includ_pr10 = '0'
 									;
 
-%let includ_drg = ;
+%let includ_drg = '0';
 
 /** Exclusion criteria **/
 %let EXCLUD_dx10_1='C'; 
