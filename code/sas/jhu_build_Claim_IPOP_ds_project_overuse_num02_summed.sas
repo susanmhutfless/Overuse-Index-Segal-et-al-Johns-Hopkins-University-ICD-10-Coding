@@ -1,5 +1,5 @@
 /********************************************************************
-* Job Name: jhu_build_Claim_IPOP_ds_project_overuse_num2_summed.sas
+* Job Name: jhu_build_Claim_IPOP_ds_project_overuse_num02_summed.sas
 * Job Desc: Input for Inpatient & Outpatient (Including Carrier) Claims 
 * Copyright: Johns Hopkins University - SegalLab & HutflessLab 2019
 ********************************************************************/
@@ -51,8 +51,8 @@
 
 /** Label pop specific variables  **/
 %global popN;
-%let	popN							= 2;
-%let 	flag_popped             		= popped2 								;
+%let	popN							= 02;
+%let 	flag_popped             		= popped02 								;
 %let 	flag_popped_label				= 'indicator 2 popped'					;	
 %let	flag_popped_dt					= popped2_dt							;
 %let 	flag_popped_dt_label			= 'indicator 2 date patient popped (IP=clm_admsn_dt OP=clm_from_dt)'	;
