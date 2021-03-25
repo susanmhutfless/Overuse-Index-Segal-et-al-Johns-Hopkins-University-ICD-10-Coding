@@ -44,7 +44,7 @@
 %let exclud_hcpcs= '0'; 					
 
 %let EXclud_pr10 =	'0'				; 
-%let EXclud_pr10_n = 0;	
+%let EXclud_pr10_n = 1;	
 
 %let EXCLUD_dx10  = 'D472' ; 						* use for inclusion visit & popped visit;
 %let exclud_dx10_n = 4; 
