@@ -31,7 +31,7 @@
 
 %let includ_pr10 =
 					'0'			; 
-%let includ_pr10_n = 0;		
+%let includ_pr10_n = 1;		
 %let includ_dx10_code3   = 'Z88' ;						*use for inclusion visit;
 %let includ_dx10_code3_n = 3;	
 %let includ_dx10_code4   = 'Z910' 'J301' 'J302'
@@ -250,15 +250,6 @@ do r=1 to dim(rev);
 	if rev(r) in(&ED_rev_cntr) then elig_ed=1;	
 end;
 label elig_ed='eligible visit: revenue center indicated emergency department'; 
-array hcpcs{*} hcpcs_cd:;
-do h=1 to dim(hcpcs);
-	if hcpcs(h) in(&exclud_hcpcs) then DELETE=1;	
-end;
-label elig_ed='eligible visit: revenue center indicated emergency department'; 
-array pr(&proc_cd_max) &proc_pfx.&proc_cd_min - &proc_pfx.&proc_cd_max;
-do i=1 to &proc_cd_max;
-	if substr(pr(i),1,&exclud_pr10_n) in(&EXclud_pr10) then DELETE=1;	
-end;
 array dx(&diag_cd_max) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
 do j=1 to &diag_cd_max;
 	if substr(dx(j),1,&includ_dx10_code3_n) in(&includ_dx10_code3) then KEEP=1;
@@ -577,76 +568,10 @@ where
 	b.prvdr_num = a.&ccn
 ;
 quit;
-*pull icd procedure criteria from claims*;
-proc sql;
-	create table include_cohort1d (compress=yes) as
-select *
-from 
-	&source
-where
-		icd_prcdr_cd1 in(&includ_pr10) or				/*Eliana--I don't see icd procedure inclusion criteria?*/
-		icd_prcdr_cd2 in(&includ_pr10) or				/*you want to get this info only for that had hcpcs--use different template*/
-		icd_prcdr_cd3 in(&includ_pr10) or
-		icd_prcdr_cd4 in(&includ_pr10) or
-		icd_prcdr_cd5 in(&includ_pr10) or
-		icd_prcdr_cd6 in(&includ_pr10) or
-		icd_prcdr_cd7 in(&includ_pr10) or
-		icd_prcdr_cd8 in(&includ_pr10) or
-		icd_prcdr_cd9 in(&includ_pr10) or
-		icd_prcdr_cd10 in(&includ_pr10) or
-		icd_prcdr_cd11 in(&includ_pr10) or
-		icd_prcdr_cd12 in(&includ_pr10) or
-		icd_prcdr_cd13 in(&includ_pr10) or
-		icd_prcdr_cd14 in(&includ_pr10) or
-		icd_prcdr_cd15 in(&includ_pr10) or
-		icd_prcdr_cd16 in(&includ_pr10) or
-		icd_prcdr_cd17 in(&includ_pr10) or
-		icd_prcdr_cd18 in(&includ_pr10) or
-		icd_prcdr_cd19 in(&includ_pr10) or
-		icd_prcdr_cd20 in(&includ_pr10) or
-		icd_prcdr_cd21 in(&includ_pr10) or
-		icd_prcdr_cd22 in(&includ_pr10) or
-		icd_prcdr_cd23 in(&includ_pr10) or
-		icd_prcdr_cd24 in(&includ_pr10) or
-		icd_prcdr_cd25 in(&includ_pr10)		;
-quit;
-*link icd prcdr identified to revenue center*;
-proc sql;
-	create table include_cohort1e (compress=yes) as
-select a.&rev_cntr, b.*
-from 
-	&rev_cohort 		a,
-	include_cohort1d 	b 
-where 
-	(a.&bene_id=b.&bene_id and a.&clm_id=b.&clm_id);
-quit;
-*transpose the revenue to 1 row per bene/clm;
-proc sort data=include_cohort1e nodupkey out=rev_transposed; by &bene_id &clm_id &rev_cntr; run;
-proc transpose data=rev_transposed out=rev_transposed (drop = _name_ _label_) prefix=rev_cntr;
-    by &bene_id &clm_id ;
-    var &rev_cntr;
-run;
-*bring transposed rev center in with claim;
-data include_cohort1e2 ; 
-merge 	include_cohort1d  
-		rev_transposed; *have separate criteria for hcpcs above so no need to grab hcpcs here;
-by &bene_id &clm_id ;
-run;
 
-* link to CCN ;
-proc sql;
-	create table include_cohort1f (compress=yes) as
-select *
-from 
-	&permlib..ahrq_ccn a,
-	include_cohort1e2 b	
-where 
-	b.prvdr_num = a.&ccn
-;
-quit;
 *merge HCPCS and PRCDR identified pops together;
 Data include_cohort1g; 
-set include_cohort1c include_cohort1f; 
+set include_cohort1c; 
 array rev{*} rev_cntr:;
 do r=1 to dim(rev);
 	if rev(r) in(&ED_rev_cntr) then pop_ed=1;	
@@ -655,15 +580,9 @@ label pop_ed='popped: revenue center indicated emergency department';
 &flag_popped_dt=&date; 
 	format &flag_popped_dt date9.; 						label &flag_popped_dt			=	&flag_popped_dt_label;
 				 										label &flag_popped				=	&flag_popped_label;
-array pr(&proc_cd_max) &proc_pfx.&proc_cd_min - &proc_pfx.&proc_cd_max;
-do i=1 to &proc_cd_max;
-	if substr(pr(i),1,&exclud_pr10_n) in(&EXclud_pr10) then DELETE=1;	
-	if substr(pr(i),1,&includ_pr10_n) in(&includ_pr10) then KEEP=1;
-end;
 array dx(&diag_cd_max) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
 do j=1 to &diag_cd_max;
-		if substr(dx(j),1,&exclud_dx10_substr3) in(&EXCLUD_dx10_code3) then DELETE=1;
-	if substr(dx(j),1,&exclud_dx10_substr4) in(&EXCLUD_dx10_code4) then DELETE=1;	
+		if substr(dx(j),1,&exclud_dx10_n) in(&EXCLUD_dx10) then DELETE=1;	
 end;
 if hcpcs_cd in(&includ_hcpcs) then KEEP=1;
 if hcpcs_cd in(&exclud_hcpcs) then DELETE=1;
@@ -849,7 +768,7 @@ run;
 proc sort data=pop_&popN._OUT NODUPKEY; by pop_compendium_hospital_id pop_year pop_qtr &bene_id elig_dt; run;
 proc sort data=pop_&popN._OUT NODUPKEY; by pop_compendium_hospital_id pop_year pop_qtr &bene_id ; run; 
 
-data pop_&popN._in_out_popped
+data &permlib..pop_&popN._in_out_popped
 	(keep = bene_id elig: pop: setting: 
 			/*&gndr_cd bene_race_cd	bene_cnty_cd bene_state_cd 	bene_mlg_cntct_zip_cd*/
 			);
@@ -871,13 +790,13 @@ pop_bene_state_cd=bene_state_cd;
 pop_bene_mlg_cntct_zip_cd=bene_mlg_cntct_zip_cd;
 run;
 *person can contribute only once even if seen in inpatient and outpatient in same hosp/year/qtr;
-proc sort data=pop_&popN._in_out_popped NODUPKEY; by pop_compendium_hospital_id pop_year pop_qtr &bene_id elig_dt; run;
-proc sort data=pop_&popN._in_out_popped NODUPKEY; by pop_compendium_hospital_id pop_year pop_qtr &bene_id; run;
+proc sort data=&permlib..pop_&popN._in_out_popped NODUPKEY; by pop_compendium_hospital_id pop_year pop_qtr &bene_id elig_dt; run;
+proc sort data=&permlib..pop_&popN._in_out_popped NODUPKEY; by pop_compendium_hospital_id pop_year pop_qtr &bene_id; run;
 
 *End: Identify who popped;
 
 *Start link eligible and popped;
-proc sort data=pop_&popN._in_out_popped		NODUPKEY; by  &bene_id elig_dt;run;
+proc sort data=&permlib..pop_&popN._in_out_popped		NODUPKEY; by  &bene_id elig_dt;run;
 proc sort data=&permlib..pop_&popN._elig	NODUPKEY; by  &bene_id elig_dt;run;
 
 *choose POP hospital, year quarter if patient poppped, otherwise choose ELIG;
@@ -1341,14 +1260,15 @@ data pop_&popN._in_out_anal2;
 merge pop_&popN._means pop_&popN._popped pop_&popN._elig_gndr_cd;
 by pop_compendium_hospital_id pop_year pop_qtr;
 if n=. then n=0;
-if 1<=n<=10 then n=.;
+*if 1<=n<=10 then n=.;
 if popped=. then popped=0;
-if 1<=popped<=10 then popped=.;
+*if 1<=popped<=10 then popped=.;pop_num=&popN;
+pop_text=&poptext;
 run;
 
 *merge hospital aggregated data to health system--request export of this dataset;
 proc sql;
-create table pop_&popN._in_out_anal3 (compress=yes) as
+create table &permlib..pop_&popN (compress=yes) as
 select  
 *
 from 
