@@ -1,11 +1,8 @@
 /********************************************************************
-* Job Name: jhu_build_Claim_IPOP_ds_project_overuse_num03_summed.sas
-* Job Desc: Input for Inpatient & Outpatient (Including Carrier) Claims 
+* Job Name: jhu_build_Claim_IPOP_ds_project_overuse_preopchest.sas
+* Job Desc: Input for Inpatient & Outpatient Claims 
 * Copyright: Johns Hopkins University - SegalLab & HutflessLab 2019
 ********************************************************************/
-
-/*** Indicator description ***/
-/* Description and codes from .xlsx file  "ICD-10 conversions_7_24_2020" */
 
 /* Indicator 1 (old indicator 3) */
 
@@ -53,32 +50,32 @@
 %global popN;
 %let	popN							= 01;
 %let 	poptext							= "preopchest"							;
-%let 	flag_popped             		= popped3 								;
-%let 	flag_popped_label				= 'indicator 3 popped'					;	
-%let	flag_popped_dt					= popped3_dt							;
-%let 	flag_popped_dt_label			= 'indicator 3 date patient popped (IP=clm_admsn_dt OP=clm_from_dt)'	;
-%let 	pop_age							= pop_3_age							;				
-%let	pop_age_label					= 'age popped for pop 3'				;
-%let	pop_los							= pop_3_los							;
+%let 	flag_popped             		= popped1 								;
+%let 	flag_popped_label				= 'indicator 1 popped'					;	
+%let	flag_popped_dt					= popped1_dt							;
+%let 	flag_popped_dt_label			= 'indicator 1 date patient popped (IP=clm_admsn_dt OP=clm_from_dt)'	;
+%let 	pop_age							= pop_1_age							;				
+%let	pop_age_label					= 'age popped for pop 1'				;
+%let	pop_los							= pop_1_los							;
 %let	pop_los_label					= 'length of stay when patient popped'	;
-%let	pop_year						= pop_3_year							;
-%let	pop_nch_clm_type_cd				= pop_3_nch_clm_type_cd				;
-%let  	pop_CLM_IP_ADMSN_TYPE_CD		= pop_3_CLM_IP_ADMSN_TYPE_CD			;
-%let	pop_clm_fac_type_cd				= pop_3_clm_fac_type_cd				;
-%let	pop_clm_src_ip_admsn_cd			= pop_3_clm_src_ip_admsn_cd			;
-%let	pop_ptnt_dschrg_stus_cd  		= pop_3_ptnt_dschrg_stus_cd			;
-%let	pop_admtg_dgns_cd				= pop_3_admtg_dgns_cd					;
-%let	pop_icd_dgns_cd1				= pop_3_icd_dgns_cd1					;
-%let	pop_icd_prcdr_cd1				= pop_3_icd_prcdr_cd1					;
-%let	pop_clm_drg_cd					= pop_3_clm_drg_cd						;
-%let	pop_hcpcs_cd					= pop_3_hcpcs_cd						;
-%let	pop_OP_PHYSN_SPCLTY_CD			= pop_3_OP_PHYSN_SPCLTY_CD				;
-%let	pop_nch_clm_type_cd				= pop_3_nch_clm_type_cd				;
-%let	pop_nch_clm_type_cd_label		= 'claim/facility type for pop 3' 		;
-%let	pop_CLM_IP_ADMSN_TYPE_CD_label	= 'inpatient admission type code for pop 3'	;
-%let  	pop_clm_fac_type_cd_label		= 'inpatient clm_fac_type_cd for pop 3';
-%let	pop_clm_src_ip_admsn_cd_label	= 'clm_src_ip_admsn_cd for pop 3'		;
-%let	pop_ptnt_dschrg_stus_cd_label	= 'discharge status code for pop 3'	;	
+%let	pop_year						= pop_1_year							;
+%let	pop_nch_clm_type_cd				= pop_1_nch_clm_type_cd				;
+%let  	pop_CLM_IP_ADMSN_TYPE_CD		= pop_1_CLM_IP_ADMSN_TYPE_CD			;
+%let	pop_clm_fac_type_cd				= pop_1_clm_fac_type_cd				;
+%let	pop_clm_src_ip_admsn_cd			= pop_1_clm_src_ip_admsn_cd			;
+%let	pop_ptnt_dschrg_stus_cd  		= pop_1_ptnt_dschrg_stus_cd			;
+%let	pop_admtg_dgns_cd				= pop_1_admtg_dgns_cd					;
+%let	pop_icd_dgns_cd1				= pop_1_icd_dgns_cd1					;
+%let	pop_icd_prcdr_cd1				= pop_1_icd_prcdr_cd1					;
+%let	pop_clm_drg_cd					= pop_1_clm_drg_cd						;
+%let	pop_hcpcs_cd					= pop_1_hcpcs_cd						;
+%let	pop_OP_PHYSN_SPCLTY_CD			= pop_1_OP_PHYSN_SPCLTY_CD				;
+%let	pop_nch_clm_type_cd				= pop_1_nch_clm_type_cd				;
+%let	pop_nch_clm_type_cd_label		= 'claim/facility type for pop 1' 		;
+%let	pop_CLM_IP_ADMSN_TYPE_CD_label	= 'inpatient admission type code for pop 1'	;
+%let  	pop_clm_fac_type_cd_label		= 'inpatient clm_fac_type_cd for pop 1';
+%let	pop_clm_src_ip_admsn_cd_label	= 'clm_src_ip_admsn_cd for pop 1'		;
+%let	pop_ptnt_dschrg_stus_cd_label	= 'discharge status code for pop 1'	;	
 /*** end of indicator specific variables ***/
 
 
@@ -818,7 +815,7 @@ run;
 proc sort data=pop_&popN._OUT NODUPKEY; by pop_compendium_hospital_id pop_year pop_qtr &bene_id elig_dt; run;
 proc sort data=pop_&popN._OUT NODUPKEY; by pop_compendium_hospital_id pop_year pop_qtr &bene_id ; run; 
 
-data pop_&popN._in_out_popped
+data &permlib..pop_&popN._in_out_popped
 	(keep = bene_id elig: pop: setting: 
 			/*&gndr_cd bene_race_cd	bene_cnty_cd bene_state_cd 	bene_mlg_cntct_zip_cd*/
 			);
@@ -840,13 +837,13 @@ pop_bene_state_cd=bene_state_cd;
 pop_bene_mlg_cntct_zip_cd=bene_mlg_cntct_zip_cd;
 run;
 *person can contribute only once even if seen in inpatient and outpatient in same hosp/year/qtr;
-proc sort data=pop_&popN._in_out_popped NODUPKEY; by pop_compendium_hospital_id pop_year pop_qtr &bene_id elig_dt; run;
-proc sort data=pop_&popN._in_out_popped NODUPKEY; by pop_compendium_hospital_id pop_year pop_qtr &bene_id; run;
+proc sort data=&permlib..pop_&popN._in_out_popped NODUPKEY; by pop_compendium_hospital_id pop_year pop_qtr &bene_id elig_dt; run;
+proc sort data=&permlib..pop_&popN._in_out_popped NODUPKEY; by pop_compendium_hospital_id pop_year pop_qtr &bene_id; run;
 
 *End: Identify who popped;
 
 *Start link eligible and popped;
-proc sort data=pop_&popN._in_out_popped		NODUPKEY; by  &bene_id elig_dt;run;
+proc sort data=&permlib..pop_&popN._in_out_popped		NODUPKEY; by  &bene_id elig_dt;run;
 proc sort data=&permlib..pop_&popN._elig	NODUPKEY; by  &bene_id elig_dt;run;
 
 *choose POP hospital, year quarter if patient poppped, otherwise choose ELIG;
@@ -1202,7 +1199,7 @@ proc datasets lib=work nolist;
  		pop_icd: 
 		year qtr &gndr_cd  bene_race_cd 
 		pop_ed pop_year
-		&pop_hcpcs_cd &pop_clm_drg_cd &pop_rev_cntr
+		&pop_hcpcs_cd &pop_clm_drg_cd 
 		&pop_admtg_dgns_cd &pop_OP_PHYSN_SPCLTY_CD pop_nch_clm_type_cd
 		&ptnt_dschrg_stus_cd ;
 quit;
@@ -1228,7 +1225,7 @@ proc datasets lib=work nolist;
  		pop_icd: 
 		year qtr &gndr_cd  bene_race_cd 
 		pop_ed pop_year
-		&pop_hcpcs_cd &pop_clm_drg_cd &pop_rev_cntr
+		&pop_hcpcs_cd &pop_clm_drg_cd 
 		&pop_admtg_dgns_cd &pop_OP_PHYSN_SPCLTY_CD pop_nch_clm_type_cd
 		&ptnt_dschrg_stus_cd ;
 quit;
