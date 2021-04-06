@@ -4,11 +4,6 @@
 * Copyright: Johns Hopkins University - SegalLab & HutflessLab 2019
 ********************************************************************/
 
-/* Indicator 1 (old indicator 3) */
-
-
-/*** start of indicator specific variables ***/
-
 /*global variables for inclusion and exclusion*/
 %global includ_hcpcs 
 		includ_pr10 includ_pr10_n
@@ -815,7 +810,7 @@ run;
 proc sort data=pop_&popN._OUT NODUPKEY; by pop_compendium_hospital_id pop_year pop_qtr &bene_id elig_dt; run;
 proc sort data=pop_&popN._OUT NODUPKEY; by pop_compendium_hospital_id pop_year pop_qtr &bene_id ; run; 
 
-data &permlib..pop_&popN._in_out_popped
+data &permlib..pop_&popN._popped
 	(keep = bene_id elig: pop: setting: 
 			/*&gndr_cd bene_race_cd	bene_cnty_cd bene_state_cd 	bene_mlg_cntct_zip_cd*/
 			);
@@ -837,20 +832,20 @@ pop_bene_state_cd=bene_state_cd;
 pop_bene_mlg_cntct_zip_cd=bene_mlg_cntct_zip_cd;
 run;
 *person can contribute only once even if seen in inpatient and outpatient in same hosp/year/qtr;
-proc sort data=&permlib..pop_&popN._in_out_popped NODUPKEY; by pop_compendium_hospital_id pop_year pop_qtr &bene_id elig_dt; run;
-proc sort data=&permlib..pop_&popN._in_out_popped NODUPKEY; by pop_compendium_hospital_id pop_year pop_qtr &bene_id; run;
+proc sort data=&permlib..pop_&popN._popped NODUPKEY; by pop_compendium_hospital_id pop_year pop_qtr &bene_id elig_dt; run;
+proc sort data=&permlib..pop_&popN._popped NODUPKEY; by pop_compendium_hospital_id pop_year pop_qtr &bene_id; run;
 
 *End: Identify who popped;
 
 *Start link eligible and popped;
-proc sort data=&permlib..pop_&popN._in_out_popped		NODUPKEY; by  &bene_id elig_dt;run;
+proc sort data=&permlib..pop_&popN._popped		NODUPKEY; by  &bene_id elig_dt;run;
 proc sort data=&permlib..pop_&popN._elig	NODUPKEY; by  &bene_id elig_dt;run;
 
 *choose POP hospital, year quarter if patient poppped, otherwise choose ELIG;
-data &permlib..pop_&popN._in_out 
+data &permlib..pop_&popN._1line_nocc 
 	(	drop=elig_compendium_hospital_id elig_year elig_qtr 
 		keep= bene_id elig: pop: setting:);
-merge pop_&popN._in_out_popped &permlib..pop_&popN._elig;
+merge &permlib..pop_&popN._popped &permlib..pop_&popN._elig;
 by &bene_id elig_dt;
 if elig_compendium_hospital_id=' ' and pop_compendium_hospital_id=' ' then delete;
 if pop_compendium_hospital_id=' ' then pop_compendium_hospital_id=elig_compendium_hospital_id;
@@ -875,12 +870,12 @@ if &flag_popped=. then &flag_popped=0;
 popped=&flag_popped;
 run;
 /*allow to pop only once per qtr*/
-proc sort data=&permlib..pop_&popN._in_out NODUPKEY; by pop_compendium_hospital_id pop_year pop_qtr &bene_id;run;
+proc sort data=&permlib..pop_&popN._1line_nocc NODUPKEY; by pop_compendium_hospital_id pop_year pop_qtr &bene_id;run;
 
 /*title 'Popped Inpatient or Outpatient (No Carrier) For Analysis';
-proc freq data=&permlib..pop_&popN._in_out; 
+proc freq data=&permlib..pop_&popN._1line_nocc; 
 table  	popped &flag_popped &pop_year pop_year pop_qtr setting_pop setting_elig; run;
-proc contents data=&permlib..pop_&popN._in_out; run;*/
+proc contents data=&permlib..pop_&popN._1line_nocc; run;*/
 *End link eligible and popped;
 
 *start linkage to MBSF for comorbidities;
@@ -892,7 +887,7 @@ create table &include_cohort (compress=yes) as
 select  
 a.bene_id, a.elig_dt, b.*
 from 
-&permlib..pop_&popN._in_out a,
+&permlib..pop_&popN._1line_nocc a,
 &abcd b
 where a.bene_id = b.bene_id and a.pop_year = b.BENE_ENROLLMT_REF_YR;
 quit;
@@ -912,7 +907,7 @@ proc sort data=cc_2018; by bene_id elig_dt;
 proc sort data=otcc_2016; by bene_id elig_dt;
 proc sort data=otcc_2017; by bene_id elig_dt;
 proc sort data=otcc_2018; by bene_id elig_dt;
-proc sort data=&permlib..pop_&popN._in_out; by bene_id elig_dt;
+proc sort data=&permlib..pop_&popN._1line_nocc; by bene_id elig_dt;
 run;
 data cc (keep=bene: elig_dt enrl_src ami ami_ever alzh_ever alzh_demen_ever atrial_fib_ever
 cataract_ever chronickidney_ever copd_ever chf_ever diabetes_ever glaucoma_ever  hip_fracture_ever 
@@ -1004,9 +999,9 @@ cc_osteoporosis, cc_ra_oa, cc_stroke_tia, cc_cancer_breast, cc_cancer_colorectal
 cc_hyperl, cc_hypert,cc_autism, cc_hepviral, cc_hivaids, cc_schi);
 run;
 
-data &permlib..pop_&popN._in_out;
+data &permlib..pop_&popN._1line_cc;
 merge 
-cc (in=a) &permlib..pop_&popN._in_out (in=b);
+cc (in=a) &permlib..pop_&popN._1line_nocc (in=b);
 by bene_id elig_dt;
 if a and b;
 run; 
@@ -1015,11 +1010,11 @@ run;
 *Start summary checks;
 /**Look at freq, means, contents of final 1 record per person dataset **/
 title 'Popped Inpatient or Outpatient (No Carrier) For Analysis';
-proc freq data=&permlib..pop_&popN._in_out; 
+proc freq data=&permlib..pop_&popN._1line_cc; 
 table  	popped &flag_popped &pop_year pop_year pop_qtr setting_pop setting_elig; run;
-proc means data=&permlib..pop_&popN._in_out n mean median min max; 
+proc means data=&permlib..pop_&popN._1line_cc n mean median min max; 
 var elig_age elig_los &pop_age &pop_los pop_age cc_sum; run;
-proc contents data=&permlib..pop_&popN._in_out; run;
+proc contents data=&permlib..pop_&popN._1line_cc; run;
 
 *Start summary checks;
 /**This section makes summaries for inpatient, outpatient POPPED & eligible **/
@@ -1245,7 +1240,7 @@ run;
 
 *create models;
 *make categories of age and cc for analysis;
-data pop_&popN._in_out_anal; set &permlib..pop_&popN._in_out;
+data pop_&popN._in_out_anal; set &permlib..pop_&popN._1line_cc;
 if elig_age   =.   then delete; 
 if elig_age   <0   then delete;
 if elig_age   >105 then delete;
