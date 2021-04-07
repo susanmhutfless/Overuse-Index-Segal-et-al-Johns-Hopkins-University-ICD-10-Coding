@@ -1,5 +1,5 @@
 /********************************************************************
-* Job Name: chronic conditions.sas
+* Job Name: chronic_conditions.sas
 * Job Desc: Identify chronic conditions
 * Copyright: Johns Hopkins University - HutflessLab 2021
 ********************************************************************/
