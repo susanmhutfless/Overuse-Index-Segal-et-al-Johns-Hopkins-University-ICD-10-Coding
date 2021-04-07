@@ -4,6 +4,8 @@
 * Copyright: Johns Hopkins University - SegalLab & HutflessLab 2019
 ********************************************************************/
 
+*does not run--crosses claims and lines as written;
+
 /*global variables for inclusion and exclusion*/
 %global includ_hcpcs 
 		includ_pr10  includ_pr10_n
@@ -139,7 +141,7 @@ proc sql;
 	create table include_cohort1 (compress=yes) as
 select * 
 from 
-&source	  
+&rev_cohort	  
 where hcpcs_cd in(&includ_hcpcs);
 quit;
 *link to ahrq ccn so in hospital within a health system;
