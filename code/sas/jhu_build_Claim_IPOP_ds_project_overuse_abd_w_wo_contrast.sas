@@ -138,11 +138,20 @@
 %macro claims_rev(date=,	source=,  rev_cohort=, include_cohort=, ccn=);
 *identify hcpcs codes of interest;
 proc sql;
-	create table include_cohort1 (compress=yes) as
+	create table include_cohort1a (compress=yes) as
 select * 
 from 
 &rev_cohort	  
 where hcpcs_cd in(&includ_hcpcs);
+quit;
+*link to claim;
+proc sql;
+	create table include_cohort1 (compress=yes) as
+select * 
+from 
+include_cohort1a hcpcs,
+&source claim 
+where hcpcs.clm_id=claim.clm_id;
 quit;
 *link to ahrq ccn so in hospital within a health system;
 proc sql;
@@ -185,10 +194,11 @@ merge 	include_cohort2
 		hcpcs_transposed
 		rev_transposed; 
 by &bene_id &clm_id ;
-array rev{*} rev_cntr:;
+/*array rev{*} rev_cntr:;
 do r=1 to dim(rev);
 	if rev(r) in(&ED_rev_cntr) then elig_ed=1;	
-end;
+end;*/
+run;
 proc sql;
 	create table include_cohort1d (compress=yes) as
 select *
