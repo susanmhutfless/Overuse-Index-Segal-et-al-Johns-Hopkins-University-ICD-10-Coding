@@ -189,7 +189,7 @@ proc transpose data=rev_transposed out=rev_transposed (drop = _name_ _label_) pr
     var &rev_cntr;
 run;
 *make inclusion/exclusion criteria and set variables for eligible population;
-data &include_cohort ; 
+data include_cohort1c ; 
 merge 	include_cohort2 
 		hcpcs_transposed
 		rev_transposed; 
@@ -231,7 +231,48 @@ where
 		icd_prcdr_cd24 in(&includ_pr10) or
 		icd_prcdr_cd25 in(&includ_pr10)		;
 run;
-label elig_ed='eligible visit: revenue center indicated emergency department'; 
+/*link icd prcdr identified to revenue center*;
+proc sql;
+	create table include_cohort1e (compress=yes) as
+select a.&rev_cntr, b.*
+from 
+	&rev_cohort 		a,
+	include_cohort1d 	b 
+where 
+	(a.&bene_id=b.&bene_id and a.&clm_id=b.&clm_id);
+quit;
+/*transpose the revenue to 1 row per bene/clm;
+proc sort data=include_cohort1e nodupkey out=rev_transposed; by &bene_id &clm_id &rev_cntr; run;
+proc transpose data=rev_transposed out=rev_transposed (drop = _name_ _label_) prefix=rev_cntr;
+    by &bene_id &clm_id ;
+    var &rev_cntr;
+run;
+*bring transposed rev center in with claim;
+data include_cohort1e2 ; 
+merge 	include_cohort1d  
+		rev_transposed; *have separate criteria for hcpcs above so no need to grab hcpcs here;
+by &bene_id &clm_id ;
+run;
+*/
+* link to CCN ;
+proc sql;
+	create table include_cohort1f (compress=yes) as
+select *
+from 
+	&permlib..ahrq_ccn a,
+	include_cohort1d  b	
+where 
+	b.prvdr_num = a.&ccn
+;
+quit;
+*merge HCPCS and PRCDR identified pops together;
+Data include_cohort1g; 
+set include_cohort1c include_cohort1f; 
+/*array rev{*} rev_cntr:;
+do r=1 to dim(rev);
+	if rev(r) in(&ED_rev_cntr) then elig_ed=1;	
+end; 
+label elig_ed='eligible visit: revenue center indicated emergency department'; */
 array hcpcs{*} hcpcs_cd:;
 do h=1 to dim(hcpcs);
 	if hcpcs(h) in(&exclud_hcpcs) then DELETE=1;
