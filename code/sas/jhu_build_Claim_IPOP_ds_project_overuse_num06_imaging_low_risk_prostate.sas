@@ -1,5 +1,5 @@
 /********************************************************************
-* Job Name: jhu_build_Claim_IPOP_ds_project_overuse_num10_summed.sas
+* Job Name: jhu_build_Claim_IPOP_ds_project_overuse_imaging low risk prostate.sas
 * Job Desc: Input for Inpatient & Outpatient (Including Carrier) Claims 
 * Copyright: Johns Hopkins University - SegalLab & HutflessLab 2019
 ********************************************************************/
@@ -50,7 +50,8 @@
 
 /** Label pop specific variables  **/
 %global popN;
-%let	popN							= 10;
+%let	popN							= 06;
+%let 	poptext							= "imaging low risk prostate"							;
 %let 	flag_popped             		= popped10 								;
 %let 	flag_popped_label				= 'indicator 10 popped'					;	
 %let	flag_popped_dt					= popped10_dt							;
