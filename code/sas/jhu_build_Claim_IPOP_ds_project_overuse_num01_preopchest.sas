@@ -438,7 +438,7 @@ from
 	include_cohort1g		  b	
 where 
 		a.&bene_id=b.&bene_id 
-		and (	a.elig_dt <= b.&flag_popped_dt <=a.elig_dt+30	);  *Eliana: enter the lookback here;
+		and (	a.elig_dt <= b.&flag_popped_dt <=a.elig_dt+30	); *pop on or within 30 days of elig date;
 quit;
 %mend;
 %include "&vrdc_code./pop_op.sas";
