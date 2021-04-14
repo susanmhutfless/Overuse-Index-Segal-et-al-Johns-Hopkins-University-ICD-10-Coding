@@ -214,6 +214,7 @@ proc transpose data=rev_transposed out=rev_transposed (drop = _name_ _label_) pr
     by &bene_id &clm_id ;
     var &rev_cntr;
 run;
+proc sort data=include_cohort2; by &bene_id &clm_id ; run;
 *make inclusion/exclusion criteria and set variables for eligible population;
 data &include_cohort ; 
 merge 	include_cohort2 
