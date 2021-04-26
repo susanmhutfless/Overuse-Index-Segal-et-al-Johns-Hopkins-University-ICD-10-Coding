@@ -1,35 +1,39 @@
 /********************************************************************
-* Job Name: jhu_build_Claim_IPOP_ds_project_overuse_foot_imaging.sas
-* Job Desc: Input for Inpatient & Outpatient  Claims 
+* Job Name: jhu_build_Claim_IPOP_ds_project_overuse_laminectomy.sas
+* Job Desc: Input for Inpatient & Outpatient (Including Carrier) Claims 
 * Copyright: Johns Hopkins University - SegalLab & HutflessLab 2019
 ********************************************************************/
 
+/* Indicator 10 */
 
 /*** start of indicator specific variables ***/
 
 /*global variables for inclusion and exclusion*/
 %global includ_hcpcs 
-		includ_pr10  includ_pr10_n
+		includ_pr10_code4  includ_pr10_substr4
+		includ_pr10_code7  includ_pr10_substr7
 		includ_dx10  includ_dx10_n 
 		EXCLUD_dx10  exclud_dx10_n;
 
 /*inclusion criteria*/
-		*people with DIAGNOSES of foot trauma;
+		*people without DIAGNOSES of lower extremtiy neuropathy or weakness;
 
 %let includ_hcpcs =
-					'73700'	'73701'	'73702'	'73718'			;		*use for popped visit;
+					'22558'	'22585' '22612' '22614' '22630'
+					'22632' '22633' '22634' '22699' '63005'
+					'63017' '63030' '63047' '63048'  ;		*use for popped visit;
 
 
 
-%let includ_pr10 =
-					'BQ2J' 'BQ2K' 'BQ2L' 'BQ2M' 'BQ2P'
-					'BQ2Q' 'BQ2X' 'BQ2Y' 'BQ3J' 'BQ3K'
-					'BQ3L' 'BQ3M' 'BQ3P' 'BQ3Q'		; *use for popped visit;
-%let includ_pr10_n = 4;		*this number should match number that needs to be substringed;
+%let includ_pr10_code4 =
+					'0QQ0'		; *use for popped visit;
+%let includ_pr10_substr4 = 4;		*this number should match number that needs to be substringed;
 
-%let includ_dx10   = 'S90' 'S91' 'S92' 'S93' 'S94' 'S95'
-					'S96' 'S97' 'S98' 'S99'	;						*use for inclusion visit;
-%let includ_dx10_n = 3;		*this number should match number that needs to be substringed;
+%let includ_pr10_code7 =
+					'00NY0ZZ'		; *use for popped visit;
+%let includ_pr10_substr7 = 7;		*this number should match number that needs to be substringed;
+%let includ_dx10   = '0';							
+%let includ_dx10_n = 7;		
 %let includ_drg = '0';
 
 /** Exclusion criteria **/
@@ -38,39 +42,38 @@
 %let EXclud_pr10 =	'0'				; 
 %let EXclud_pr10_n = 7;	
 
-%let EXCLUD_dx10   = '0'; 						
-%let exclud_dx10_n = 7; 
+%let EXCLUD_dx10   = 'M543' 'M544'	; 		* use for inclusion visit and popped visit;
+%let exclud_dx10_n = 4; 
 
 /** Label pop specific variables  **/
 %global popN;
-%let	popN							= 02;
-%let	poptext							= "foot imaging";
-%let 	flag_popped             		= popped2 								;
-%let 	flag_popped_label				= 'indicator 2 popped'					;	
-%let	flag_popped_dt					= popped2_dt							;
-%let 	flag_popped_dt_label			= 'indicator 2 date patient popped (IP=clm_admsn_dt OP=clm_from_dt)'	;
-%let 	pop_age							= pop_2_age							;				
-%let	pop_age_label					= 'age popped for pop 2'				;
-%let	pop_los							= pop_2_los							;
+%let	popN							= 10;
+%let 	flag_popped             		= popped10 								;
+%let 	flag_popped_label				= 'indicator 10 popped'					;	
+%let	flag_popped_dt					= popped10_dt							;
+%let 	flag_popped_dt_label			= 'indicator 10 date patient popped (IP=clm_admsn_dt OP=clm_from_dt)'	;
+%let 	pop_age							= pop_10_age							;				
+%let	pop_age_label					= 'age popped for pop 10'				;
+%let	pop_los							= pop_10_los							;
 %let	pop_los_label					= 'length of stay when patient popped'	;
-%let	pop_year						= pop_2_year							;
-%let	pop_nch_clm_type_cd				= pop_2_nch_clm_type_cd				;
-%let  	pop_CLM_IP_ADMSN_TYPE_CD		= pop_2_CLM_IP_ADMSN_TYPE_CD			;
-%let	pop_clm_fac_type_cd				= pop_2_clm_fac_type_cd				;
-%let	pop_clm_src_ip_admsn_cd			= pop_2_clm_src_ip_admsn_cd			;
-%let	pop_ptnt_dschrg_stus_cd  		= pop_2_ptnt_dschrg_stus_cd			;
-%let	pop_admtg_dgns_cd				= pop_2_admtg_dgns_cd					;
-%let	pop_icd_dgns_cd1				= pop_2_icd_dgns_cd1					;
-%let	pop_icd_prcdr_cd1				= pop_2_icd_prcdr_cd1					;
-%let	pop_clm_drg_cd					= pop_2_clm_drg_cd						;
-%let	pop_hcpcs_cd					= pop_2_hcpcs_cd						;
-%let	pop_OP_PHYSN_SPCLTY_CD			= pop_2_OP_PHYSN_SPCLTY_CD				;
-%let	pop_nch_clm_type_cd				= pop_2_nch_clm_type_cd				;
-%let	pop_nch_clm_type_cd_label		= 'claim/facility type for pop 2' 		;
-%let	pop_CLM_IP_ADMSN_TYPE_CD_label	= 'inpatient admission type code for pop 2'	;
-%let  	pop_clm_fac_type_cd_label		= 'inpatient clm_fac_type_cd for pop 2';
-%let	pop_clm_src_ip_admsn_cd_label	= 'clm_src_ip_admsn_cd for pop 2'		;
-%let	pop_ptnt_dschrg_stus_cd_label	= 'discharge status code for pop 2'	;	
+%let	pop_year						= pop_10_year							;
+%let	pop_nch_clm_type_cd				= pop_10_nch_clm_type_cd				;
+%let  	pop_CLM_IP_ADMSN_TYPE_CD		= pop_10_CLM_IP_ADMSN_TYPE_CD			;
+%let	pop_clm_fac_type_cd				= pop_10_clm_fac_type_cd				;
+%let	pop_clm_src_ip_admsn_cd			= pop_10_clm_src_ip_admsn_cd			;
+%let	pop_ptnt_dschrg_stus_cd  		= pop_10_ptnt_dschrg_stus_cd			;
+%let	pop_admtg_dgns_cd				= pop_10_admtg_dgns_cd					;
+%let	pop_icd_dgns_cd1				= pop_10_icd_dgns_cd1					;
+%let	pop_icd_prcdr_cd1				= pop_10_icd_prcdr_cd1					;
+%let	pop_clm_drg_cd					= pop_10_clm_drg_cd						;
+%let	pop_hcpcs_cd					= pop_10_hcpcs_cd						;
+%let	pop_OP_PHYSN_SPCLTY_CD			= pop_10_OP_PHYSN_SPCLTY_CD				;
+%let	pop_nch_clm_type_cd				= pop_10_nch_clm_type_cd				;
+%let	pop_nch_clm_type_cd_label		= 'claim/facility type for pop 10' 		;
+%let	pop_CLM_IP_ADMSN_TYPE_CD_label	= 'inpatient admission type code for pop 10'	;
+%let  	pop_clm_fac_type_cd_label		= 'inpatient clm_fac_type_cd for pop 10';
+%let	pop_clm_src_ip_admsn_cd_label	= 'clm_src_ip_admsn_cd for pop 10'		;
+%let	pop_ptnt_dschrg_stus_cd_label	= 'discharge status code for pop 10'	;	
 /*** end of indicator specific variables ***/
 
 
@@ -116,7 +119,7 @@
 %let  icd_dgns_cd1       = icd_dgns_cd1         ;
 %let  icd_prcdr_cd1       = icd_prcdr_cd1       ;
 %let  OP_PHYSN_SPCLTY_CD = OP_PHYSN_SPCLTY_CD   ;
-/*revenue center for inpatient/outpatient identifies ED*/
+/*revenue center for inpatient/outpatient identifies ED*/ *exclude ED for this 
 %global rev_cntr;
 %let rev_cntr = rev_cntr;
 %let ED_rev_cntr = 	'0450' '0451' '0452' '0453' '0454' '0455' '0456'
@@ -145,32 +148,7 @@ proc sql;
 select * 
 from 
 &source
-where 
-	    substr(icd_dgns_cd1,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd2,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd3,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd4,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd5,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd6,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd7,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd8,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd9,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd10,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd11,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd12,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd13,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd14,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd15,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd16,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd17,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd18,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd19,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd20,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd21,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd22,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd23,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd24,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd25,1,&includ_dx10_n) in(&includ_dx10)		;
+;
 quit;
 *link to ahrq ccn so in hospital within a health system;
 proc sql;
@@ -229,11 +207,8 @@ do i=1 to &proc_cd_max;
 end;
 array dx(&diag_cd_max) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
 do j=1 to &diag_cd_max;
-	if substr(dx(j),1,&includ_dx10_n) in(&includ_dx10) then KEEP=1;
 	if substr(dx(j),1,&exclud_dx10_n) in(&exclud_dx10) then DELETE=1;		
 end;
-if KEEP ne 1 then DELETE;
-if DELETE = 1 then delete;
 elig_dt=&date;
 elig_age=(&date-&clm_dob)/365.25; label elig_age='age at eligibility';
 if &clm_end_dt_in ne . then do;
@@ -251,6 +226,47 @@ proc datasets lib=work nolist;
 quit;
 run;
 %mend;
+%include "&vrdc_code./elig_inp.sas";
+
+data pop_&popN._INinclude (keep= &bene_id &clm_id elig_dt elig: setting_elig:
+							pop_num elig_compendium_hospital_id  &gndr_cd &clm_dob bene_race_cd
+							&clm_beg_dt_in &clm_end_dt_in  &ptnt_dschrg_stus_cd
+							&nch_clm_type_cd &CLM_IP_ADMSN_TYPE_CD &clm_fac_type_cd &clm_src_ip_admsn_cd 
+							&admtg_dgns_cd &clm_drg_cd  hcpcs_cd1
+							&diag_pfx.&diag_cd_min   &proc_pfx.&proc_cd_min
+							prvdr_num prvdr_state_cd OP_PHYSN_SPCLTY_CD rev_cntr1
+							at_physn_npi op_physn_npi org_npi_num ot_physn_npi rndrng_physn_npi
+							/*RFR_PHYSN_NPI*/
+							bene_cnty_cd bene_state_cd 	bene_mlg_cntct_zip_cd
+						);
+set pop_&popN._INinclude: 	;
+setting_elig='IP';
+setting_elig_ip=1;
+elig_compendium_hospital_id=compendium_hospital_id;
+elig_year=year(elig_dt);
+elig_qtr=qtr(elig_dt);
+elig_prvdr_num=prvdr_num;
+elig_OP_PHYSN_SPCLTY_CD=OP_PHYSN_SPCLTY_CD;
+elig_prvdr_state_cd=prvdr_state_cd;
+elig_at_physn_npi=at_physn_npi;
+elig_op_physn_npi =op_physn_npi ;
+elig_org_npi_num=org_npi_num;
+elig_ot_physn_npi=ot_physn_npi;
+elig_rndrng_physn_npi=rndrng_physn_npi;
+elig_gndr_cd=&gndr_cd;
+elig_bene_race_cd=bene_race_cd;
+elig_bene_cnty_cd=bene_cnty_cd;
+elig_bene_state_cd=bene_state_cd; 	
+elig_bene_mlg_cntct_zip_cd=bene_mlg_cntct_zip_cd;
+format bene_state_cd prvdr_state_cd $state. OP_PHYSN_SPCLTY_CD $speccd. rev_cntr1 $rev_cntr.
+		&clm_src_ip_admsn_cd $src1adm. &nch_clm_type_cd $clm_typ. &CLM_IP_ADMSN_TYPE_CD $typeadm.
+		&ptnt_dschrg_stus_cd $stuscd. &gndr_cd gender. bene_race_cd race. &clm_drg_cd drg.
+		&icd_dgns_cd1 &admtg_dgns_cd $dgns. &icd_prcdr_cd1 $prcdr. hcpcs_cd1 $hcpcs. ;
+run;
+/* get rid of duplicate rows so that each bene contributes 1x per hospital/year/qtr */
+proc sort data=pop_&popN._INinclude NODUPKEY; by elig_compendium_hospital_id elig_year elig_qtr &bene_id elig_dt; run;
+proc sort data=pop_&popN._INinclude NODUPKEY; by elig_compendium_hospital_id elig_year elig_qtr &bene_id ; run;
+
 %include "&vrdc_code./elig_op.sas";
 
 data pop_&popN._OUTinclude (keep= &bene_id &clm_id elig_dt elig: setting_elig:
@@ -295,7 +311,7 @@ proc sort data=pop_&popN._OUTinclude NODUPKEY; by elig_compendium_hospital_id el
 
 data &permlib..pop_&popN._elig;
 set 	pop_&popN._OUTinclude 
-		/*pop_&popN._INinclude*/ ;		*as of May 2020 we are not including inpatient;
+		pop_&popN._INinclude ;		
 run;
 *person can contribute only once even if seen in inpatient and outpatient in same hosp/year/qtr;
 proc sort data=&permlib..pop_&popN._elig NODUPKEY; by elig_compendium_hospital_id elig_year elig_qtr &bene_id ;run;
@@ -342,31 +358,57 @@ select *
 from 
 	&source
 where
-		icd_prcdr_cd1 in(&includ_pr10) or
-		icd_prcdr_cd2 in(&includ_pr10) or
-		icd_prcdr_cd3 in(&includ_pr10) or
-		icd_prcdr_cd4 in(&includ_pr10) or
-		icd_prcdr_cd5 in(&includ_pr10) or
-		icd_prcdr_cd6 in(&includ_pr10) or
-		icd_prcdr_cd7 in(&includ_pr10) or
-		icd_prcdr_cd8 in(&includ_pr10) or
-		icd_prcdr_cd9 in(&includ_pr10) or
-		icd_prcdr_cd10 in(&includ_pr10) or
-		icd_prcdr_cd11 in(&includ_pr10) or
-		icd_prcdr_cd12 in(&includ_pr10) or
-		icd_prcdr_cd13 in(&includ_pr10) or
-		icd_prcdr_cd14 in(&includ_pr10) or
-		icd_prcdr_cd15 in(&includ_pr10) or
-		icd_prcdr_cd16 in(&includ_pr10) or
-		icd_prcdr_cd17 in(&includ_pr10) or
-		icd_prcdr_cd18 in(&includ_pr10) or
-		icd_prcdr_cd19 in(&includ_pr10) or
-		icd_prcdr_cd20 in(&includ_pr10) or
-		icd_prcdr_cd21 in(&includ_pr10) or
-		icd_prcdr_cd22 in(&includ_pr10) or
-		icd_prcdr_cd23 in(&includ_pr10) or
-		icd_prcdr_cd24 in(&includ_pr10) or
-		icd_prcdr_cd25 in(&includ_pr10)		;
+		icd_prcdr_cd1 in(&includ_pr10_substr4) or
+		icd_prcdr_cd2 in(&includ_pr10_substr4) or
+		icd_prcdr_cd3 in(&includ_pr10_substr4) or
+		icd_prcdr_cd4 in(&includ_pr10_substr4) or
+		icd_prcdr_cd5 in(&includ_pr10_substr4) or
+		icd_prcdr_cd6 in(&includ_pr10_substr4) or
+		icd_prcdr_cd7 in(&includ_pr10_substr4) or
+		icd_prcdr_cd8 in(&includ_pr10_substr4) or
+		icd_prcdr_cd9 in(&includ_pr10_substr4) or
+		icd_prcdr_cd10 in(&includ_pr10_substr4) or
+		icd_prcdr_cd11 in(&includ_pr10_substr4) or
+		icd_prcdr_cd12 in(&includ_pr10_substr4) or
+		icd_prcdr_cd13 in(&includ_pr10_substr4) or
+		icd_prcdr_cd14 in(&includ_pr10_substr4) or
+		icd_prcdr_cd15 in(&includ_pr10_substr4) or
+		icd_prcdr_cd16 in(&includ_pr10_substr4) or
+		icd_prcdr_cd17 in(&includ_pr10_substr4) or
+		icd_prcdr_cd18 in(&includ_pr10_substr4) or
+		icd_prcdr_cd19 in(&includ_pr10_substr4) or
+		icd_prcdr_cd20 in(&includ_pr10_substr4) or
+		icd_prcdr_cd21 in(&includ_pr10_substr4) or
+		icd_prcdr_cd22 in(&includ_pr10_substr4) or
+		icd_prcdr_cd23 in(&includ_pr10_substr4) or
+		icd_prcdr_cd24 in(&includ_pr10_substr4) or
+		icd_prcdr_cd25 in(&includ_pr10_substr4)	;	
+where
+		icd_prcdr_cd1 in(&includ_pr10_substr7) or
+		icd_prcdr_cd2 in(&includ_pr10_substr7) or
+		icd_prcdr_cd3 in(&includ_pr10_substr7) or
+		icd_prcdr_cd4 in(&includ_pr10_substr7) or
+		icd_prcdr_cd5 in(&includ_pr10_substr7) or
+		icd_prcdr_cd6 in(&includ_pr10_substr7) or
+		icd_prcdr_cd7 in(&includ_pr10_substr7) or
+		icd_prcdr_cd8 in(&includ_pr10_substr7) or
+		icd_prcdr_cd9 in(&includ_pr10_substr7) or
+		icd_prcdr_cd10 in(&includ_pr10_substr7) or
+		icd_prcdr_cd11 in(&includ_pr10_substr7) or
+		icd_prcdr_cd12 in(&includ_pr10_substr7) or
+		icd_prcdr_cd13 in(&includ_pr10_substr7) or
+		icd_prcdr_cd14 in(&includ_pr10_substr7) or
+		icd_prcdr_cd15 in(&includ_pr10_substr7) or
+		icd_prcdr_cd16 in(&includ_pr10_substr7) or
+		icd_prcdr_cd17 in(&includ_pr10_substr7) or
+		icd_prcdr_cd18 in(&includ_pr10_substr7) or
+		icd_prcdr_cd19 in(&includ_pr10_substr7) or
+		icd_prcdr_cd20 in(&includ_pr10_substr7) or
+		icd_prcdr_cd21 in(&includ_pr10_substr7) or
+		icd_prcdr_cd22 in(&includ_pr10_substr7) or
+		icd_prcdr_cd23 in(&includ_pr10_substr7) or
+		icd_prcdr_cd24 in(&includ_pr10_substr7) or
+		icd_prcdr_cd25 in(&includ_pr10_substr7);
 quit;
 *link icd prcdr identified to revenue center*;
 proc sql;
@@ -424,6 +466,7 @@ do j=1 to &diag_cd_max;
 end;
 if hcpcs_cd in(&exclud_hcpcs) then DELETE=1;
 if DELETE = 1 then delete;
+*if clm_drg_cd notin(&includ_drg) then delete;
 if &flag_popped ne 1 then delete;
 run; 
 *link to eligibility--require the timing of inclusion dx and procedure match-up;
@@ -436,11 +479,58 @@ from
 where 
 		a.&bene_id=b.&bene_id 
 		and 
-		a.elig_dt=b.&flag_popped_dt									/*Eliana: enter the time element here NO LOOKBACK;*/
-		/*and (	(a.elig_dt-180) <= b.&flag_popped_dt <=a.elig_dt	)*Eliana: enter the time element here-WITH LOOKBACK;*/
+		a.elig_dt-90 <= b.&flag_popped_dt <=a.elig_dt	
 ;  
 quit;
 %mend;
+%include "&vrdc_code./pop_inp.sas";
+
+data pop_&popN._IN (keep=  pop: &flag_popped_dt elig: setting: 
+							&bene_id &clm_id 
+							&clm_beg_dt_in &clm_end_dt_in &clm_dob  &ptnt_dschrg_stus_cd
+							&nch_clm_type_cd &CLM_IP_ADMSN_TYPE_CD &clm_fac_type_cd &clm_src_ip_admsn_cd 
+							&admtg_dgns_cd &clm_drg_cd  rev_cntr1
+							prvdr_num prvdr_state_cd OP_PHYSN_SPCLTY_CD 
+							at_physn_npi op_physn_npi org_npi_num ot_physn_npi rndrng_physn_npi
+							/*RFR_PHYSN_NPI*/
+							&gndr_cd bene_race_cd	bene_cnty_cd
+							bene_state_cd 	bene_mlg_cntct_zip_cd );
+set pop_&popN._IN_:;
+&pop_age=(&clm_beg_dt_in-&clm_dob)/365.25; 				label &pop_age					=	&pop_age_label;
+&pop_age=round(&pop_age);
+&pop_los=&clm_end_dt_in-&clm_beg_dt_in;					label &pop_los					=	&pop_los_label;
+&pop_nch_clm_type_cd=put(&nch_clm_type_cd, clm_type_cd.); 
+														label &pop_nch_clm_type_cd		=	&pop_nch_clm_type_cd_label;
+&pop_CLM_IP_ADMSN_TYPE_CD = put(&CLM_IP_ADMSN_TYPE_CD,$IP_ADMSN_TYPE_CD.);
+&pop_clm_fac_type_cd = &clm_fac_type_cd; 				label &pop_clm_fac_type_cd     	= 	&pop_clm_fac_type_cd_label;
+&pop_clm_src_ip_admsn_cd = &clm_src_ip_admsn_cd; 		label &pop_clm_src_ip_admsn_cd 	= 	&pop_clm_src_ip_admsn_cd_label;
+&pop_ptnt_dschrg_stus_cd = &ptnt_dschrg_stus_cd; 		label &pop_ptnt_dschrg_stus_cd 	= 	&pop_ptnt_dschrg_stus_cd;
+&pop_admtg_dgns_cd=put(&admtg_dgns_cd,$dgns.);
+&pop_icd_dgns_cd1=put(&icd_dgns_cd1,$dgns.);
+&pop_icd_prcdr_cd1=put(&icd_prcdr_cd1,$prcdr.);
+&pop_clm_drg_cd=put(&clm_drg_cd,$drg.);
+&pop_hcpcs_cd=put(&hcpcs_cd,$hcpcs.);
+&pop_OP_PHYSN_SPCLTY_CD=&OP_PHYSN_SPCLTY_CD;
+pop_compendium_hospital_id=compendium_hospital_id;
+setting_pop='IP'; label setting_pop='setting where patient popped';
+setting_pop_ip=1;
+&pop_year=year(&flag_popped_dt);
+pop_year=year(&flag_popped_dt);
+pop_qtr=qtr(&flag_popped_dt);
+if elig_dt = . then delete;
+if &pop_year<2016 then delete;
+if &pop_year>2018 then delete;
+format bene_state_cd prvdr_state_cd $state. &pop_OP_PHYSN_SPCLTY_CD $speccd. rev_cntr1 $rev_cntr.
+		&pop_clm_src_ip_admsn_cd $src1adm. &pop_nch_clm_type_cd $clm_typ.
+		&pop_CLM_IP_ADMSN_TYPE_CD $typeadm.
+		&pop_ptnt_dschrg_stus_cd $stuscd.
+		&pop_icd_dgns_cd1 &pop_admtg_dgns_cd $dgns. &pop_icd_prcdr_cd1 $prcdr. &pop_hcpcs_cd $hcpcs. 
+		&gndr_cd gender. bene_race_cd race. &pop_clm_drg_cd drg. ;
+run;
+* get rid of duplicate rows so that each bene contributes 1x per hospital/year/qtr ;
+proc sort data=pop_&popN._IN NODUPKEY; by pop_compendium_hospital_id pop_year pop_qtr &bene_id elig_dt; run;
+proc sort data=pop_&popN._IN NODUPKEY; by pop_compendium_hospital_id pop_year pop_qtr &bene_id ; run; 
+
 %include "&vrdc_code./pop_op.sas";
 
 data pop_&popN._out (keep=  pop: &flag_popped_dt elig: setting: 
@@ -484,9 +574,8 @@ proc sort data=pop_&popN._OUT NODUPKEY; by pop_compendium_hospital_id pop_year p
 
 data &permlib..pop_&popN._popped
 	(keep = bene_id elig: pop: setting: 
-			/*&gndr_cd bene_race_cd	bene_cnty_cd bene_state_cd 	bene_mlg_cntct_zip_cd*/
 			);
-set /*pop_&popN._IN*/ pop_&popN._OUT;
+set pop_&popN._IN pop_&popN._OUT;
 pop_year=year(&flag_popped_dt);
 pop_qtr=qtr(&flag_popped_dt);
 pop_prvdr_num=prvdr_num;

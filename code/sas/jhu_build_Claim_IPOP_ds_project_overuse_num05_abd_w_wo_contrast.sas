@@ -1,35 +1,32 @@
 /********************************************************************
-* Job Name: jhu_build_Claim_IPOP_ds_project_overuse_foot_imaging.sas
-* Job Desc: Input for Inpatient & Outpatient  Claims 
+* Job Name: jhu_build_Claim_IPOP_ds_project_overuse_abd_w_wo_contrast.sas
+* Job Desc: Input for Inpatient & Outpatient Claims 
 * Copyright: Johns Hopkins University - SegalLab & HutflessLab 2019
 ********************************************************************/
 
-
-/*** start of indicator specific variables ***/
+*does not run--crosses claims and lines as written;
 
 /*global variables for inclusion and exclusion*/
 %global includ_hcpcs 
 		includ_pr10  includ_pr10_n
 		includ_dx10  includ_dx10_n 
-		EXCLUD_dx10  exclud_dx10_n;
+		EXCLUD_dx10  exclud_dx10_n
+		EXCLUD_pr10  exclud_pr10_n;
 
 /*inclusion criteria*/
-		*people with DIAGNOSES of foot trauma;
+		*entire population;
 
 %let includ_hcpcs =
-					'73700'	'73701'	'73702'	'73718'			;		*use for popped visit;
-
+					'74150'	'74160'	'74170'		;		*use for inclusion visit with at least 1;
+														*popped requires both with and without dye coded;
 
 
 %let includ_pr10 =
-					'BQ2J' 'BQ2K' 'BQ2L' 'BQ2M' 'BQ2P'
-					'BQ2Q' 'BQ2X' 'BQ2Y' 'BQ3J' 'BQ3K'
-					'BQ3L' 'BQ3M' 'BQ3P' 'BQ3Q'		; *use for popped visit;
-%let includ_pr10_n = 4;		*this number should match number that needs to be substringed;
+					'BW2000Z' 'BW2010Z' 'BW20Y0Z'		; *use for popped visit--Jodi--all people with at least 1 of these codes are considered popped based on the excel sheet criteria--are you sure that matches your stated preference. Jodi to confirm;
+%let includ_pr10_n = 7;		*this number should match number that needs to be substringed;
 
-%let includ_dx10   = 'S90' 'S91' 'S92' 'S93' 'S94' 'S95'
-					'S96' 'S97' 'S98' 'S99'	;						*use for inclusion visit;
-%let includ_dx10_n = 3;		*this number should match number that needs to be substringed;
+%let includ_dx10   = '0';						
+%let includ_dx10_n = 7;		
 %let includ_drg = '0';
 
 /** Exclusion criteria **/
@@ -38,39 +35,39 @@
 %let EXclud_pr10 =	'0'				; 
 %let EXclud_pr10_n = 7;	
 
-%let EXCLUD_dx10   = '0'; 						
+%let EXCLUD_dx10   = '0'; 																																			  
 %let exclud_dx10_n = 7; 
 
 /** Label pop specific variables  **/
 %global popN;
-%let	popN							= 02;
-%let	poptext							= "foot imaging";
-%let 	flag_popped             		= popped2 								;
-%let 	flag_popped_label				= 'indicator 2 popped'					;	
-%let	flag_popped_dt					= popped2_dt							;
-%let 	flag_popped_dt_label			= 'indicator 2 date patient popped (IP=clm_admsn_dt OP=clm_from_dt)'	;
-%let 	pop_age							= pop_2_age							;				
-%let	pop_age_label					= 'age popped for pop 2'				;
-%let	pop_los							= pop_2_los							;
+%let	popN							= 05;
+%let 	poptext							= "abd_w_wo_contrast";										  
+%let 	flag_popped             		= popped5 								;
+%let 	flag_popped_label				= 'indicator 5 popped'					;	
+%let	flag_popped_dt					= popped5_dt							;
+%let 	flag_popped_dt_label			= 'indicator 5 date patient popped (IP=clm_admsn_dt OP=clm_from_dt)'	;
+%let 	pop_age							= pop_5_age							;				
+%let	pop_age_label					= 'age popped for pop 5'				;
+%let	pop_los							= pop_5_los							;
 %let	pop_los_label					= 'length of stay when patient popped'	;
-%let	pop_year						= pop_2_year							;
-%let	pop_nch_clm_type_cd				= pop_2_nch_clm_type_cd				;
-%let  	pop_CLM_IP_ADMSN_TYPE_CD		= pop_2_CLM_IP_ADMSN_TYPE_CD			;
-%let	pop_clm_fac_type_cd				= pop_2_clm_fac_type_cd				;
-%let	pop_clm_src_ip_admsn_cd			= pop_2_clm_src_ip_admsn_cd			;
-%let	pop_ptnt_dschrg_stus_cd  		= pop_2_ptnt_dschrg_stus_cd			;
-%let	pop_admtg_dgns_cd				= pop_2_admtg_dgns_cd					;
-%let	pop_icd_dgns_cd1				= pop_2_icd_dgns_cd1					;
-%let	pop_icd_prcdr_cd1				= pop_2_icd_prcdr_cd1					;
-%let	pop_clm_drg_cd					= pop_2_clm_drg_cd						;
-%let	pop_hcpcs_cd					= pop_2_hcpcs_cd						;
-%let	pop_OP_PHYSN_SPCLTY_CD			= pop_2_OP_PHYSN_SPCLTY_CD				;
-%let	pop_nch_clm_type_cd				= pop_2_nch_clm_type_cd				;
-%let	pop_nch_clm_type_cd_label		= 'claim/facility type for pop 2' 		;
-%let	pop_CLM_IP_ADMSN_TYPE_CD_label	= 'inpatient admission type code for pop 2'	;
-%let  	pop_clm_fac_type_cd_label		= 'inpatient clm_fac_type_cd for pop 2';
-%let	pop_clm_src_ip_admsn_cd_label	= 'clm_src_ip_admsn_cd for pop 2'		;
-%let	pop_ptnt_dschrg_stus_cd_label	= 'discharge status code for pop 2'	;	
+%let	pop_year						= pop_5_year							;
+%let	pop_nch_clm_type_cd				= pop_5_nch_clm_type_cd				;
+%let  	pop_CLM_IP_ADMSN_TYPE_CD		= pop_5_CLM_IP_ADMSN_TYPE_CD			;
+%let	pop_clm_fac_type_cd				= pop_5_clm_fac_type_cd				;
+%let	pop_clm_src_ip_admsn_cd			= pop_5_clm_src_ip_admsn_cd			;
+%let	pop_ptnt_dschrg_stus_cd  		= pop_5_ptnt_dschrg_stus_cd			;
+%let	pop_admtg_dgns_cd				= pop_5_admtg_dgns_cd					;
+%let	pop_icd_dgns_cd1				= pop_5_icd_dgns_cd1					;
+%let	pop_icd_prcdr_cd1				= pop_5_icd_prcdr_cd1					;
+%let	pop_clm_drg_cd					= pop_5_clm_drg_cd						;
+%let	pop_hcpcs_cd					= pop_5_hcpcs_cd						;
+%let	pop_OP_PHYSN_SPCLTY_CD			= pop_5_OP_PHYSN_SPCLTY_CD				;
+%let	pop_nch_clm_type_cd				= pop_5_nch_clm_type_cd				;
+%let	pop_nch_clm_type_cd_label		= 'claim/facility type for pop 5' 		;
+%let	pop_CLM_IP_ADMSN_TYPE_CD_label	= 'inpatient admission type code for pop 5'	;
+%let  	pop_clm_fac_type_cd_label		= 'inpatient clm_fac_type_cd for pop 5';
+%let	pop_clm_src_ip_admsn_cd_label	= 'clm_src_ip_admsn_cd for pop 5'		;
+%let	pop_ptnt_dschrg_stus_cd_label	= 'discharge status code for pop 5'	;	
 /*** end of indicator specific variables ***/
 
 
@@ -137,40 +134,24 @@
 *start identification of eligibility;
 *First identify all who are eligible;
 
-/*** this macro is for inpatient and outpatient claims--must have DX code of interest***/
+/*** this macro is for inpatient and outpatient claims***/
 %macro claims_rev(date=,	source=,  rev_cohort=, include_cohort=, ccn=);
-*identify dx codes of interest;
+*identify hcpcs codes of interest;
+proc sql;
+	create table include_cohort1a (compress=yes) as
+select &bene_id, &clm_id, &rev_cntr, &hcpcs_cd 
+from 
+&rev_cohort	  
+where hcpcs_cd in(&includ_hcpcs);
+quit;
+*link to claim;
 proc sql;
 	create table include_cohort1 (compress=yes) as
 select * 
 from 
-&source
-where 
-	    substr(icd_dgns_cd1,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd2,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd3,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd4,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd5,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd6,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd7,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd8,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd9,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd10,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd11,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd12,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd13,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd14,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd15,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd16,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd17,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd18,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd19,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd20,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd21,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd22,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd23,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd24,1,&includ_dx10_n) in(&includ_dx10) or
-		substr(icd_dgns_cd25,1,&includ_dx10_n) in(&includ_dx10)		;
+include_cohort1a hcpcs,
+&source claim 
+where hcpcs.clm_id=claim.clm_id;
 quit;
 *link to ahrq ccn so in hospital within a health system;
 proc sql;
@@ -183,57 +164,82 @@ where
 	b.prvdr_num = a.&ccn
 ;
 quit;
-*link to revenue center and hcpcs;
-proc sql;
-create table include_cohort3 (compress=yes) as
-select a.*, b.&rev_cntr, b.&hcpcs_cd
-from 
-	include_cohort2 a,
-	&rev_cohort b
-where 
-	a.&bene_id = b.&bene_id 
-	and 
-	a.&clm_id = b.&clm_id;
-quit;
+
 *transpose the revenue/hcpcs to 1 row per bene/clm;
-proc sort data=include_cohort3 nodupkey out=hcpcs_transposed; by &bene_id &clm_id &hcpcs_cd; run;
+proc sort data=include_cohort2 nodupkey out=hcpcs_transposed; by &bene_id &clm_id &hcpcs_cd; run;
 proc transpose data=hcpcs_transposed out=hcpcs_transposed (drop = _name_ _label_) prefix=hcpcs_cd;
     by &bene_id &clm_id ;
     var &hcpcs_cd;
 run;
 
-proc sort data=include_cohort3 nodupkey out=rev_transposed; by &bene_id &clm_id &rev_cntr; run;
+proc sort data=include_cohort2 nodupkey out=rev_transposed; by &bene_id &clm_id &rev_cntr; run;
 proc transpose data=rev_transposed out=rev_transposed (drop = _name_ _label_) prefix=rev_cntr;
     by &bene_id &clm_id ;
     var &rev_cntr;
 run;
 *make inclusion/exclusion criteria and set variables for eligible population;
-data &include_cohort ; 
+data include_cohort1c ; 
 merge 	include_cohort2 
 		hcpcs_transposed
 		rev_transposed; 
 by &bene_id &clm_id ;
-array rev{*} rev_cntr:;
-do r=1 to dim(rev);
-	if rev(r) in(&ED_rev_cntr) then elig_ed=1;	
-end;
-label elig_ed='eligible visit: revenue center indicated emergency department'; 
+run;
+proc sql;
+	create table include_cohort1d (compress=yes) as
+select *
+from 
+	&source
+where
+		icd_prcdr_cd1 in(&includ_pr10) or
+		icd_prcdr_cd2 in(&includ_pr10) or
+		icd_prcdr_cd3 in(&includ_pr10) or
+		icd_prcdr_cd4 in(&includ_pr10) or
+		icd_prcdr_cd5 in(&includ_pr10) or
+		icd_prcdr_cd6 in(&includ_pr10) or
+		icd_prcdr_cd7 in(&includ_pr10) or
+		icd_prcdr_cd8 in(&includ_pr10) or
+		icd_prcdr_cd9 in(&includ_pr10) or
+		icd_prcdr_cd10 in(&includ_pr10) or
+		icd_prcdr_cd11 in(&includ_pr10) or
+		icd_prcdr_cd12 in(&includ_pr10) or
+		icd_prcdr_cd13 in(&includ_pr10) or
+		icd_prcdr_cd14 in(&includ_pr10) or
+		icd_prcdr_cd15 in(&includ_pr10) or
+		icd_prcdr_cd16 in(&includ_pr10) or
+		icd_prcdr_cd17 in(&includ_pr10) or
+		icd_prcdr_cd18 in(&includ_pr10) or
+		icd_prcdr_cd19 in(&includ_pr10) or
+		icd_prcdr_cd20 in(&includ_pr10) or
+		icd_prcdr_cd21 in(&includ_pr10) or
+		icd_prcdr_cd22 in(&includ_pr10) or
+		icd_prcdr_cd23 in(&includ_pr10) or
+		icd_prcdr_cd24 in(&includ_pr10) or
+		icd_prcdr_cd25 in(&includ_pr10)		;
+run;
+* link to CCN ;
+proc sql;
+	create table include_cohort1f (compress=yes) as
+select *
+from 
+	&permlib..ahrq_ccn a,
+	include_cohort1d  b	
+where 
+	b.prvdr_num = a.&ccn
+;
+quit;
+*merge HCPCS and PRCDR identified pops together;
+Data &include_cohort ; 
+set include_cohort1c include_cohort1f; 
 array hcpcs{*} hcpcs_cd:;
 do h=1 to dim(hcpcs);
-	if hcpcs(h) in(&exclud_hcpcs) then DELETE=1;	
+	if hcpcs(h) in(&includ_hcpcs) then KEEP=1;	
 end;
 label elig_ed='eligible visit: revenue center indicated emergency department'; 
 array pr(&proc_cd_max) &proc_pfx.&proc_cd_min - &proc_pfx.&proc_cd_max;
 do i=1 to &proc_cd_max;
-	if substr(pr(i),1,&exclud_pr10_n) in(&EXclud_pr10) then DELETE=1;	
-end;
-array dx(&diag_cd_max) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
-do j=1 to &diag_cd_max;
-	if substr(dx(j),1,&includ_dx10_n) in(&includ_dx10) then KEEP=1;
-	if substr(dx(j),1,&exclud_dx10_n) in(&exclud_dx10) then DELETE=1;		
-end;
-if KEEP ne 1 then DELETE;
-if DELETE = 1 then delete;
+	if substr(pr(i),1,&includ_pr10_n) in(&includ_pr10) then KEEP=1;
+end;					 
+if keep ne 1 then delete;
 elig_dt=&date;
 elig_age=(&date-&clm_dob)/365.25; label elig_age='age at eligibility';
 if &clm_end_dt_in ne . then do;
@@ -244,7 +250,7 @@ if elig_los =. then do;
 end;
 elig=1;
 pop_num=&popN;
-run; 
+run;
 *delete the temp datasets;
 proc datasets lib=work nolist;
  delete include: ;
@@ -303,145 +309,33 @@ proc sort data=&permlib..pop_&popN._elig NODUPKEY; by elig_compendium_hospital_i
 *end identification of eligibility;
 
 *Start: Identify who popped;
-%macro claims_rev(date=, source=, rev_cohort=, include_cohort=, ccn=);
-* identify hcpcs ;
-proc sql;
-create table include_cohort1a (compress=yes) as
-select &bene_id, &clm_id, &rev_cntr,
-	&hcpcs_cd, case when &hcpcs_cd in (&includ_hcpcs) then 1 else 0 end as &flag_popped
-from 
-	&rev_cohort
-where 
-	&hcpcs_cd in (&includ_hcpcs);
-quit;
-* pull claim info for those with HCPCS (need to do this to get dx codes)*;
-proc sql;
-	create table include_cohort1b (compress=yes) as
-select a.&rev_cntr, a.&hcpcs_cd, a.&flag_popped, b.*
-from 
-	include_cohort1a a, 
-	&source b
-where 
-	(a.&bene_id=b.&bene_id and a.&clm_id=b.&clm_id);
-quit;
-*link to ccn;
-proc sql;
-	create table include_cohort1c (compress=yes) as
-select *
-from 
-	&permlib..ahrq_ccn a,
-	include_cohort1b b	
-where 
-	b.prvdr_num = a.&ccn
-;
-quit;
-*pull icd procedure criteria from claims*;
-proc sql;
-	create table include_cohort1d (compress=yes) as
-select *
-from 
-	&source
-where
-		icd_prcdr_cd1 in(&includ_pr10) or
-		icd_prcdr_cd2 in(&includ_pr10) or
-		icd_prcdr_cd3 in(&includ_pr10) or
-		icd_prcdr_cd4 in(&includ_pr10) or
-		icd_prcdr_cd5 in(&includ_pr10) or
-		icd_prcdr_cd6 in(&includ_pr10) or
-		icd_prcdr_cd7 in(&includ_pr10) or
-		icd_prcdr_cd8 in(&includ_pr10) or
-		icd_prcdr_cd9 in(&includ_pr10) or
-		icd_prcdr_cd10 in(&includ_pr10) or
-		icd_prcdr_cd11 in(&includ_pr10) or
-		icd_prcdr_cd12 in(&includ_pr10) or
-		icd_prcdr_cd13 in(&includ_pr10) or
-		icd_prcdr_cd14 in(&includ_pr10) or
-		icd_prcdr_cd15 in(&includ_pr10) or
-		icd_prcdr_cd16 in(&includ_pr10) or
-		icd_prcdr_cd17 in(&includ_pr10) or
-		icd_prcdr_cd18 in(&includ_pr10) or
-		icd_prcdr_cd19 in(&includ_pr10) or
-		icd_prcdr_cd20 in(&includ_pr10) or
-		icd_prcdr_cd21 in(&includ_pr10) or
-		icd_prcdr_cd22 in(&includ_pr10) or
-		icd_prcdr_cd23 in(&includ_pr10) or
-		icd_prcdr_cd24 in(&includ_pr10) or
-		icd_prcdr_cd25 in(&includ_pr10)		;
-quit;
-*link icd prcdr identified to revenue center*;
-proc sql;
-	create table include_cohort1e (compress=yes) as
-select a.&rev_cntr, b.*
-from 
-	&rev_cohort 		a,
-	include_cohort1d 	b 
-where 
-	(a.&bene_id=b.&bene_id and a.&clm_id=b.&clm_id);
-quit;
-*transpose the revenue to 1 row per bene/clm;
-proc sort data=include_cohort1e nodupkey out=rev_transposed; by &bene_id &clm_id &rev_cntr; run;
-proc transpose data=rev_transposed out=rev_transposed (drop = _name_ _label_) prefix=rev_cntr;
-    by &bene_id &clm_id ;
-    var &rev_cntr;
-run;
-*bring transposed rev center in with claim;
-data include_cohort1e2 ; 
-merge 	include_cohort1d  
-		rev_transposed; *have separate criteria for hcpcs above so no need to grab hcpcs here;
-by &bene_id &clm_id ;
-run;
+*Popped are a subset of eligible for this pop;
 
-* link to CCN ;
-proc sql;
-	create table include_cohort1f (compress=yes) as
-select *
-from 
-	&permlib..ahrq_ccn a,
-	include_cohort1e2 b	
-where 
-	b.prvdr_num = a.&ccn
-;
-quit;
 *merge HCPCS and PRCDR identified pops together;
-Data include_cohort1g; 
-set include_cohort1c include_cohort1f; 
-array rev{*} rev_cntr:;
-do r=1 to dim(rev);
-	if rev(r) in(&ED_rev_cntr) then pop_ed=1;	
+Data pop_&popN._out_all; 
+set pop_&popN._OUTinclude: ; 
+*need to transpose hcpcs code so all hcpcs on same row for this to work;
+array hcpcs{*} hcpcs_cd:;
+do s=1 to dim(hcpcs);
+		if hcpcs(s) = '74150' then pop_74150=1;
+		if hcpcs(s) = '74160' then pop_74160=1;
+		if hcpcs(s) = '74170' then pop_74170=1;
 end; 
+if pop_74150=1 and pop_74160=1 then &flag_popped=1;
+if pop_74170=1 then &flag_popped=1;
 label pop_ed='popped: revenue center indicated emergency department';
-&flag_popped_dt=&date; 
+&flag_popped_dt=&clm_from_dt; 
+elig_dt=&clm_from_dt; 
 	format &flag_popped_dt date9.; 						label &flag_popped_dt			=	&flag_popped_dt_label;
 				 										label &flag_popped				=	&flag_popped_label;
 array pr(&proc_cd_max) &proc_pfx.&proc_cd_min - &proc_pfx.&proc_cd_max;
 do i=1 to &proc_cd_max;
-	if substr(pr(i),1,&exclud_pr10_n) in(&EXclud_pr10) then DELETE=1;	
 	if substr(pr(i),1,&includ_pr10_n) in(&includ_pr10) then &flag_popped=1;
 end;
-array dx(&diag_cd_max) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
-do j=1 to &diag_cd_max;
-	if substr(dx(j),1,&exclud_dx10_n) in(&exclud_dx10) then DELETE=1;	
-end;
-if hcpcs_cd in(&exclud_hcpcs) then DELETE=1;
-if DELETE = 1 then delete;
+*if clm_drg_cd notin(&includ_drg) then delete;
 if &flag_popped ne 1 then delete;
 run; 
-*link to eligibility--require the timing of inclusion dx and procedure match-up;
-proc sql;
-	create table &include_cohort (compress=yes) as
-select a.elig_dt, b.*
-from 
-	&permlib..pop_&popN._elig a,
-	include_cohort1g		  b	
-where 
-		a.&bene_id=b.&bene_id 
-		and 
-		a.elig_dt=b.&flag_popped_dt									/*Eliana: enter the time element here NO LOOKBACK;*/
-		/*and (	(a.elig_dt-180) <= b.&flag_popped_dt <=a.elig_dt	)*Eliana: enter the time element here-WITH LOOKBACK;*/
-;  
-quit;
-%mend;
-%include "&vrdc_code./pop_op.sas";
+
 
 data pop_&popN._out (keep=  pop: &flag_popped_dt elig: setting: 
 							&bene_id &clm_id 
@@ -452,7 +346,7 @@ data pop_&popN._out (keep=  pop: &flag_popped_dt elig: setting:
 							/*RFR_PHYSN_NPI*/
 							&gndr_cd bene_race_cd	bene_cnty_cd
 							bene_state_cd 	bene_mlg_cntct_zip_cd	 );
-set pop_&popN._out_:;
+set pop_&popN._out_all;
 &flag_popped_dt=&clm_from_dt; 
 	format &flag_popped_dt date9.; 			label &flag_popped_dt	=	&flag_popped_dt_label;
 				 							label &flag_popped		=	&flag_popped_label;
@@ -470,7 +364,6 @@ setting_pop_op=1;
 &pop_year=year(&flag_popped_dt);
 pop_year=year(&flag_popped_dt);
 pop_qtr=qtr(&flag_popped_dt);
-if elig_dt = . then delete;
 if &pop_year<2016 then delete;
 if &pop_year>2018 then delete;
 format &pop_OP_PHYSN_SPCLTY_CD $speccd. rev_cntr $rev_cntr.
@@ -484,9 +377,8 @@ proc sort data=pop_&popN._OUT NODUPKEY; by pop_compendium_hospital_id pop_year p
 
 data &permlib..pop_&popN._popped
 	(keep = bene_id elig: pop: setting: 
-			/*&gndr_cd bene_race_cd	bene_cnty_cd bene_state_cd 	bene_mlg_cntct_zip_cd*/
 			);
-set /*pop_&popN._IN*/ pop_&popN._OUT;
+set  pop_&popN._OUT;
 pop_year=year(&flag_popped_dt);
 pop_qtr=qtr(&flag_popped_dt);
 pop_prvdr_num=prvdr_num;
@@ -510,7 +402,7 @@ proc sort data=&permlib..pop_&popN._popped NODUPKEY; by pop_compendium_hospital_
 *End: Identify who popped;
 
 *Start link eligible and popped;
-proc sort data=&permlib..pop_&popN._popped	NODUPKEY; by  &bene_id elig_dt;run;
+proc sort data=&permlib..pop_&popN._popped		NODUPKEY; by  &bene_id elig_dt;run;
 proc sort data=&permlib..pop_&popN._elig	NODUPKEY; by  &bene_id elig_dt;run;
 
 *choose POP hospital, year quarter if patient poppped, otherwise choose ELIG;
@@ -547,6 +439,7 @@ run;
 /*allow to pop only once per qtr*/
 proc sort data=&permlib..pop_&popN._1line_nocc NODUPKEY; by pop_compendium_hospital_id pop_year pop_qtr &bene_id;run;
 
+
 *linkage to MBSF for comorbidities;
 %include "&vrdc_code./chronic_conditions.sas";
 
@@ -557,4 +450,6 @@ then run the requested model for the single pop**/
 										
 *summary checks of elig & popped & creation of aggregate table for modeling;
 %include "&vrdc_code./pop_crosstabs.sas";
+	
+
 	
