@@ -1,9 +1,24 @@
 /********************************************************************
-* Job Name: jhu_build_Claim_IPOP_ds_project_overuse_foot_imaging.sas
-* Job Desc: Input for Inpatient & Outpatient  Claims 
+* Job Name: jhu_build_Claim_IPOP_ds_project_overuse_meniscectomy.sas
+* Job Desc: Input for Inpatient & Outpatient (Including Carrier) Claims 
 * Copyright: Johns Hopkins University - SegalLab & HutflessLab 2019
 ********************************************************************/
 
+/*** Indicator description ***/
+/* Description and codes from .xlsx file  "ICD-10 conversions_5_28_20" */
+
+***************Major modifications made per 27mar2020 phone call to 
+include at risk population only and sum counts**************************************
+We need to identify the at-risk population, calculate their agecat/comorbid/female and sum 
+by hospital qtr year
+then evaluate N of the eligible that popped;
+
+***********May 2020: JS changed so that there is NO LOOKBACK****************************
+*************People now become eligible and POP during the same encounter;
+
+*NOTE: Defining an array with 0 elements in log is acceptable if N identified is 0;
+
+/* Indicator 11 (old indicator 18) */
 
 /*** start of indicator specific variables ***/
 
@@ -14,63 +29,64 @@
 		EXCLUD_dx10  exclud_dx10_n;
 
 /*inclusion criteria*/
-		*people with DIAGNOSES of foot trauma;
+		*people with DIAGNOSES of DJD of knee 
+		and no DIAGNOSIS of knee trauma 
+		and without a concurrent knee replacement;
 
 %let includ_hcpcs =
-					'73700'	'73701'	'73702'	'73718'			;		*use for popped visit;
+					'29881' '27332' '27333' '27403'
+					'29868' '29880' '29881' '29882'
+					'29883'			;		*use for popped visit;
 
 
 
 %let includ_pr10 =
-					'BQ2J' 'BQ2K' 'BQ2L' 'BQ2M' 'BQ2P'
-					'BQ2Q' 'BQ2X' 'BQ2Y' 'BQ3J' 'BQ3K'
-					'BQ3L' 'BQ3M' 'BQ3P' 'BQ3Q'		; *use for popped visit;
-%let includ_pr10_n = 4;		*this number should match number that needs to be substringed;
+					'0SBC4ZZ' '0SBD4ZZ'			; *use for popped visit;
+%let includ_pr10_n = 7;		*this number should match number that needs to be substringed;
 
-%let includ_dx10   = 'S90' 'S91' 'S92' 'S93' 'S94' 'S95'
-					'S96' 'S97' 'S98' 'S99'	;						*use for inclusion visit;
+%let includ_dx10   = 'M17';						*use for inclusion visit--djd of knee;
 %let includ_dx10_n = 3;		*this number should match number that needs to be substringed;
 %let includ_drg = '0';
 
 /** Exclusion criteria **/
-%let exclud_hcpcs= '0'; 					
+%let exclud_hcpcs= '27447'; 					*use for inclusion visit & popped visit;
 
-%let EXclud_pr10 =	'0'				; 
-%let EXclud_pr10_n = 7;	
+%let EXclud_pr10 =	'0SRC' '0SRD'				; *use for inclusion visit & popped visit;
+%let EXclud_pr10_n = 4;	
 
-%let EXCLUD_dx10   = '0'; 						
-%let exclud_dx10_n = 7; 
+%let EXCLUD_dx10   = 'V' 'W'; 						* use for inclusion visit & popped visit;
+%let exclud_dx10_n = 1; 
 
 /** Label pop specific variables  **/
 %global popN;
-%let	popN							= 02;
-%let	poptext							= "foot imaging";
-%let 	flag_popped             		= popped2 								;
-%let 	flag_popped_label				= 'indicator 2 popped'					;	
-%let	flag_popped_dt					= popped2_dt							;
-%let 	flag_popped_dt_label			= 'indicator 2 date patient popped (IP=clm_admsn_dt OP=clm_from_dt)'	;
-%let 	pop_age							= pop_2_age							;				
-%let	pop_age_label					= 'age popped for pop 2'				;
-%let	pop_los							= pop_2_los							;
+%let	popN							= 11;
+%let	poptext							= "meniscectomy"; 
+%let 	flag_popped             		= popped11 								;
+%let 	flag_popped_label				= 'indicator 11 popped'					;	
+%let	flag_popped_dt					= popped11_dt							;
+%let 	flag_popped_dt_label			= 'indicator 11 date patient popped (IP=clm_admsn_dt OP=clm_from_dt)'	;
+%let 	pop_age							= pop_11_age							;				
+%let	pop_age_label					= 'age popped for pop 11'				;
+%let	pop_los							= pop_11_los							;
 %let	pop_los_label					= 'length of stay when patient popped'	;
-%let	pop_year						= pop_2_year							;
-%let	pop_nch_clm_type_cd				= pop_2_nch_clm_type_cd				;
-%let  	pop_CLM_IP_ADMSN_TYPE_CD		= pop_2_CLM_IP_ADMSN_TYPE_CD			;
-%let	pop_clm_fac_type_cd				= pop_2_clm_fac_type_cd				;
-%let	pop_clm_src_ip_admsn_cd			= pop_2_clm_src_ip_admsn_cd			;
-%let	pop_ptnt_dschrg_stus_cd  		= pop_2_ptnt_dschrg_stus_cd			;
-%let	pop_admtg_dgns_cd				= pop_2_admtg_dgns_cd					;
-%let	pop_icd_dgns_cd1				= pop_2_icd_dgns_cd1					;
-%let	pop_icd_prcdr_cd1				= pop_2_icd_prcdr_cd1					;
-%let	pop_clm_drg_cd					= pop_2_clm_drg_cd						;
-%let	pop_hcpcs_cd					= pop_2_hcpcs_cd						;
-%let	pop_OP_PHYSN_SPCLTY_CD			= pop_2_OP_PHYSN_SPCLTY_CD				;
-%let	pop_nch_clm_type_cd				= pop_2_nch_clm_type_cd				;
-%let	pop_nch_clm_type_cd_label		= 'claim/facility type for pop 2' 		;
-%let	pop_CLM_IP_ADMSN_TYPE_CD_label	= 'inpatient admission type code for pop 2'	;
-%let  	pop_clm_fac_type_cd_label		= 'inpatient clm_fac_type_cd for pop 2';
-%let	pop_clm_src_ip_admsn_cd_label	= 'clm_src_ip_admsn_cd for pop 2'		;
-%let	pop_ptnt_dschrg_stus_cd_label	= 'discharge status code for pop 2'	;	
+%let	pop_year						= pop_11_year							;
+%let	pop_nch_clm_type_cd				= pop_11_nch_clm_type_cd				;
+%let  	pop_CLM_IP_ADMSN_TYPE_CD		= pop_11_CLM_IP_ADMSN_TYPE_CD			;
+%let	pop_clm_fac_type_cd				= pop_11_clm_fac_type_cd				;
+%let	pop_clm_src_ip_admsn_cd			= pop_11_clm_src_ip_admsn_cd			;
+%let	pop_ptnt_dschrg_stus_cd  		= pop_11_ptnt_dschrg_stus_cd			;
+%let	pop_admtg_dgns_cd				= pop_11_admtg_dgns_cd					;
+%let	pop_icd_dgns_cd1				= pop_11_icd_dgns_cd1					;
+%let	pop_icd_prcdr_cd1				= pop_11_icd_prcdr_cd1					;
+%let	pop_clm_drg_cd					= pop_11_clm_drg_cd						;
+%let	pop_hcpcs_cd					= pop_11_hcpcs_cd						;
+%let	pop_OP_PHYSN_SPCLTY_CD			= pop_11_OP_PHYSN_SPCLTY_CD				;
+%let	pop_nch_clm_type_cd				= pop_11_nch_clm_type_cd				;
+%let	pop_nch_clm_type_cd_label		= 'claim/facility type for pop 11' 		;
+%let	pop_CLM_IP_ADMSN_TYPE_CD_label	= 'inpatient admission type code for pop 11'	;
+%let  	pop_clm_fac_type_cd_label		= 'inpatient clm_fac_type_cd for pop 11';
+%let	pop_clm_src_ip_admsn_cd_label	= 'clm_src_ip_admsn_cd for pop 11'		;
+%let	pop_ptnt_dschrg_stus_cd_label	= 'discharge status code for pop 11'	;	
 /*** end of indicator specific variables ***/
 
 
@@ -237,7 +253,7 @@ if DELETE = 1 then delete;
 elig_dt=&date;
 elig_age=(&date-&clm_dob)/365.25; label elig_age='age at eligibility';
 if &clm_end_dt_in ne . then do;
-	elig_los=&clm_end_dt_in-&date;	label elig_los ='length of stay at eligbility';
+	elig_los=&clm_end_dt_in-&date;	label elig_los ='length of stay at eligbility (inpatient only)';
 end;
 if elig_los =. then do;
 	elig_los=&clm_thru_dt-&date;	label elig_los ='length of stay at eligbility';
@@ -294,8 +310,7 @@ proc sort data=pop_&popN._OUTinclude NODUPKEY; by elig_compendium_hospital_id el
 proc sort data=pop_&popN._OUTinclude NODUPKEY; by elig_compendium_hospital_id elig_year elig_qtr &bene_id ; run; 
 
 data &permlib..pop_&popN._elig;
-set 	pop_&popN._OUTinclude 
-		/*pop_&popN._INinclude*/ ;		*as of May 2020 we are not including inpatient;
+set 	pop_&popN._OUTinclude  ;		
 run;
 *person can contribute only once even if seen in inpatient and outpatient in same hosp/year/qtr;
 proc sort data=&permlib..pop_&popN._elig NODUPKEY; by elig_compendium_hospital_id elig_year elig_qtr &bene_id ;run;
@@ -424,6 +439,7 @@ do j=1 to &diag_cd_max;
 end;
 if hcpcs_cd in(&exclud_hcpcs) then DELETE=1;
 if DELETE = 1 then delete;
+*if clm_drg_cd notin(&includ_drg) then delete;
 if &flag_popped ne 1 then delete;
 run; 
 *link to eligibility--require the timing of inclusion dx and procedure match-up;
@@ -436,8 +452,7 @@ from
 where 
 		a.&bene_id=b.&bene_id 
 		and 
-		a.elig_dt=b.&flag_popped_dt									/*Eliana: enter the time element here NO LOOKBACK;*/
-		/*and (	(a.elig_dt-180) <= b.&flag_popped_dt <=a.elig_dt	)*Eliana: enter the time element here-WITH LOOKBACK;*/
+		a.elig_dt=b.&flag_popped_dt					
 ;  
 quit;
 %mend;
@@ -485,7 +500,7 @@ proc sort data=pop_&popN._OUT NODUPKEY; by pop_compendium_hospital_id pop_year p
 data &permlib..pop_&popN._popped
 	(keep = bene_id elig: pop: setting: 
 			);
-set /*pop_&popN._IN*/ pop_&popN._OUT;
+set  pop_&popN._OUT;
 pop_year=year(&flag_popped_dt);
 pop_qtr=qtr(&flag_popped_dt);
 pop_prvdr_num=prvdr_num;
