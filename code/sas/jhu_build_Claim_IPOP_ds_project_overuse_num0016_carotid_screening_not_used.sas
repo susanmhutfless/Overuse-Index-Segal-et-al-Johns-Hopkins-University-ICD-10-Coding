@@ -1,5 +1,5 @@
 /********************************************************************
-* Job Name: jhu_build_Claim_IPOP_ds_project_overuse_num13_summed.sas
+* Job Name: jhu_build_Claim_IPOP_ds_project_overuse_num16_carotid_screening.sas
 * Job Desc: Input for Inpatient & Outpatient (Including Carrier) Claims 
 * Copyright: Johns Hopkins University - SegalLab & HutflessLab 2019
 ********************************************************************/
@@ -20,7 +20,6 @@
 		EXCLUD_dx10  exclud_dx10_n;
 
 /*inclusion criteria*/
-		*people without DIAGNOSES suspicious of stroke or TIA;
 
 %let includ_hcpcs =
 					'93880'	'3100F'				;		*use for popped visit;
@@ -31,7 +30,7 @@
 					'B345ZZ3' 'B345ZZZ' 'B348ZZ3' 'B348ZZZ'		; *use for popped visit;
 %let includ_pr10_n = 7;		*this number should match number that needs to be substringed;
 
-%let includ_dx10   = '0';		*according to 1st sql statement, requires dx code=0 to be included--edited to remove dx inclusion criteria;						
+%let includ_dx10   = '0';							
 %let includ_dx10_n = 7;		
 %let includ_drg = '0';
 
