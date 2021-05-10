@@ -281,7 +281,7 @@ from
 pop_&popN._in_out_anal2 a,
 &permlib..ahrq_ccn b
 where a.pop_compendium_hospital_id = b.compendium_hospital_id 
-and b.health_sys_id2016 ne ' ';
+and (b.health_sys_id2016 ne ' ' or b.health_sys_id2018 ne ' ');
 quit;
 
 
