@@ -48,32 +48,32 @@
 %global popN;
 %let	popN							= 16;
 %let	poptext							= "carotid screening";
-%let 	flag_popped             		= popped13 								;
-%let 	flag_popped_label				= 'indicator 13 popped'					;	
-%let	flag_popped_dt					= popped13_dt							;
-%let 	flag_popped_dt_label			= 'indicator 13 date patient popped (IP=clm_admsn_dt OP=clm_from_dt)'	;
-%let 	pop_age							= pop_13_age							;				
-%let	pop_age_label					= 'age popped for pop 13'				;
-%let	pop_los							= pop_13_los							;
+%let 	flag_popped             		= popped16 								;
+%let 	flag_popped_label				= 'indicator 16 popped'					;	
+%let	flag_popped_dt					= popped16_dt							;
+%let 	flag_popped_dt_label			= 'indicator 16 date patient popped (IP=clm_admsn_dt OP=clm_from_dt)'	;
+%let 	pop_age							= pop_16_age							;				
+%let	pop_age_label					= 'age popped for pop 16'				;
+%let	pop_los							= pop_16_los							;
 %let	pop_los_label					= 'length of stay when patient popped'	;
-%let	pop_year						= pop_13_year							;
-%let	pop_nch_clm_type_cd				= pop_13_nch_clm_type_cd				;
-%let  	pop_CLM_IP_ADMSN_TYPE_CD		= pop_13_CLM_IP_ADMSN_TYPE_CD			;
-%let	pop_clm_fac_type_cd				= pop_13_clm_fac_type_cd				;
-%let	pop_clm_src_ip_admsn_cd			= pop_13_clm_src_ip_admsn_cd			;
-%let	pop_ptnt_dschrg_stus_cd  		= pop_13_ptnt_dschrg_stus_cd			;
-%let	pop_admtg_dgns_cd				= pop_13_admtg_dgns_cd					;
-%let	pop_icd_dgns_cd1				= pop_13_icd_dgns_cd1					;
-%let	pop_icd_prcdr_cd1				= pop_13_icd_prcdr_cd1					;
-%let	pop_clm_drg_cd					= pop_13_clm_drg_cd						;
-%let	pop_hcpcs_cd					= pop_13_hcpcs_cd						;
-%let	pop_OP_PHYSN_SPCLTY_CD			= pop_13_OP_PHYSN_SPCLTY_CD				;
-%let	pop_nch_clm_type_cd				= pop_13_nch_clm_type_cd				;
-%let	pop_nch_clm_type_cd_label		= 'claim/facility type for pop 13' 		;
-%let	pop_CLM_IP_ADMSN_TYPE_CD_label	= 'inpatient admission type code for pop 13'	;
-%let  	pop_clm_fac_type_cd_label		= 'inpatient clm_fac_type_cd for pop 13';
-%let	pop_clm_src_ip_admsn_cd_label	= 'clm_src_ip_admsn_cd for pop 13'		;
-%let	pop_ptnt_dschrg_stus_cd_label	= 'discharge status code for pop 13'	;	
+%let	pop_year						= pop_16_year							;
+%let	pop_nch_clm_type_cd				= pop_16_nch_clm_type_cd				;
+%let  	pop_CLM_IP_ADMSN_TYPE_CD		= pop_16_CLM_IP_ADMSN_TYPE_CD			;
+%let	pop_clm_fac_type_cd				= pop_16_clm_fac_type_cd				;
+%let	pop_clm_src_ip_admsn_cd			= pop_16_clm_src_ip_admsn_cd			;
+%let	pop_ptnt_dschrg_stus_cd  		= pop_16_ptnt_dschrg_stus_cd			;
+%let	pop_admtg_dgns_cd				= pop_16_admtg_dgns_cd					;
+%let	pop_icd_dgns_cd1				= pop_16_icd_dgns_cd1					;
+%let	pop_icd_prcdr_cd1				= pop_16_icd_prcdr_cd1					;
+%let	pop_clm_drg_cd					= pop_16_clm_drg_cd						;
+%let	pop_hcpcs_cd					= pop_16_hcpcs_cd						;
+%let	pop_OP_PHYSN_SPCLTY_CD			= pop_16_OP_PHYSN_SPCLTY_CD				;
+%let	pop_nch_clm_type_cd				= pop_16_nch_clm_type_cd				;
+%let	pop_nch_clm_type_cd_label		= 'claim/facility type for pop 16' 		;
+%let	pop_CLM_IP_ADMSN_TYPE_CD_label	= 'inpatient admission type code for pop 16'	;
+%let  	pop_clm_fac_type_cd_label		= 'inpatient clm_fac_type_cd for pop 16';
+%let	pop_clm_src_ip_admsn_cd_label	= 'clm_src_ip_admsn_cd for pop 16'		;
+%let	pop_ptnt_dschrg_stus_cd_label	= 'discharge status code for pop 16'	;	
 /*** end of indicator specific variables ***/
 
 
@@ -136,11 +136,12 @@
 %include "&vrdc_code./medicare_formats.sas";
 *%include "&vrdc_code./jhu_build_Health_Systems.sas";
 
+*run pop only--this should be a never event;
 
 *start identification of eligibility;
 *First identify all who are eligible;
 
-/*** this macro is for inpatient and outpatient claims--must have DX code of interest***/
+/*** this macro is for inpatient and outpatient claims--must have DX code of interest***
 %macro claims_rev(date=,	source=,  rev_cohort=, include_cohort=, ccn=);
 *identify dx codes of interest;
 proc sql;
@@ -351,7 +352,7 @@ run;
 proc sort data=pop_&popN._INinclude NODUPKEY; by elig_compendium_hospital_id elig_year elig_qtr &bene_id elig_dt; run;
 proc sort data=pop_&popN._INinclude NODUPKEY; by elig_compendium_hospital_id elig_year elig_qtr &bene_id ; run;
 
-/*** this section is related to OP - outpatient claims--for eligibility***/
+/*** this section is related to OP - outpatient claims--for eligibility***
 %claims_rev(date=&clm_from_dt, source=rif2015.OUTpatient_claims_07,  
 	rev_cohort=rif2015.inpatient_revenue_07, include_cohort=pop_&popN._OUTinclude_2015_7, ccn=ccn2016);
 %claims_rev(date=&clm_from_dt, source=rif2015.OUTpatient_claims_08,  
@@ -445,7 +446,6 @@ data pop_&popN._OUTinclude (keep= &bene_id &clm_id elig_dt elig: setting_elig:
 							&diag_pfx.&diag_cd_min   &proc_pfx.&proc_cd_min
 							prvdr_num prvdr_state_cd OP_PHYSN_SPCLTY_CD rev_cntr1
 							at_physn_npi op_physn_npi org_npi_num ot_physn_npi rndrng_physn_npi
-							/*RFR_PHYSN_NPI*/
 							bene_cnty_cd bene_state_cd 	bene_mlg_cntct_zip_cd
 						);
 set pop_&popN._OUTinclude: 	;
@@ -473,7 +473,7 @@ format bene_state_cd prvdr_state_cd $state. OP_PHYSN_SPCLTY_CD $speccd. rev_cntr
 		&icd_dgns_cd1  $dgns. &icd_prcdr_cd1 $prcdr. hcpcs_cd1 $hcpcs. ;
 run;
 run;
-/* get rid of duplicate rows so that each bene contributes 1x per hospital/year/qtr */
+/* get rid of duplicate rows so that each bene contributes 1x per hospital/year/qtr *
 proc sort data=pop_&popN._OUTinclude NODUPKEY; by elig_compendium_hospital_id elig_year elig_qtr &bene_id elig_dt; run;
 proc sort data=pop_&popN._OUTinclude NODUPKEY; by elig_compendium_hospital_id elig_year elig_qtr &bene_id ; run; 
 
@@ -481,9 +481,9 @@ data &permlib..pop_&popN._elig;
 set 	pop_&popN._OUTinclude 
 		/*pop_&popN._INinclude*/ ;		*as of May 2020 we are not including inpatient;
 run;
-*person can contribute only once even if seen in inpatient and outpatient in same hosp/year/qtr;
+/*person can contribute only once even if seen in inpatient and outpatient in same hosp/year/qtr;
 proc sort data=&permlib..pop_&popN._elig NODUPKEY; by elig_compendium_hospital_id elig_year elig_qtr &bene_id ;run;
-
+*/
 *end identification of eligibility;
 
 *Start: Identify who popped;
