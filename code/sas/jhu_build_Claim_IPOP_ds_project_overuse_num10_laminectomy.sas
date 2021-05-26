@@ -165,7 +165,7 @@
 *start identification of eligibility;
 *First identify all who are eligible;
 data &permlib..pop_&popN._elig;	
-set &permlib..pop_7_elig;
+set &permlib..pop_07_elig;
 run;
 *end identification of eligibility;
 
