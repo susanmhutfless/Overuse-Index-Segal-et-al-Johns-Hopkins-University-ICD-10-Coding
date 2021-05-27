@@ -247,7 +247,7 @@ quit;
 run;
 %mend;
 /*** this section is related to IP - inpatient claims--for eligible cohort***/
-%include "&vrdc_code./elig_ip.sas";
+%include "&vrdc_code./elig_inp.sas";
 
 data pop_&popN._INinclude (keep= &bene_id &clm_id elig_dt elig: setting_elig:
 							pop_num elig_compendium_hospital_id  &gndr_cd &clm_dob bene_race_cd
@@ -479,7 +479,7 @@ quit;
 %mend;
 
 /*** this section is related to IP - inpatient claims ***/
-%include "&vrdc_code./pop_ip.sas";
+%include "&vrdc_code./pop_inp.sas";
 
 data pop_&popN._IN (keep=  pop: &flag_popped_dt elig: setting: 
 							&bene_id &clm_id 
