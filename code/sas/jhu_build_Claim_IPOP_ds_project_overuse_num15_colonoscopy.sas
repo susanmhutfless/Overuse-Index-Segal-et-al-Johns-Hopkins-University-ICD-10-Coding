@@ -262,8 +262,7 @@ proc sort data=pop_&popN._OUTinclude NODUPKEY; by elig_compendium_hospital_id el
 proc sort data=pop_&popN._OUTinclude NODUPKEY; by elig_compendium_hospital_id elig_year elig_qtr &bene_id ; run; 
 
 data &permlib..pop_&popN._elig;
-set 	pop_&popN._OUTinclude 
-		/*pop_&popN._INinclude*/ ;		*as of May 2020 we are not including inpatient;
+set 	pop_&popN._OUTinclude  ;		
 run;
 *person can contribute only once even if seen in inpatient and outpatient in same hosp/year/qtr;
 proc sort data=&permlib..pop_&popN._elig NODUPKEY; by elig_compendium_hospital_id elig_year elig_qtr &bene_id ;run;
@@ -411,7 +410,6 @@ where
 quit;
 %mend;
 %include "&vrdc_code./pop_op.sas";
-%include "&vrdc_code./pop_op.sas";
 data pop_&popN._out (keep=  pop: &flag_popped_dt elig: setting: 
 							&bene_id &clm_id 
 							&clm_from_dt &clm_thru_dt &clm_dob  &ptnt_dschrg_stus_cd
@@ -452,10 +450,8 @@ proc sort data=pop_&popN._OUT NODUPKEY; by pop_compendium_hospital_id pop_year p
 proc sort data=pop_&popN._OUT NODUPKEY; by pop_compendium_hospital_id pop_year pop_qtr &bene_id ; run; 
 
 data &permlib..pop_&popN._popped
-	(keep = bene_id elig: pop: setting: 
-			/*&gndr_cd bene_race_cd	bene_cnty_cd bene_state_cd 	bene_mlg_cntct_zip_cd*/
-			);
-set /*pop_&popN._IN*/ pop_&popN._OUT;
+	(keep = bene_id elig: pop: setting: 			);
+set  pop_&popN._OUT;
 pop_year=year(&flag_popped_dt);
 pop_qtr=qtr(&flag_popped_dt);
 pop_prvdr_num=prvdr_num;
