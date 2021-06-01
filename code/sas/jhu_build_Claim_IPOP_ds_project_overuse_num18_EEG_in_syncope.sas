@@ -331,7 +331,7 @@ proc sort data=pop_&popN._OUTinclude NODUPKEY; by elig_compendium_hospital_id el
 proc sort data=pop_&popN._OUTinclude NODUPKEY; by elig_compendium_hospital_id elig_year elig_qtr &bene_id ; run; 
 
 data &permlib..pop_&popN._elig;
-set 	pop_&popN._OUTinclude 
+set 	pop_&popN._OUTinclude;* 
 		pop_&popN._INinclude ;	
 run;
 *person can contribute only once even if seen in inpatient and outpatient in same hosp/year/qtr;
