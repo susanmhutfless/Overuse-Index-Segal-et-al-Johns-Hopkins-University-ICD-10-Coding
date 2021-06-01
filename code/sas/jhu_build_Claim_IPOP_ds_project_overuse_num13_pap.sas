@@ -258,7 +258,7 @@ from
 	include_cohort1a a, 
 	&source b
 where 
-	(a.&bene_id=b.&bene_id and a.&clm_id=b.&clm_id)
+	(a.&bene_id=b.&bene_id and a.&clm_id=b.&clm_id);
 quit;
 * pull claim info for those with dx for pop ;
 proc sql;
@@ -268,81 +268,81 @@ from
 	include_cohort1a a, 
 	&source b
 where 
-		substr(icd_dgns_cd1,1,&includ_dx10_substr4) in(&includ_dx10_code4) or
-		substr(icd_dgns_cd2,1,&includ_dx10_substr4) in(&includ_dx10_code4) or
-		substr(icd_dgns_cd3,1,&includ_dx10_substr4) in(&includ_dx10_code4) or
-		substr(icd_dgns_cd4,1,&includ_dx10_substr4) in(&includ_dx10_code4) or
-		substr(icd_dgns_cd5,1,&includ_dx10_substr4) in(&includ_dx10_code4) or
-		substr(icd_dgns_cd6,1,&includ_dx10_substr4) in(&includ_dx10_code4) or
-		substr(icd_dgns_cd7,1,&includ_dx10_substr4) in(&includ_dx10_code4) or
-		substr(icd_dgns_cd8,1,&includ_dx10_substr4) in(&includ_dx10_code4) or
-		substr(icd_dgns_cd9,1,&includ_dx10_substr4) in(&includ_dx10_code4) or
-		substr(icd_dgns_cd10,1,&includ_dx10_substr4) in(&includ_dx10_code4) or
-		substr(icd_dgns_cd11,1,&includ_dx10_substr4) in(&includ_dx10_code4) or
-		substr(icd_dgns_cd12,1,&includ_dx10_substr4) in(&includ_dx10_code4) or
-		substr(icd_dgns_cd13,1,&includ_dx10_substr4) in(&includ_dx10_code4) or
-		substr(icd_dgns_cd14,1,&includ_dx10_substr4) in(&includ_dx10_code4) or
-		substr(icd_dgns_cd15,1,&includ_dx10_substr4) in(&includ_dx10_code4) or
-		substr(icd_dgns_cd16,1,&includ_dx10_substr4) in(&includ_dx10_code4) or
-		substr(icd_dgns_cd17,1,&includ_dx10_substr4) in(&includ_dx10_code4) or
-		substr(icd_dgns_cd18,1,&includ_dx10_substr4) in(&includ_dx10_code4) or
-		substr(icd_dgns_cd19,1,&includ_dx10_substr4) in(&includ_dx10_code4) or
-		substr(icd_dgns_cd20,1,&includ_dx10_substr4) in(&includ_dx10_code4) or
-		substr(icd_dgns_cd21,1,&includ_dx10_substr4) in(&includ_dx10_code4) or
-		substr(icd_dgns_cd22,1,&includ_dx10_substr4) in(&includ_dx10_code4) or
-		substr(icd_dgns_cd23,1,&includ_dx10_substr4) in(&includ_dx10_code4) or
-		substr(icd_dgns_cd24,1,&includ_dx10_substr4) in(&includ_dx10_code4) or
-		substr(icd_dgns_cd25,1,&includ_dx10_substr4) in(&includ_dx10_code4) or
-		substr(icd_dgns_cd1,1,&includ_dx10_substr5) in(&includ_dx10_code5) or
-		substr(icd_dgns_cd2,1,&includ_dx10_substr5) in(&includ_dx10_code5) or
-		substr(icd_dgns_cd3,1,&includ_dx10_substr5) in(&includ_dx10_code5) or
-		substr(icd_dgns_cd4,1,&includ_dx10_substr5) in(&includ_dx10_code5) or
-		substr(icd_dgns_cd5,1,&includ_dx10_substr5) in(&includ_dx10_code5) or
-		substr(icd_dgns_cd6,1,&includ_dx10_substr5) in(&includ_dx10_code5) or
-		substr(icd_dgns_cd7,1,&includ_dx10_substr5) in(&includ_dx10_code5) or
-		substr(icd_dgns_cd8,1,&includ_dx10_substr5) in(&includ_dx10_code5) or
-		substr(icd_dgns_cd9,1,&includ_dx10_substr5) in(&includ_dx10_code5) or
-		substr(icd_dgns_cd10,1,&includ_dx10_substr5) in(&includ_dx10_code5) or
-		substr(icd_dgns_cd11,1,&includ_dx10_substr5) in(&includ_dx10_code5) or
-		substr(icd_dgns_cd12,1,&includ_dx10_substr5) in(&includ_dx10_code5) or
-		substr(icd_dgns_cd13,1,&includ_dx10_substr5) in(&includ_dx10_code5) or
-		substr(icd_dgns_cd14,1,&includ_dx10_substr5) in(&includ_dx10_code5) or
-		substr(icd_dgns_cd15,1,&includ_dx10_substr5) in(&includ_dx10_code5) or
-		substr(icd_dgns_cd16,1,&includ_dx10_substr5) in(&includ_dx10_code5) or
-		substr(icd_dgns_cd17,1,&includ_dx10_substr5) in(&includ_dx10_code5) or
-		substr(icd_dgns_cd18,1,&includ_dx10_substr5) in(&includ_dx10_code5) or
-		substr(icd_dgns_cd19,1,&includ_dx10_substr5) in(&includ_dx10_code5) or
-		substr(icd_dgns_cd20,1,&includ_dx10_substr5) in(&includ_dx10_code5) or
-		substr(icd_dgns_cd21,1,&includ_dx10_substr5) in(&includ_dx10_code5) or
-		substr(icd_dgns_cd22,1,&includ_dx10_substr5) in(&includ_dx10_code5) or
-		substr(icd_dgns_cd23,1,&includ_dx10_substr5) in(&includ_dx10_code5) or
-		substr(icd_dgns_cd24,1,&includ_dx10_substr5) in(&includ_dx10_code5) or
-		substr(icd_dgns_cd25,1,&includ_dx10_substr5) in(&includ_dx10_code5) or
-		substr(icd_dgns_cd1,1,&includ_dx10_substr6) in(&includ_dx10_code6) or
-		substr(icd_dgns_cd2,1,&includ_dx10_substr6) in(&includ_dx10_code6) or
-		substr(icd_dgns_cd3,1,&includ_dx10_substr6) in(&includ_dx10_code6) or
-		substr(icd_dgns_cd4,1,&includ_dx10_substr6) in(&includ_dx10_code6) or
-		substr(icd_dgns_cd5,1,&includ_dx10_substr6) in(&includ_dx10_code6) or
-		substr(icd_dgns_cd6,1,&includ_dx10_substr6) in(&includ_dx10_code6) or
-		substr(icd_dgns_cd7,1,&includ_dx10_substr6) in(&includ_dx10_code6) or
-		substr(icd_dgns_cd8,1,&includ_dx10_substr6) in(&includ_dx10_code6) or
-		substr(icd_dgns_cd9,1,&includ_dx10_substr6) in(&includ_dx10_code6) or
-		substr(icd_dgns_cd10,1,&includ_dx10_substr6) in(&includ_dx10_code6) or
-		substr(icd_dgns_cd11,1,&includ_dx10_substr6) in(&includ_dx10_code6) or
-		substr(icd_dgns_cd12,1,&includ_dx10_substr6) in(&includ_dx10_code6) or
-		substr(icd_dgns_cd13,1,&includ_dx10_substr6) in(&includ_dx10_code6) or
-		substr(icd_dgns_cd14,1,&includ_dx10_substr6) in(&includ_dx10_code6) or
-		substr(icd_dgns_cd15,1,&includ_dx10_substr6) in(&includ_dx10_code6) or
-		substr(icd_dgns_cd16,1,&includ_dx10_substr6) in(&includ_dx10_code6) or
-		substr(icd_dgns_cd17,1,&includ_dx10_substr6) in(&includ_dx10_code6) or
-		substr(icd_dgns_cd18,1,&includ_dx10_substr6) in(&includ_dx10_code6) or
-		substr(icd_dgns_cd19,1,&includ_dx10_substr6) in(&includ_dx10_code6) or
-		substr(icd_dgns_cd20,1,&includ_dx10_substr6) in(&includ_dx10_code6) or
-		substr(icd_dgns_cd21,1,&includ_dx10_substr6) in(&includ_dx10_code6) or
-		substr(icd_dgns_cd22,1,&includ_dx10_substr6) in(&includ_dx10_code6) or
-		substr(icd_dgns_cd23,1,&includ_dx10_substr6) in(&includ_dx10_code6) or
-		substr(icd_dgns_cd24,1,&includ_dx10_substr6) in(&includ_dx10_code6) or
-		substr(icd_dgns_cd25,1,&includ_dx10_substr6) in(&includ_dx10_code6);
+		substr(b.icd_dgns_cd1,1,&includ_dx10_substr4) in(&includ_dx10_code4) or
+		substr(b.icd_dgns_cd2,1,&includ_dx10_substr4) in(&includ_dx10_code4) or
+		substr(b.icd_dgns_cd3,1,&includ_dx10_substr4) in(&includ_dx10_code4) or
+		substr(b.icd_dgns_cd4,1,&includ_dx10_substr4) in(&includ_dx10_code4) or
+		substr(b.icd_dgns_cd5,1,&includ_dx10_substr4) in(&includ_dx10_code4) or
+		substr(b.icd_dgns_cd6,1,&includ_dx10_substr4) in(&includ_dx10_code4) or
+		substr(b.icd_dgns_cd7,1,&includ_dx10_substr4) in(&includ_dx10_code4) or
+		substr(b.icd_dgns_cd8,1,&includ_dx10_substr4) in(&includ_dx10_code4) or
+		substr(b.icd_dgns_cd9,1,&includ_dx10_substr4) in(&includ_dx10_code4) or
+		substr(b.icd_dgns_cd10,1,&includ_dx10_substr4) in(&includ_dx10_code4) or
+		substr(b.icd_dgns_cd11,1,&includ_dx10_substr4) in(&includ_dx10_code4) or
+		substr(b.icd_dgns_cd12,1,&includ_dx10_substr4) in(&includ_dx10_code4) or
+		substr(b.icd_dgns_cd13,1,&includ_dx10_substr4) in(&includ_dx10_code4) or
+		substr(b.icd_dgns_cd14,1,&includ_dx10_substr4) in(&includ_dx10_code4) or
+		substr(b.icd_dgns_cd15,1,&includ_dx10_substr4) in(&includ_dx10_code4) or
+		substr(b.icd_dgns_cd16,1,&includ_dx10_substr4) in(&includ_dx10_code4) or
+		substr(b.icd_dgns_cd17,1,&includ_dx10_substr4) in(&includ_dx10_code4) or
+		substr(b.icd_dgns_cd18,1,&includ_dx10_substr4) in(&includ_dx10_code4) or
+		substr(b.icd_dgns_cd19,1,&includ_dx10_substr4) in(&includ_dx10_code4) or
+		substr(b.icd_dgns_cd20,1,&includ_dx10_substr4) in(&includ_dx10_code4) or
+		substr(b.icd_dgns_cd21,1,&includ_dx10_substr4) in(&includ_dx10_code4) or
+		substr(b.icd_dgns_cd22,1,&includ_dx10_substr4) in(&includ_dx10_code4) or
+		substr(b.icd_dgns_cd23,1,&includ_dx10_substr4) in(&includ_dx10_code4) or
+		substr(b.icd_dgns_cd24,1,&includ_dx10_substr4) in(&includ_dx10_code4) or
+		substr(b.icd_dgns_cd25,1,&includ_dx10_substr4) in(&includ_dx10_code4) or
+		substr(b.icd_dgns_cd1,1,&includ_dx10_substr5) in(&includ_dx10_code5) or
+		substr(b.icd_dgns_cd2,1,&includ_dx10_substr5) in(&includ_dx10_code5) or
+		substr(b.icd_dgns_cd3,1,&includ_dx10_substr5) in(&includ_dx10_code5) or
+		substr(b.icd_dgns_cd4,1,&includ_dx10_substr5) in(&includ_dx10_code5) or
+		substr(b.icd_dgns_cd5,1,&includ_dx10_substr5) in(&includ_dx10_code5) or
+		substr(b.icd_dgns_cd6,1,&includ_dx10_substr5) in(&includ_dx10_code5) or
+		substr(b.icd_dgns_cd7,1,&includ_dx10_substr5) in(&includ_dx10_code5) or
+		substr(b.icd_dgns_cd8,1,&includ_dx10_substr5) in(&includ_dx10_code5) or
+		substr(b.icd_dgns_cd9,1,&includ_dx10_substr5) in(&includ_dx10_code5) or
+		substr(b.icd_dgns_cd10,1,&includ_dx10_substr5) in(&includ_dx10_code5) or
+		substr(b.icd_dgns_cd11,1,&includ_dx10_substr5) in(&includ_dx10_code5) or
+		substr(b.icd_dgns_cd12,1,&includ_dx10_substr5) in(&includ_dx10_code5) or
+		substr(b.icd_dgns_cd13,1,&includ_dx10_substr5) in(&includ_dx10_code5) or
+		substr(b.icd_dgns_cd14,1,&includ_dx10_substr5) in(&includ_dx10_code5) or
+		substr(b.icd_dgns_cd15,1,&includ_dx10_substr5) in(&includ_dx10_code5) or
+		substr(b.icd_dgns_cd16,1,&includ_dx10_substr5) in(&includ_dx10_code5) or
+		substr(b.icd_dgns_cd17,1,&includ_dx10_substr5) in(&includ_dx10_code5) or
+		substr(b.icd_dgns_cd18,1,&includ_dx10_substr5) in(&includ_dx10_code5) or
+		substr(b.icd_dgns_cd19,1,&includ_dx10_substr5) in(&includ_dx10_code5) or
+		substr(b.icd_dgns_cd20,1,&includ_dx10_substr5) in(&includ_dx10_code5) or
+		substr(b.icd_dgns_cd21,1,&includ_dx10_substr5) in(&includ_dx10_code5) or
+		substr(b.icd_dgns_cd22,1,&includ_dx10_substr5) in(&includ_dx10_code5) or
+		substr(b.icd_dgns_cd23,1,&includ_dx10_substr5) in(&includ_dx10_code5) or
+		substr(b.icd_dgns_cd24,1,&includ_dx10_substr5) in(&includ_dx10_code5) or
+		substr(b.icd_dgns_cd25,1,&includ_dx10_substr5) in(&includ_dx10_code5) or
+		substr(b.icd_dgns_cd1,1,&includ_dx10_substr6) in(&includ_dx10_code6) or
+		substr(b.icd_dgns_cd2,1,&includ_dx10_substr6) in(&includ_dx10_code6) or
+		substr(b.icd_dgns_cd3,1,&includ_dx10_substr6) in(&includ_dx10_code6) or
+		substr(b.icd_dgns_cd4,1,&includ_dx10_substr6) in(&includ_dx10_code6) or
+		substr(b.icd_dgns_cd5,1,&includ_dx10_substr6) in(&includ_dx10_code6) or
+		substr(b.icd_dgns_cd6,1,&includ_dx10_substr6) in(&includ_dx10_code6) or
+		substr(b.icd_dgns_cd7,1,&includ_dx10_substr6) in(&includ_dx10_code6) or
+		substr(b.icd_dgns_cd8,1,&includ_dx10_substr6) in(&includ_dx10_code6) or
+		substr(b.icd_dgns_cd9,1,&includ_dx10_substr6) in(&includ_dx10_code6) or
+		substr(b.icd_dgns_cd10,1,&includ_dx10_substr6) in(&includ_dx10_code6) or
+		substr(b.icd_dgns_cd11,1,&includ_dx10_substr6) in(&includ_dx10_code6) or
+		substr(b.icd_dgns_cd12,1,&includ_dx10_substr6) in(&includ_dx10_code6) or
+		substr(b.icd_dgns_cd13,1,&includ_dx10_substr6) in(&includ_dx10_code6) or
+		substr(b.icd_dgns_cd14,1,&includ_dx10_substr6) in(&includ_dx10_code6) or
+		substr(b.icd_dgns_cd15,1,&includ_dx10_substr6) in(&includ_dx10_code6) or
+		substr(b.icd_dgns_cd16,1,&includ_dx10_substr6) in(&includ_dx10_code6) or
+		substr(b.icd_dgns_cd17,1,&includ_dx10_substr6) in(&includ_dx10_code6) or
+		substr(b.icd_dgns_cd18,1,&includ_dx10_substr6) in(&includ_dx10_code6) or
+		substr(b.icd_dgns_cd19,1,&includ_dx10_substr6) in(&includ_dx10_code6) or
+		substr(b.icd_dgns_cd20,1,&includ_dx10_substr6) in(&includ_dx10_code6) or
+		substr(b.icd_dgns_cd21,1,&includ_dx10_substr6) in(&includ_dx10_code6) or
+		substr(b.icd_dgns_cd22,1,&includ_dx10_substr6) in(&includ_dx10_code6) or
+		substr(b.icd_dgns_cd23,1,&includ_dx10_substr6) in(&includ_dx10_code6) or
+		substr(b.icd_dgns_cd24,1,&includ_dx10_substr6) in(&includ_dx10_code6) or
+		substr(b.icd_dgns_cd25,1,&includ_dx10_substr6) in(&includ_dx10_code6);
 quit;
 data include_cohort1b;
 set include_cohort1b1 include_cohort1b2;
