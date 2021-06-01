@@ -374,12 +374,12 @@ set include_cohort1c;* include_cohort1f;
 &flag_popped_dt=&date; 
 	format &flag_popped_dt date9.; 						label &flag_popped_dt			=	&flag_popped_dt_label;
 				 										label &flag_popped				=	&flag_popped_label;
-array dx(&diag_cd_max) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
+/*array dx(&diag_cd_max) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
 do j=1 to &diag_cd_max;	
 	if substr(dx(j),1,&includ_dx10_substr4) in(&includ_dx10_code4) then &flag_popped=1;
 	if substr(dx(j),1,&includ_dx10_substr5) in(&includ_dx10_code5) then &flag_popped=1;
 	if substr(dx(j),1,&includ_dx10_substr6) in(&includ_dx10_code6) then &flag_popped=1;
-end;
+end;*/
 if &flag_popped ne 1 then delete;
 run; 
 
