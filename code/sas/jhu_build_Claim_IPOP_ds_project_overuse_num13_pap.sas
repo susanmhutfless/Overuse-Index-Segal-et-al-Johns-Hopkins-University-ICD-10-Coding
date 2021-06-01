@@ -19,9 +19,18 @@
 		*women over 65;
 
 %let includ_hcpcs =
-					'Q0091' 'G0123'	'G0143'	'G0144'
-					'G0145'	'G0146'	'G0147'	'G0148'	
-					'G0476'			;		*use for popped visit;
+		'G0123' 
+		'G0124'
+		'G0141' 
+		'G0143' 
+		'G0144' 
+		'G0145' 
+		'G0147' 
+		'G0148' 
+		'P3000' 
+		'P3001' 
+		'Q0091' 
+		;		*use for popped visit;
 
 
 
@@ -29,13 +38,14 @@
 					'0'			; 
 %let includ_pr10_n = 7;		
 
-%let includ_dx10_code4   = 'Z124';		*use for popped visit;				
+*remove dx option for pop on 01jun2021;
+/*%let includ_dx10_code4   = 'Z124';		*use for popped visit;				
 %let includ_dx10_substr4 = 4;		*this number should match number that needs to be substringed;
 %let includ_dx10_code5   = 'Z1272' 'Z1279' 'Z1151' 'Z1289' 'Z1151' ;		*use for popped visit;				
 %let includ_dx10_substr5 = 5;		*this number should match number that needs to be substringed;
 %let includ_dx10_code6   = 'Z01411' 'Z01419' ;		*use for popped visit;				
 %let includ_dx10_substr6 = 6;		*this number should match number that needs to be substringed;
-
+*/
 %let includ_drg = '0';
 
 /** Exclusion criteria **/
@@ -252,7 +262,7 @@ where
 quit;
 * pull claim info for those with HCPCS (need to do this to get dx codes)*;
 proc sql;
-	create table include_cohort1b1 (compress=yes) as
+	create table include_cohort1b (compress=yes) as
 select a.&rev_cntr, a.&hcpcs_cd, a.&flag_popped, b.*
 from 
 	include_cohort1a a, 
@@ -260,7 +270,7 @@ from
 where 
 	(a.&bene_id=b.&bene_id and a.&clm_id=b.&clm_id);
 quit;
-* pull claim info for those with dx for pop ;
+/* pull claim info for those with dx for pop ;
 proc sql;
 	create table include_cohort1b2 (compress=yes) as
 select a.&rev_cntr, a.&hcpcs_cd, a.&flag_popped, b.*
@@ -346,7 +356,7 @@ where
 quit;
 data include_cohort1b;
 set include_cohort1b1 include_cohort1b2;
-run;
+run;*/
 *link to ccn;
 proc sql;
 	create table include_cohort1c (compress=yes) as
