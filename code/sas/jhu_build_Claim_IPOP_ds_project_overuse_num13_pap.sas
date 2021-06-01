@@ -252,14 +252,22 @@ where
 quit;
 * pull claim info for those with HCPCS (need to do this to get dx codes)*;
 proc sql;
-	create table include_cohort1b (compress=yes) as
+	create table include_cohort1b1 (compress=yes) as
 select a.&rev_cntr, a.&hcpcs_cd, a.&flag_popped, b.*
 from 
 	include_cohort1a a, 
 	&source b
 where 
 	(a.&bene_id=b.&bene_id and a.&clm_id=b.&clm_id)
-or 
+quit;
+* pull claim info for those with dx for pop ;
+proc sql;
+	create table include_cohort1b2 (compress=yes) as
+select a.&rev_cntr, a.&hcpcs_cd, a.&flag_popped, b.*
+from 
+	include_cohort1a a, 
+	&source b
+where 
 		substr(icd_dgns_cd1,1,&includ_dx10_substr4) in(&includ_dx10_code4) or
 		substr(icd_dgns_cd2,1,&includ_dx10_substr4) in(&includ_dx10_code4) or
 		substr(icd_dgns_cd3,1,&includ_dx10_substr4) in(&includ_dx10_code4) or
@@ -336,6 +344,9 @@ or
 		substr(icd_dgns_cd24,1,&includ_dx10_substr6) in(&includ_dx10_code6) or
 		substr(icd_dgns_cd25,1,&includ_dx10_substr6) in(&includ_dx10_code6);
 quit;
+data include_cohort1b;
+set include_cohort1b1 include_cohort1b2;
+run;
 *link to ccn;
 proc sql;
 	create table include_cohort1c (compress=yes) as
