@@ -341,7 +341,7 @@ and
 		a.icd_dgns_cd24 in(&includ_dx10) or
 		a.icd_dgns_cd25 in(&includ_dx10)		);
 quit;
-*link icd dx identified to revenue center*;
+/*link icd dx identified to revenue center*;
 proc sql;
 	create table include_cohort1e (compress=yes) as
 select a.&rev_cntr, b.*
@@ -363,14 +363,14 @@ merge 	include_cohort1d
 		rev_transposed; *have separate criteria for hcpcs above so no need to grab hcpcs here;
 by &bene_id &clm_id ;
 run;
-
+*/
 * link to CCN ;
 proc sql;
 	create table include_cohort1f (compress=yes) as
 select *
 from 
 	&permlib..ahrq_ccn a,
-	include_cohort1e2 b	
+	include_cohort1d b	
 where 
 	b.prvdr_num = a.&ccn
 ;
@@ -378,11 +378,11 @@ quit;
 *merge HCPCS and PRCDR identified pops together;
 Data include_cohort1g; 
 set include_cohort1c include_cohort1f; 
-array rev{*} rev_cntr:;
+/*array rev{*} rev_cntr:;
 do r=1 to dim(rev);
 	if rev(r) in(&ED_rev_cntr) then pop_ed=1;	
 end; 
-label pop_ed='popped: revenue center indicated emergency department';
+label pop_ed='popped: revenue center indicated emergency department';*/
 &flag_popped_dt=&date; 
 	format &flag_popped_dt date9.; 						label &flag_popped_dt			=	&flag_popped_dt_label;
 				 										label &flag_popped				=	&flag_popped_label;
