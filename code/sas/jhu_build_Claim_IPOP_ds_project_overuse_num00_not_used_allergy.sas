@@ -52,6 +52,7 @@
 /** Label pop specific variables  **/
 %global popN;
 %let	popN							= 02;
+%let	poptext							= "allergy";
 %let 	flag_popped             		= popped02 								;
 %let 	flag_popped_label				= 'indicator 2 popped'					;	
 %let	flag_popped_dt					= popped2_dt							;
