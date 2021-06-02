@@ -71,6 +71,7 @@
 /** Label pop specific variables  **/
 %global popN;
 %let	popN							= 10;
+%let	poptext							= "laminectomy";
 %let 	flag_popped             		= popped10 								;
 %let 	flag_popped_label				= 'indicator 10 popped'					;	
 %let	flag_popped_dt					= popped10_dt							;
