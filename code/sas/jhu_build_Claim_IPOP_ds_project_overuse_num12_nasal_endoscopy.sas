@@ -51,7 +51,7 @@
 %global popN;
 %let	popN							= 12;
 %let	poptext							= "nasal endoscopy"; 
-%let 	flag_popped             		= popped7 								;
+%let 	flag_popped             		= popped12 								;
 %let 	flag_popped_label				= 'indicator 12 popped'					;	
 %let	flag_popped_dt					= popped12_dt							;
 %let 	flag_popped_dt_label			= 'indicator 12 date patient popped (IP=clm_admsn_dt OP=clm_from_dt)'	;
