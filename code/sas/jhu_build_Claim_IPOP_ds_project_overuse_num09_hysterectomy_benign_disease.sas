@@ -64,6 +64,7 @@
 /** Label pop specific variables  **/
 %global popN;
 %let	popN							= 09;
+%let 	poptext							= "hyst";
 %let 	flag_popped             		= popped9 								;
 %let 	flag_popped_label				= 'indicator 9 popped'					;	
 %let	flag_popped_dt					= popped9_dt							;
