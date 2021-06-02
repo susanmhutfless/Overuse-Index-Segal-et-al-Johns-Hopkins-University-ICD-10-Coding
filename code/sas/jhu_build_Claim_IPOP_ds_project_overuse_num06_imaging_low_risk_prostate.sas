@@ -51,7 +51,7 @@
 /** Label pop specific variables  **/
 %global popN;
 %let	popN							= 06;
-%let 	poptext							= "imaging low risk prostate"							;
+%let 	poptext							= "imaging low risk prostate"			;
 %let 	flag_popped             		= popped6 								;
 %let 	flag_popped_label				= 'indicator 6 popped'					;	
 %let	flag_popped_dt					= popped6_dt							;
