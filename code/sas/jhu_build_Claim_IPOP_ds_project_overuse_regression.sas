@@ -6,9 +6,8 @@
 
 /*** bring hosp level tables together and run regression model***/
 
-data pop_data_input;
-	* Read in data, keeping track of the popN ;
-	set &permlib..pop_: 	;
+data &permlib..pop_01_18;
+	set &permlib..pop_01 - &permlib..pop_18 	;
 run;
 
 
@@ -16,19 +15,18 @@ run;
 /* 		REGRESSION MODEL		 	       */
 /*=============================================================*/
 
-ods trace on;   
-proc glimmix data = pop_data_input ;
-	/* Store parameter estimates */
+title "Pop &popN Aggregate summary For Analysis";
+proc freq data=&permlib..pop_&popN; 
+table  	pop_num pop_text  pop_year pop_qtr ; run;
+proc means data=&permlib..pop_&popN n mean median min max; 
+var elig_age_mean elig_age_median cc_sum_median female_percent popped n; run;
+
+
+proc glimmix data = &permlib..pop_&popN ;
         ods output ParameterEstimates=params;
-	* I believe all fixed effects/categorical variables should go in the class statement ;
-	* You can set your reference group with a (REF = 'XX') statement following each variable ;
 	class health_sys_id2016 pop_year pop_qtr pop_num pop_compendium_hospital_id;
-	* My understanding is that random effects should be included in the class statement but NOT model statement ;
 	model popped/n= elig_age_mean female_percent cc_sum_mean health_sys_id2016 pop_year pop_qtr pop_num
 	/ solution;
-	* Random effects go below ;
 	random intercept /subject=pop_compendium_hospital_id solution;
-
-run;
-ods trace off;     
+run;    
 
