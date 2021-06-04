@@ -22,12 +22,14 @@
 
 /*inclusion criteria*/
 		*men with low grade prostate cancer diagnosis;
+		*men with prostate cancer (ICD10-C61) AND a CPT code indicating low risk of recurrence (HCPCS-G9706) ;
 
 %let includ_hcpcs =
 					'78810'	'78812'	'78813'	'78814'
 					'78815'	'78816'	'72192'	'72193'	
 					'72194'	'3269F'	'77074'	'77075'		;		*use for popped visit;
 
+%let includ_hcpcs_elig='G9706'	;
 
 %let includ_pr10 =
 					'CW3NYZZ' 'BW2G00Z' 'BW2G0ZZ'
@@ -35,8 +37,8 @@
 					'BW2GYZZ' 'BW2GZZZ' 'CP1Z1ZZ'			; *use for popped visit;
 %let includ_pr10_n = 7;		
 
-%let includ_dx10   = 'D075';						*use for inclusion visit and popped;
-%let includ_dx10_n = 4;		
+%let includ_dx10   = 'C61';						*use for inclusion visit and popped;
+%let includ_dx10_n = 3;		
 %let includ_drg = '0';
 
 /** Exclusion criteria **/
@@ -228,7 +230,8 @@ end;
 label elig_ed='eligible visit: revenue center indicated emergency department'; 
 array hcpcs{*} hcpcs_cd:;
 do h=1 to dim(hcpcs);
-	if hcpcs(h) in(&exclud_hcpcs) then DELETE=1;	
+	if hcpcs(h) in(&exclud_hcpcs) then DELETE=1;
+	if hcpcs(h) in(&includ_hcpcs_elig) then KEEP_hcpcs=1;
 end;
 label elig_ed='eligible visit: revenue center indicated emergency department'; 
 array pr(&proc_cd_max) &proc_pfx.&proc_cd_min - &proc_pfx.&proc_cd_max;
@@ -237,10 +240,11 @@ do i=1 to &proc_cd_max;
 end;
 array dx(&diag_cd_max) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
 do j=1 to &diag_cd_max;
-	if substr(dx(j),1,&includ_dx10_n) in(&includ_dx10) then KEEP=1;
+	if substr(dx(j),1,&includ_dx10_n) in(&includ_dx10) then KEEP_dx=1;
 	if substr(dx(j),1,&exclud_dx10_n) in(&exclud_dx10) then DELETE=1;		
 end;
-if KEEP ne 1 then DELETE;
+if KEEP_hcpcs=1 and KEEP_dx= 1 then KEEP=1;
+if KEEP ne 1 then delete;
 if DELETE = 1 then delete;
 elig_dt=&date;
 elig_age=(&date-&clm_dob)/365.25; label elig_age='age at eligibility';
@@ -424,15 +428,14 @@ label pop_ed='popped: revenue center indicated emergency department';
 array pr(&proc_cd_max) &proc_pfx.&proc_cd_min - &proc_pfx.&proc_cd_max;
 do i=1 to &proc_cd_max;
 	if substr(pr(i),1,&exclud_pr10_n) in(&EXclud_pr10) then DELETE=1;	
-	if substr(pr(i),1,&includ_pr10_n) in(&includ_pr10) then KEEP=1;
+	if substr(pr(i),1,&includ_pr10_n) in(&includ_pr10) then &flag_popped=1;
 end;
 array dx(&diag_cd_max) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
 do j=1 to &diag_cd_max;
 	if substr(dx(j),1,&exclud_dx10_n) in(&exclud_dx10) then DELETE=1;	
 end;
-if hcpcs_cd in(&includ_hcpcs) then KEEP=1;
+if hcpcs_cd in(&includ_hcpcs) then &flag_popped=1;
 if hcpcs_cd in(&exclud_hcpcs) then DELETE=1;
-if KEEP ne 1 then DELETE;
 if DELETE = 1 then delete;
 *if clm_drg_cd notin(&includ_drg) then delete;
 if &flag_popped ne 1 then delete;
