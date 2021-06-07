@@ -11,8 +11,25 @@
 %let  permlib              = shu172sl          	;
 
 data &permlib..pop_01_18;
-	set &permlib..pop_01 - &permlib..pop_18 	;
-	
+	set 
+&permlib..pop_01
+&permlib..pop_02
+&permlib..pop_03
+&permlib..pop_04
+&permlib..pop_05
+
+&permlib..pop_07
+&permlib..pop_08
+&permlib..pop_09
+&permlib..pop_10
+&permlib..pop_11
+&permlib..pop_12
+&permlib..pop_13
+&permlib..pop_14
+&permlib..pop_15
+&permlib..pop_16
+&permlib..pop_17
+&permlib..pop_18 	;
 run;
 
 
