@@ -32,6 +32,12 @@ data &permlib..pop_01_18;
 &permlib..pop_18 	;
 run;
 
+data temp; set &permlib..pop_01_18;
+if 1<=n<=10 then do; n=.; log_elig_pop=.;end;
+if 1<=popped<=10 then popped=.;
+run;
+
+
 
 /*=============================================================*/
 /* 		REGRESSION MODEL		 	       */
