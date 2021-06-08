@@ -30,6 +30,9 @@ data &permlib..pop_01_18;
 &permlib..pop_16
 &permlib..pop_17
 &permlib..pop_18 	;
+*delete children's hospitals;
+if upcase(hospital_name2016) contains "CHILD" then delete;
+if upcase(hospital_name2018) contains "CHILD" then delete;
 run;
 
 data temp; set &permlib..pop_01_18;
