@@ -8,68 +8,39 @@ means that order does not matter for those 2+ jobs
 
 Seq   Job Name
   0   read_me_overuse_job_sequence.txt
-  0   jhu_build_denom_ds_project_various.sas
-  0   medicare_formats.sas
-  1   jhu_build_Claim_IP_ds_project_overuse.sas
-  1   jhu_build_Claim_OP_ds_project_overuse.sas
-
-*Pending---will either have 1 file that sets up all measures or 
-	1 measure per file OR both
-  2   overuse_cohort_prep_logic_for_output.sas
-      source_code_for_output_prep_using_table1_logic.sas
-
+  0   chronic conditions.sas
+  0   elig_inp
+  0   elig_op
+  0   pop_inp
+  0   pop_op
+  0   pop_crosstabs
+  1   jhu_build_Claim_IPOP_ds_project_overuse_num01 -
+      jhu_build_Claim_IPOP_ds_project_overuse_num18
 
 Seq   Job Name (followed by description)
   0   read_me_overuse_job_sequence.txt
       - this job/file - with relevant facts
   
-  0   jhu_build_denom_ds_project_various.sas
-      - Denominator file from another repo is called in.
-	The format of this file is....
-	List final repo (Hutfless is editing that repo naming now)
+  0   chronic conditions
+	Code to apply medicare chronic conditions
 
-  0   medicare_formats.sas
-	-formats for dx, hcpcs codes
+  0   elig_inp
+	Code to read in inpatient claims/lines from Medicare monthly
+
+  0   elig_op
+	Code to read in outpatient claims/lines from Medicare monthly
 	
-  0   macro_tool_box.sas
-	-useful macros for checks
-  1   jhu_build_Claim_IP_ds_project_overuse.sas
-      - Takes Inpatient (IP) claims for YYYY and preps them
-        with overuse logic and intention for use in downstream jobs
-        - this job should typically RUN before 
-          overuse_cohort_prep_logic_for_output.sas
-        - output from this is used by:
-          overuse_cohort_prep_logic_for_output.sas
-        - this job uses VIEWS - be aware that views require
-          diligent administration of folders, naming, intent
-  
-  1   jhu_build_Claim_OP_ds_project_overuse.sas
-      - Takes Outpatient (OP) claims for YYYY and preps them
-        with overuse logic and intention for use in downstream jobs
-        - this job should typically RUN before 
-          overuse_cohort_prep_logic_for_output.sas
-        - output from this is used by:
-          overuse_cohort_prep_logic_for_output.sas
-        - this job uses VIEWS - be aware that views require
-          diligent administration of folders, naming, intent  
+  0   pop_inp
+	Code to read in inpatient claims/lines from Medicare monthly
 
+  0   pop_op
+	Code to read in outpatient claims/lines from Medicare monthly
 
-
-
-****very draft below---need to decide on final workflow****  
-  
-  2   overuse_cohort_prep_logic_for_output.sas
-      - Takes the output of jobs:
-        jhu_build_denom_ds_project_various.sas
-        jhu_build_Claim_IP_ds_project_overuse.sas
-        jhu_build_Claim_OP_ds_project_overuse.sas
-	jhu_build_Claim_CAR_ds_project_overuse.sas
-        this code then makes final table/data preparation with
-        overuse logic to produce facts needed for publication
-  
-  
-      source_code_for_output_prep_using_table1_logic.sas
-      - This code is meant to hold logic and code 
-        for overuse maybe used in parts, sections to refine
-        output.  The parts copied from here will go into
-        overuse_cohort_prep_logic_for_output.sas
+  0   pop_crosstabs
+	Frequency tables of eligible, popped, eligible combined with popped
+		and hosp level characteristics; 
+		creation of analysis table by pop;
+		regression by pop
+  1   jhu_build_Claim_IPOP_ds_project_overuse_num01 -
+      jhu_build_Claim_IPOP_ds_project_overuse_num18
+	1 program per pop measure
