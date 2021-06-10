@@ -30,16 +30,20 @@ data &permlib..pop_01_18;
 &permlib..pop_16
 &permlib..pop_17
 &permlib..pop_18 	;
-if upcase(hospital_name2016) contains "CHILDREN" then delete;
-if upcase(hospital_name2018) contains "CHILDREN" then delete;
-if upcase(hospital_name2016) contains "PEDIATRIC" then delete;
-if upcase(hospital_name2018) contains "PEDIATRIC" then delete;
-if upcase(hospital_name2016) contains "PSYCH" then delete;
-if upcase(hospital_name2018) contains "PSYCH" then delete;
-if upcase(hospital_name2016) contains "STATE HOSPITAL" then delete;
-if upcase(hospital_name2018) contains "STATE HOSPITAL" then delete;
-if upcase(hospital_name2016) contains "REHAB" then delete;
-if upcase(hospital_name2018) contains "REHAB" then delete;
+*remove children's, psychiatric and rehab hospitals;
+if find(hospital_name2016,'childr','i') then delete;
+if find(hospital_name2016,'pedia','i') then delete;
+if find(hospital_name2016,'behav','i') then delete;
+if find(hospital_name2016,'rehab','i') then delete;
+if find(hospital_name2016,'psych','i') then delete;
+if find(hospital_name2016,'state hospital','i') then delete;
+*do for 2018 name of hosp for completeness;
+if find(hospital_name2018,'childr','i') then delete;
+if find(hospital_name2018,'pedia','i') then delete;
+if find(hospital_name2018,'behav','i') then delete;
+if find(hospital_name2018,'rehab','i') then delete;
+if find(hospital_name2018,'psych','i') then delete;
+if find(hospital_name2018,'state hospital','i') then delete;
 run;
 
 data temp; set &permlib..pop_01_18;
@@ -48,8 +52,21 @@ if 1<=popped<=10 then popped=.;
 run;
 
 *of the low n, how many pop?;
-PROC means data=&permlib..pop_01_18;
+title "How many pop when n<=10?";
+PROC means data=&permlib..pop_01_18 n min mean median p25 p75 max;
 where n<=10;
+var popped;
+run;
+
+title "How many pop when n>=11?";
+PROC means data=&permlib..pop_01_18 n min mean median p25 p75 max;
+where n>=11;
+var popped;
+run;
+
+title "How many pop when n>=20?";
+PROC means data=&permlib..pop_01_18 n min mean median p25 p75 max;
+where n>=20;
 var popped;
 run;
 
@@ -60,7 +77,7 @@ run;
 
 title "Pop 01 - Pop 18 Aggregate Summary For Analysis";
 proc freq data=&permlib..pop_01_18; 
-table  	pop_num pop_text  pop_year pop_qtr yr_qtr pop_num;* health_sys_id2016 pop_compendium_hospital_id; run;
+table  	pop_num pop_text  pop_year pop_qtr yr_qtr pop_num;* health_sys_id pop_compendium_hospital_id; run;
 proc means data=&permlib..pop_01_18 n mean median min max; 
 var elig_age_mean elig_age_median cc_sum_mean cc_sum_median female_percent popped n; run;
 proc means nmiss data=&permlib..pop_01_18; run;
@@ -68,8 +85,8 @@ proc means nmiss data=&permlib..pop_01_18; run;
 title "Pop 01 - Pop 18 without standardized coefficients";
 ods trace on;
 proc glimmix data = &permlib..pop_01_18 method=quad;        
-class health_sys_id2016 yr_qtr(ref=first) pop_num pop_compendium_hospital_id;
-model popped= elig_age_mean female_percent cc_sum_mean health_sys_id2016 yr_qtr pop_num
+class health_sys_id yr_qtr(ref=first) pop_num pop_compendium_hospital_id;
+model popped= elig_age_mean female_percent cc_sum_mean health_sys_id yr_qtr pop_num
 	/ s dist=negbin offset=log_elig_pop;
 	random intercept /subject=pop_compendium_hospital_id ;
 ods output ParameterEstimates=params;
