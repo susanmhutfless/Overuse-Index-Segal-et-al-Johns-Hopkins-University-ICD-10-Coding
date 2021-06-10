@@ -30,13 +30,16 @@ data &permlib..pop_01_18;
 &permlib..pop_16
 &permlib..pop_17
 &permlib..pop_18 	;
-*delete children's hospitals;
-if upcase(hospital_name2016) contains "CHILD" then delete;
-if upcase(hospital_name2018) contains "CHILD" then delete;
+if upcase(hospital_name2016) contains "CHILDREN" then delete;
+if upcase(hospital_name2018) contains "CHILDREN" then delete;
+if upcase(hospital_name2016) contains "PEDIATRIC" then delete;
+if upcase(hospital_name2018) contains "PEDIATRIC" then delete;
 if upcase(hospital_name2016) contains "PSYCH" then delete;
 if upcase(hospital_name2018) contains "PSYCH" then delete;
 if upcase(hospital_name2016) contains "STATE HOSPITAL" then delete;
 if upcase(hospital_name2018) contains "STATE HOSPITAL" then delete;
+if upcase(hospital_name2016) contains "REHAB" then delete;
+if upcase(hospital_name2018) contains "REHAB" then delete;
 run;
 
 data temp; set &permlib..pop_01_18;
@@ -44,6 +47,11 @@ if 1<=n<=10 then do; n=.; log_elig_pop=.;end;
 if 1<=popped<=10 then popped=.;
 run;
 
+*of the low n, how many pop?;
+PROC means data=&permlib..pop_01_18;
+where n<=10;
+var popped;
+run;
 
 
 /*=============================================================*/
