@@ -6,4 +6,5 @@ This repo includes
 -Code and its associated instructions to generate each of the 17 overuse indicator measures. There is one program per measure.  Set up files 1) to call tables (which can be adapted to any claims data set), 2) to calculate chronic condition indicators for adjustment, 3) to aggregate hospitals to their health systems, and 4) to run the regression model that generates the Overuse Index. 
 ## *overuse definitions* 
 -An Excel file that lists background on the measures specifications. 
-This code is associated with a peer-reviewed article. This manuscript is in progress. ADD LINK HERE ONCE ACCEPTED.
+
+### This code is associated with a peer-reviewed article. This manuscript is in progress. ADD LINK HERE ONCE ACCEPTED.
