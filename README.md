@@ -8,3 +8,5 @@ This repo includes
 -An Excel file that lists background on the measures specifications. 
 
 ### This code is associated with a peer-reviewed article. This manuscript is in progress. ADD LINK HERE ONCE ACCEPTED.
+
+### Contact Jodi Segal at jsegal at jhmi dot edu for questions.
