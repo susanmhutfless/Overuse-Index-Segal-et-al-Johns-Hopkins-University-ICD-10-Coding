@@ -1,9 +1,7 @@
-# Johns-Hopkins-Overuse-Project-with-Segal
-Code for 2021 update
+# Overuse Index, Segal et al, Johns Hopkins University - ICD-10 Coding
+-Access here the ICD-10 coding for the 2021 update of the Overuse Index developed at Johns Hopkins University.
 
-See *code* and its associated readme to run the pop measures 
--1 program per measure + set up files to call tables, calculate chronic conditions and calculate aggregates & model
-
-See *overuse definitions* for excel file that lists background on the measures that should match code
-
-This code is associated with a peer-reviewed article.  This manuscript is in progress. ADD LINK HERE ONCE ACCEPTED.
+This repo includes
+- *code* Code and its associated instructions to generate each of the 17 overuse indicator measures. There is one program per measure.  Set up files 1) to call tables (which can be adapted to any claims data set), 2) to calculate chronic condition indicators for adjustment, 3) to aggregate hospitals to their health systems, and 4) to run the regression model that generates the Overuse Index. 
+- *uveruse definitions* an Excel file that lists background on the measures specifications. 
+This code is associated with a peer-reviewed article. This manuscript is in progress. ADD LINK HERE ONCE ACCEPTED.
