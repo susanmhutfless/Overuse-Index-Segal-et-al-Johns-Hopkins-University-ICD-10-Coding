@@ -36,9 +36,9 @@ run;
 
 
 *get % for aggregate (1 record per hospital) analysis;
-proc sort data=pop_&popN._in_out_anal; by elig_prvdr_state_cd pop_year pop_qtr; 
+proc sort data=pop_&popN._in_out_anal; by pop_compendium_hospital_id pop_year pop_qtr; 
 proc summary data= pop_&popN._in_out_anal;
-by elig_prvdr_state_cd pop_year pop_qtr;
+by pop_compendium_hospital_id pop_year pop_qtr;
 var elig_age cc_sum;
 output out=sum2 mean= median=/autoname;
 run;
@@ -47,43 +47,60 @@ set sum2;
 n=_freq_; label n='number eligible for pop';
 run;
 
-proc sort data=pop_&popN._in_out_anal; by elig_prvdr_state_cd pop_year pop_qtr;
-proc freq data=pop_&popN._in_out_anal noprint; by elig_prvdr_state_cd pop_year pop_qtr;
+proc sort data=pop_&popN._in_out_anal; by pop_compendium_hospital_id pop_year pop_qtr;
+proc freq data=pop_&popN._in_out_anal noprint; by pop_compendium_hospital_id pop_year pop_qtr;
 where popped=1;
 table  	popped /nocum out=popped; run;
-data pop_&popN._popped (keep = elig_prvdr_state_cd pop_year pop_qtr popped); set popped (drop = popped);
+data pop_&popN._popped (keep = pop_compendium_hospital_id pop_year pop_qtr popped); set popped (drop = popped);
 popped=count;
 run;
 
 
-proc sort data=pop_&popN._in_out_anal; by elig_prvdr_state_cd pop_year pop_qtr;
-proc freq data=pop_&popN._in_out_anal noprint; by elig_prvdr_state_cd pop_year pop_qtr;
+proc sort data=pop_&popN._in_out_anal; by pop_compendium_hospital_id pop_year pop_qtr;
+proc freq data=pop_&popN._in_out_anal noprint; by pop_compendium_hospital_id pop_year pop_qtr;
 table  	elig_gndr_cd /nocum out=elig_gndr_cd; run;
-data pop_&popN._elig_gndr_cd (keep = elig_prvdr_state_cd pop_year pop_qtr female_percent); 
+data pop_&popN._elig_gndr_cd (keep = pop_compendium_hospital_id pop_year pop_qtr female_percent); 
 set elig_gndr_cd;
 where elig_gndr_cd='2';
 female_percent=percent;
 run;
 
-data &permlib..pop_&popN._st;
+data pop_&popN._in_out_anal2;
 merge pop_&popN._means pop_&popN._popped pop_&popN._elig_gndr_cd;
-by elig_prvdr_state_cd pop_year pop_qtr;
+by pop_compendium_hospital_id pop_year pop_qtr;
 if n=. then n=0;
 if popped=. then popped=0; 
 pop_num=&popN;
 pop_text=&poptext;
 run;
 
-title "Pop &popN Aggregate summary For Analysis PROVIDER STATE";
-proc freq data=&permlib..pop_&popN._st; 
-table  	pop_num pop_text  pop_year pop_qtr elig_prvdr_state_cd; run;
-proc means data=&permlib..pop_&popN._st n mean median min max; 
-var elig_age_mean elig_age_median cc_sum_median female_percent popped n; run;
 
-proc glimmix data = &permlib..pop_&popN._st method=quad;        
-class elig_prvdr_state_cd yr_qtr(ref=first) pop_num pop_compendium_hospital_id;
-model popped= elig_age_mean female_percent cc_sum_mean elig_prvdr_state_cd yr_qtr pop_num
-	/ s dist=negbin offset=log_elig_pop;
-	random intercept /subject=pop_compendium_hospital_id ;
-ods output ParameterEstimates=params;
-run;    
+*merge hospital aggregated data to health system;
+proc sql;
+create table &permlib..pop_&popN (compress=yes) as		
+select  
+*
+from 
+pop_&popN._in_out_anal2 a,
+&permlib..ahrq_ccn b
+where a.pop_compendium_hospital_id = b.compendium_hospital_id 
+and (b.health_sys_id2016 ne ' ' or b.health_sys_id2018 ne ' ');
+quit;
+data &permlib..pop_&popN; set &permlib..pop_&popN;
+if health_sys_id2016 ne ' ' then do; 
+	health_sys_id=health_sys_id2016;
+	hospital_state=hospital_state2016;
+end;
+if health_sys_id2018 ne ' ' then do; 
+	health_sys_id=health_sys_id2018;
+	hospital_state=hospital_state2018;
+end;
+
+title "Pop &popN Aggregate summary For Analysis HOSPITAL STATE";
+proc freq data=&permlib..pop_&popN; 
+table  	pop_num pop_text  pop_year pop_qtr hospital_state; run;
+proc means data=&permlib..pop_&popN n mean median min max; 
+var elig_age_mean elig_age_median cc_sum_median female_percent popped n; run;
+  
+*THIS REWRITES ALL POPS TO INCLUDE THE HOSPITAL STATE FROM AHRQ CCN;
+*CAN RUN REGRESSION AS IS--SEE THE VERSION THAT INCLUDES STATE INSTEAD OF SYSTEM;
