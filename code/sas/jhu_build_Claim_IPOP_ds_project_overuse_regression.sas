@@ -93,3 +93,16 @@ ods output ParameterEstimates=params;
 run;    
 ods trace off;
 data &permlib..pop_01_18_params; set params; run;
+
+*state level;
+title "Pop 01 - Pop 18 without standardized coefficients PROVIDER STATE CODE";
+ods trace on;
+proc glimmix data = &permlib..pop_01_18 method=quad;        
+class elig_prvdr_state_cd yr_qtr(ref=first) pop_num pop_compendium_hospital_id;
+model popped= elig_age_mean female_percent cc_sum_mean elig_prvdr_state_cd yr_qtr pop_num
+	/ s dist=negbin offset=log_elig_pop;
+	random intercept /subject=pop_compendium_hospital_id ;
+ods output ParameterEstimates=params;
+run;    
+ods trace off;
+data &permlib..pop_01_18_params_st; set params; run;
