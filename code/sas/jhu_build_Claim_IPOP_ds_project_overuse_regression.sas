@@ -44,6 +44,8 @@ if find(hospital_name2018,'behav','i') then delete;
 if find(hospital_name2018,'rehab','i') then delete;
 if find(hospital_name2018,'psych','i') then delete;
 if find(hospital_name2018,'state hospital','i') then delete;
+yr_qtr=cats(pop_year,pop_qtr);
+log_elig_pop=log(n);
 run;
 
 data temp; set &permlib..pop_01_18;
