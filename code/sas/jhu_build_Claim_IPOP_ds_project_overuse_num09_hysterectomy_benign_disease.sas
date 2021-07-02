@@ -45,7 +45,10 @@
 					'0UT94ZZ'	'0UT90ZL'	'0UT90ZZ'
 					'0UT94ZL'	'0UT94ZZ'	'0UT97ZL'
 					'0UT97ZZ'	'0UT98ZL'	'0UT98ZZ'
-					'0UT9FZL'	'0UT9FZZ'		; *use for popped visit;
+					'0UT9FZL'	'0UT9FZZ'	'0UB90ZZ'
+					'0UB90ZX'	'0UB93ZX'	'0UB93ZZ'
+					'0UB94ZX'	'0UB94ZZ' 	'0UB97ZX'
+					'0UB97ZZ'	'0UB98ZX'	'0UB98ZZ'			; *use for popped visit;
 %let includ_pr10_n = 7;		*this number should match number that needs to be substringed;
 
 %let includ_dx10   = '0';								
