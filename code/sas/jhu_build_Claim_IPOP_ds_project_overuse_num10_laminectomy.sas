@@ -21,18 +21,14 @@
 		*people without DIAGNOSES of lower extremtiy neuropathy or weakness;
 
 %let includ_hcpcs =
-					'22558'	'22585' '22612' '22614' '22630'
-					'22632' '22633' '22634' '22699' '63005'
-					'63017' '63030' '63047' '63048'  ;		*use for popped visit;
-
-
-
-%let includ_pr10_code4 =
-					'0QQ0'		; *use for popped visit;
-%let includ_pr10_substr4 = 4;		*this number should match number that needs to be substringed;
+					'22558'	'22612' '22630'
+					'22633' 				;		*use for popped visit;
 
 %let includ_pr10_code7 =
-					'00NY0ZZ'		; *use for popped visit;
+					'0SG0070' '0SG0071' '0SG007J'
+					'0SG00A0' '0SG00AJ' 
+					'0SG00J0' '0SG00J1' '0SG00JJ'
+					'0SG00K0' '0SG00K1' 			; 		*use for popped visit;
 %let includ_pr10_substr7 = 7;		*this number should match number that needs to be substringed;
 %let includ_dx10   = '0';							
 %let includ_dx10_n = 7;		
