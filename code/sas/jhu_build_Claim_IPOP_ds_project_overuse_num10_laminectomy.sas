@@ -59,9 +59,9 @@
 					'C78' 'C79' 'C80' 'C81' 'C82' 
 					'C83' 'C84' 'C85' 'C86' 'C87'
 					'C88' 'C89' 'C90' 'C91' 'C92' 
-					'C93' 'C94' 'C95' 'C96' ; 						* use for inclusion visit & popped visit;
+					'C93' 'C94' 'C95' 'C96' ; 						* use for popped visit;
 %let exclud_dx10_substr3 = 3; 
-%let EXCLUD_dx10_code4   = 'M543' 'M544' 'M462' 'M463' 'M464' 'M465' ; 			* use for inclusion visit & popped visit;
+%let EXCLUD_dx10_code4   = 'M543' 'M544' 'M462' 'M463' 'M464' 'M465' ; 			* use for popped visit;
 %let exclud_dx10_substr4 = 4; 
 
 /** Label pop specific variables  **/
