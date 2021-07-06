@@ -207,32 +207,6 @@ select *
 from 
 	&source
 where
-		substr(icd_prcdr_cd1,1,&includ_pr10_substr4) in(&includ_pr10_code4) or
-		substr(icd_prcdr_cd2,1,&includ_pr10_substr4) in(&includ_pr10_code4) or
-		substr(icd_prcdr_cd3,1,&includ_pr10_substr4) in(&includ_pr10_code4) or
-		substr(icd_prcdr_cd4,1,&includ_pr10_substr4) in(&includ_pr10_code4) or
-		substr(icd_prcdr_cd5,1,&includ_pr10_substr4) in(&includ_pr10_code4) or
-		substr(icd_prcdr_cd6,1,&includ_pr10_substr4) in(&includ_pr10_code4) or
-		substr(icd_prcdr_cd7,1,&includ_pr10_substr4) in(&includ_pr10_code4) or
-		substr(icd_prcdr_cd8,1,&includ_pr10_substr4) in(&includ_pr10_code4) or
-		substr(icd_prcdr_cd9,1,&includ_pr10_substr4) in(&includ_pr10_code4) or
-		substr(icd_prcdr_cd10,1,&includ_pr10_substr4) in(&includ_pr10_code4) or
-		substr(icd_prcdr_cd11,1,&includ_pr10_substr4) in(&includ_pr10_code4) or
-		substr(icd_prcdr_cd12,1,&includ_pr10_substr4) in(&includ_pr10_code4) or
-		substr(icd_prcdr_cd13,1,&includ_pr10_substr4) in(&includ_pr10_code4) or
-		substr(icd_prcdr_cd14,1,&includ_pr10_substr4) in(&includ_pr10_code4) or
-		substr(icd_prcdr_cd15,1,&includ_pr10_substr4) in(&includ_pr10_code4) or
-		substr(icd_prcdr_cd16,1,&includ_pr10_substr4) in(&includ_pr10_code4) or
-		substr(icd_prcdr_cd17,1,&includ_pr10_substr4) in(&includ_pr10_code4) or
-		substr(icd_prcdr_cd18,1,&includ_pr10_substr4) in(&includ_pr10_code4) or
-		substr(icd_prcdr_cd19,1,&includ_pr10_substr4) in(&includ_pr10_code4) or
-		substr(icd_prcdr_cd20,1,&includ_pr10_substr4) in(&includ_pr10_code4) or
-		substr(icd_prcdr_cd21,1,&includ_pr10_substr4) in(&includ_pr10_code4) or
-		substr(icd_prcdr_cd22,1,&includ_pr10_substr4) in(&includ_pr10_code4) or
-		substr(icd_prcdr_cd23,1,&includ_pr10_substr4) in(&includ_pr10_code4) or
-		substr(icd_prcdr_cd24,1,&includ_pr10_substr4) in(&includ_pr10_code4) or
-		substr(icd_prcdr_cd25,1,&includ_pr10_substr4) in(&includ_pr10_code4) or
-
 		substr(icd_prcdr_cd1,1,&includ_pr10_substr7) in(&includ_pr10_code7) or
 		substr(icd_prcdr_cd2,1,&includ_pr10_substr7) in(&includ_pr10_code7) or
 		substr(icd_prcdr_cd3,1,&includ_pr10_substr7) in(&includ_pr10_code7) or
