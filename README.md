@@ -1,7 +1,7 @@
 # Overuse Index, Segal et al, Johns Hopkins University - ICD-10 Coding
 -Access here the ICD-10 coding for the 2021 update of the Overuse Index developed at Johns Hopkins University.
 
-## Please review the license.  If you use this code, you must disclose this repo and associated manuscript (wne published) as your source (this includes research and proprietary/client work).
+## Please review the license.  If you use this code, you must disclose this repo and associated manuscript (when published) as your source (this includes research and proprietary/client work).
 
 This repo includes
 ## *code* 
