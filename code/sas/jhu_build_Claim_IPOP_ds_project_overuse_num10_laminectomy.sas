@@ -15,7 +15,8 @@
 		includ_dx10  includ_dx10_n 
 		EXCLUD_dx10  exclud_dx10_n
 		EXCLUD_dx10_code3	exclud_dx10_substr3
-		EXCLUD_dx10_code4	exclud_dx10_substr4;
+		EXCLUD_dx10_code4	exclud_dx10_substr4
+		EXclud_pr10 		EXclud_pr10_n;
 
 /*inclusion criteria*/
 		*people without DIAGNOSES of lower extremtiy neuropathy or weakness;
@@ -280,9 +281,7 @@ label pop_ed='popped: revenue center indicated emergency department';
 				 										label &flag_popped				=	&flag_popped_label;
 array pr(&proc_cd_max) &proc_pfx.&proc_cd_min - &proc_pfx.&proc_cd_max;
 do i=1 to &proc_cd_max;
-	if substr(pr(i),1,&exclud_pr10_n) in(&EXclud_pr10) then DELETE=1;	
 	if substr(pr(i),1,&includ_pr10_substr7) in(&includ_pr10_code7) then &flag_popped=1;
-	if substr(pr(i),1,&includ_pr10_substr4) in(&includ_pr10_code4) then &flag_popped=1;
 end;
 array dx(&diag_cd_max) &diag_pfx.&diag_cd_min - &diag_pfx.&diag_cd_max;
 do j=1 to &diag_cd_max;
