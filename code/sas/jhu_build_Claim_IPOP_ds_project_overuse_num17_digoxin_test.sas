@@ -363,32 +363,7 @@ from
 	include_cohort1a a, 
 	&source b
 where 
-	(a.&bene_id=b.&bene_id and a.&clm_id=b.&clm_id)
-or 		substr(icd_dgns_cd1,1,&exclud_dx10_n) in(&exclud_dx10) or
-		substr(icd_dgns_cd2,1,&exclud_dx10_n) in(&exclud_dx10) or
-		substr(icd_dgns_cd3,1,&exclud_dx10_n) in(&exclud_dx10) or
-		substr(icd_dgns_cd4,1,&exclud_dx10_n) in(&exclud_dx10) or
-		substr(icd_dgns_cd5,1,&exclud_dx10_n) in(&exclud_dx10) or
-		substr(icd_dgns_cd6,1,&exclud_dx10_n) in(&exclud_dx10) or
-		substr(icd_dgns_cd7,1,&exclud_dx10_n) in(&exclud_dx10) or
-		substr(icd_dgns_cd8,1,&exclud_dx10_n) in(&exclud_dx10) or
-		substr(icd_dgns_cd9,1,&exclud_dx10_n) in(&exclud_dx10) or
-		substr(icd_dgns_cd10,1,&exclud_dx10_n) in(&exclud_dx10) or
-		substr(icd_dgns_cd11,1,&exclud_dx10_n) in(&exclud_dx10) or
-		substr(icd_dgns_cd12,1,&exclud_dx10_n) in(&exclud_dx10) or
-		substr(icd_dgns_cd13,1,&exclud_dx10_n) in(&exclud_dx10) or
-		substr(icd_dgns_cd14,1,&exclud_dx10_n) in(&exclud_dx10) or
-		substr(icd_dgns_cd15,1,&exclud_dx10_n) in(&exclud_dx10) or
-		substr(icd_dgns_cd16,1,&exclud_dx10_n) in(&exclud_dx10) or
-		substr(icd_dgns_cd17,1,&exclud_dx10_n) in(&exclud_dx10) or
-		substr(icd_dgns_cd18,1,&exclud_dx10_n) in(&exclud_dx10) or
-		substr(icd_dgns_cd19,1,&exclud_dx10_n) in(&exclud_dx10) or
-		substr(icd_dgns_cd20,1,&exclud_dx10_n) in(&exclud_dx10) or
-		substr(icd_dgns_cd21,1,&exclud_dx10_n) in(&exclud_dx10) or
-		substr(icd_dgns_cd22,1,&exclud_dx10_n) in(&exclud_dx10) or
-		substr(icd_dgns_cd23,1,&exclud_dx10_n) in(&exclud_dx10) or
-		substr(icd_dgns_cd24,1,&exclud_dx10_n) in(&exclud_dx10) or
-		substr(icd_dgns_cd25,1,&exclud_dx10_n) in(&exclud_dx10);
+	a.&bene_id=b.&bene_id and a.&clm_id=b.&clm_id;
 quit;
 *link to ccn;
 proc sql;
