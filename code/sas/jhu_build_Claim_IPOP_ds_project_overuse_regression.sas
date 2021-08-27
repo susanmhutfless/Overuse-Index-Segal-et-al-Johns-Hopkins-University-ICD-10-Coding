@@ -48,7 +48,7 @@ yr_qtr=cats(pop_year,pop_qtr);
 log_elig_pop=log(n);
 run;
 
-data temp; set &permlib..pop_01_18;
+data temp (drop = bene_state_cd_pct: bene_state_cd4-bene_state_cd60); set &permlib..pop_01_18;
 if 1<=n<=10 then do; n=.; log_elig_pop=.;end;
 if 1<=popped<=10 then popped=.;
 run;
