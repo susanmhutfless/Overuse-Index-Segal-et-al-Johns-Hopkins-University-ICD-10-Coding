@@ -9,6 +9,8 @@ This repo includes
 ## *overuse definitions* 
 -An Excel file that lists background on the measures specifications. 
 
-### This code is associated with a peer-reviewed article. This manuscript is in progress. ADD LINK HERE ONCE ACCEPTED.
+### This code is associated with a peer-reviewed article. [Factors Associated With Overuse of Health Care Within US Health Systems: A Cross-sectional Analysis of Medicare Beneficiaries From 2016 to 2018.](https://jamanetwork.com/journals/jama-health-forum/fullarticle/2788097)
+
+### The [JHU Dataverse](https://archive.data.jhu.edu/dataverse/OveruseIndex;jsessionid=c41c121f49932f040f7b345f2547) contains code and results associated with the JAMA publication.
 
 ### Contact Jodi Segal at jsegal at jhmi dot edu for questions.
